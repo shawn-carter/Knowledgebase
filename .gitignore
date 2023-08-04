@@ -1,0 +1,38 @@
+# .gitignore
+
+# Ignore configurations
+*.ini
+
+# Ignore all logfiles and databases.
+*.log
+*.sql
+*.sqlite
+
+# Ignore all byte-compiled Python files.
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Ignore all .pyc, .pyo, .pyd and .pyc files.
+*.pyc
+*.pyo
+*.pyd
+*.pyc
+
+# Ignore all folders named .ipynb_checkpoints that are generated when you run jupyter notebook
+.ipynb_checkpoints
+
+# Ignore migrations directory in Django
+*/migrations/*
+
+# Ignore all the .env files that contain sensitive information
+.env
+
+# Ignore static files collected by Django's collectstatic command
+/static/
+
+# Ignore the media folder where Django by default will put uploaded files
+/media/
+
+# Ignore the virtual environment
+venv/

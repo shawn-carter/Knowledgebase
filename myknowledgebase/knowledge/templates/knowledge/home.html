@@ -1,0 +1,12 @@
+{% extends "knowledge/base.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+    <h1>Welcome to my Knowledge Base!</h1>
+    {% if user.is_authenticated %}
+        <p>Welcome, {{ user.username }}!</p>
+    {% else %}
+        <p>You are not logged in.</p>
+    {% endif %}
+{% endblock %}

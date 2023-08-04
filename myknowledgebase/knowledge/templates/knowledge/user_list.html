@@ -1,0 +1,13 @@
+<!-- templates/knowledge/user_list.html -->
+{% extends 'knowledge/base.html' %}
+
+{% block content %}
+  <h2>All Users</h2>
+  <ul>
+    {% for user in users %}
+      <li>{{ user.username }} ({{ user.email }}) ({{ user.password }})</li>
+    {% empty %}
+      <li>No users have been created yet.</li>
+    {% endfor %}
+  </ul>
+{% endblock %}

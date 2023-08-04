@@ -1,0 +1,56 @@
+<!-- knowledge/templates/knowledge/create.html -->
+{% extends 'knowledge/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% block content %}
+  <h2>Create a New Knowledge Base Entry</h2>
+  <form method="POST" id="kbEntryForm">
+    {% csrf_token %}
+    {% for field in form %}
+      <div class="form-group">
+        {% if field.name == "article" %}
+          <label for="quillEditor">{{ field.label }}</label>
+          <div id="quillEditor" style="height: 200px;">{{ field.value }}</div>
+          {{ field|attr:"style:display:none;" }}
+        {% else %}
+          <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field|add_class:"form-control" }}
+        {% endif %}
+      </div>
+    {% endfor %}
+    <div class="form-group">
+        <label for="metatagLookup">Lookup/Add Metatags</label>
+        <input type="text" id="metatagLookup" class="form-control">
+    </div>  
+    <button type="submit" class="btn btn-primary">Submit</button>
+  </form>
+
+  {% if form.errors %}
+  <div class="alert alert-danger">
+    <ul>
+      {% for field, errors in form.errors.items %}
+        {% for error in errors %}
+          <li><strong>{{ field }}:</strong> {{ error|escape }}</li>
+        {% endfor %}
+      {% endfor %}
+    </ul>
+  </div>
+    {% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    var quill = new Quill('#quillEditor', {
+      theme: 'snow'
+    });
+    var article = document.querySelector('textarea[name=article]');
+    quill.on('text-change', function() {
+      article.value = quill.root.innerHTML;
+    });
+    // Event listener for metatag lookup field
+    var metatagLookup = document.getElementById('metatagLookup');
+    metatagLookup.oninput = function() {
+        console.log("Metatag search changed")
+    };
+  </script>
+{% endblock %}

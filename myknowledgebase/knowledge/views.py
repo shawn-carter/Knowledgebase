@@ -1,7 +1,7 @@
 # knowledge/views.py
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
-from .forms import NewUserForm, PasswordResetForm
+from .forms import NewUserForm, PasswordResetForm, KBEntryForm
 from django.contrib.auth.forms import AuthenticationForm  # add this import
 from django.contrib.auth import authenticate, login as django_login
 from django.contrib.auth import logout as django_logout
@@ -11,6 +11,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth import update_session_auth_hash
+from .models import KBEntry
 
 def register(request):
     if request.method == "POST":
@@ -89,3 +90,22 @@ def resetpassword(request):
     else:
         form = PasswordResetForm()
     return render(request, 'knowledge/reset_password.html', {'form': form})
+
+@login_required
+def create(request):
+    if request.method == 'POST':
+        form = KBEntryForm(request.POST, request=request)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Your knowledge base entry was successfully created!')
+            return redirect('home')
+        else:
+            messages.error(request, 'Please correct the error below.')
+    else:
+        form = KBEntryForm(request=request)
+    return render(request, 'knowledge/create.html', {'form': form})
+
+@login_required
+def kblist(request):
+    entries = KBEntry.objects.all()  # get all KB Articles
+    return render(request, 'knowledge/kb_list.html', {'entries': entries})

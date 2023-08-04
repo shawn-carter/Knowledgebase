@@ -2,6 +2,7 @@
 from django import forms
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
+from .models import KBEntry
 
 class NewUserForm(forms.ModelForm):
     password1 = forms.CharField(label='Password', widget=forms.PasswordInput)
@@ -48,3 +49,23 @@ class PasswordResetForm(forms.Form):
 
         if new_password1 and new_password2 and new_password1 != new_password2:
             self.add_error('new_password2', 'The two password fields didn’t match.')
+
+class KBEntryForm(forms.ModelForm):
+    class Meta:
+        model = KBEntry
+        fields = ['title', 'article', 'meta_data']
+        widgets = {
+            'article': forms.Textarea(attrs={'required': False}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
+        super(KBEntryForm, self).__init__(*args, **kwargs)
+
+    def save(self, commit=True):
+        instance = super(KBEntryForm, self).save(commit=False)
+        instance.created_by = self.request.user
+        if commit:
+            instance.save()
+            self.save_m2m()
+        return instance

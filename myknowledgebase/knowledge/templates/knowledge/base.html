@@ -55,6 +55,9 @@
             <li class="nav-item">
               <a class="nav-link" href="{% url 'change_password' %}">Change Password</a>
             </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'create' %}">Create New Article</a>
+            </li>
             {% if user.is_staff %}
               <li class="nav-item">
                 <a class="nav-link" id='logout' href="#">Staff</a>
@@ -97,18 +100,22 @@
 
     {% block scripts %} {% endblock %}
 
-    <script>
+      <script>
       window.onload = function() {
           {% for message in messages %}
               if ("{{ message.level_tag }}" === "success") {
                   alertify.success("{{ message }}");
+                  console.log("{{ message }}")
               } else if ("{{ message.level_tag }}" === "error") {
                   alertify.error("{{ message }}");
+                  console.log("{{ message }}")
               } else {
                   alertify.message("{{ message }}");
+                  console.log("{{ message }}")
               }
           {% endfor %}
       };
       </script>
+      {% block extra_js %}{% endblock %}
   </body>
 </html>

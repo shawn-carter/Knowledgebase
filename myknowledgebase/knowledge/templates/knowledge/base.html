@@ -25,65 +25,58 @@
   </head>
   <body>
     <!-- Navbar -->
-    <nav
-      class="navbar navbar-light navbar-expand-md"
-      style="background-color: #eeeeee"
-    >
+    <nav class="navbar navbar-light navbar-expand-md" style="background-color: #eeeeee">
       <div class="container">
-        <button
-          class="navbar-toggler"
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#navbarResponsive"
-          aria-controls="navbarResponsive"
-          aria-expanded="false"
-          aria-label="Toggle navigation"
-        >
-        <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarResponsive">
-          <ul class="navbar-nav ms-auto">
-            <li class="nav-item">
-              <a class="nav-link"
-                id="nav5"
-                href="">{{ user.username }}</a>
-            </li>
-            {% if user.is_authenticated %}
-            <li class="nav-item">
-              <a class="nav-link" id='logout' href="{% url 'logout' %}">Logout</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="{% url 'change_password' %}">Change Password</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="{% url 'create' %}">Create New Article</a>
-            </li>
-            {% if user.is_staff %}
-              <li class="nav-item">
-                <a class="nav-link" id='logout' href="#">Staff</a>
-              </li>
-            {% else %}
-              <li class="nav-item">
-                <a class="nav-link" id='logout' href="#">Normal User</a>
-              </li>             
-            {% endif %}
-            {% else %}
-              <li class="nav-item">
-                <a class="nav-link" id='logout' href="{% url 'login' %}">Login</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" id='logout' href="{% url 'register' %}">Register</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" id='logout' href="{% url 'reset_password' %}">Reset Password</a>
-              </li>
-            {% endif %}
-          </ul>
-        </div>
+          <!-- Navbar brand -->
+          <a class="navbar-brand" href="/">KnowledgeBase</a>
+  
+          <!-- Navbar toggler button -->
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+              <span class="navbar-toggler-icon"></span>
+          </button>
+  
+          <!-- Navbar links -->
+          <div class="collapse navbar-collapse" id="navbarResponsive">
+              <ul class="navbar-nav ms-auto">
+                  <li class="nav-item">
+                      <a class="nav-link" id="nav5" href="">{{ user.username }}</a>
+                  </li>
+                  {% if user.is_staff %}
+                  <li class="nav-item">
+                      <a class="nav-link" id='logout' href="#">Staff</a>
+                  </li>
+                  {% else %}
+                  <li class="nav-item">
+                      <a class="nav-link" id='logout' href="#">(Normal User)</a>
+                  </li>
+                  {% endif %}
+
+                  {% if user.is_authenticated %}
+                  <li class="nav-item">
+                    <a class="nav-link" href="{% url 'create' %}">Create New Article</a>
+                  </li>
+                  <li class="nav-item">
+                      <a class="nav-link" href="{% url 'change_password' %}">Change Password</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" id='logout' href="{% url 'logout' %}">Logout</a>
+                  </li>
+                  {% else %}
+                  <li class="nav-item">
+                      <a class="nav-link" id='logout' href="{% url 'login' %}">Login</a>
+                  </li>
+                  <li class="nav-item">
+                      <a class="nav-link" id='logout' href="{% url 'register' %}">Register</a>
+                  </li>
+                  <li class="nav-item">
+                      <a class="nav-link" id='logout' href="{% url 'reset_password' %}">Reset Password</a>
+                  </li>
+                  {% endif %}
+              </ul>
+          </div>
       </div>
-
-
-    </nav>
+  </nav>
+  
 
     <!-- Page Content -->
     <div class="container">{% block content %} {% endblock %}</div>
@@ -114,7 +107,7 @@
                   console.log("{{ message }}")
               }
           {% endfor %}
-      };
+      }
       </script>
       {% block extra_js %}{% endblock %}
   </body>

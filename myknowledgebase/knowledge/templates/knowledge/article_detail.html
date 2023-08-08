@@ -1,0 +1,25 @@
+{% extends 'knowledge/base.html' %}
+
+{% block content %}
+  <h2>{{ article.title }}</h2>
+  <div>{{ article.article|safe }}</div>
+  {% if request.user.is_authenticated %}
+  {% if request.user.is_authenticated %}
+  <a href="{% url 'edit_article' %}?id={{ article.id }}" class="btn btn-warning">Edit Article</a>
+{% endif %}
+
+{% endif %}
+  <h3>Metadata:</h3>
+  <div class="mt-3">
+    <strong>Meta Data:</strong>
+    {% for tag in article.meta_data.all %}
+      <a href="{% url 'home' %}?search={{ tag.name }}" class="btn btn-secondary m-1">{{ tag.name }}</a>
+    {% endfor %}
+  </div>
+  <br>
+
+  {% if request.user.is_superuser %}
+    <a href="#" class="btn btn-danger">Delete Article</a>
+  {% endif %}
+  <br>
+{% endblock %}

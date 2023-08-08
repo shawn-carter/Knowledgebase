@@ -16,6 +16,8 @@ class KBEntry(models.Model):
 
 class Tag(models.Model):
     name = models.CharField(max_length=100)
+    def __str__(self):
+        return self.name  # Assuming 'name' is the field storing the tag's name
 
 class Audit(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)

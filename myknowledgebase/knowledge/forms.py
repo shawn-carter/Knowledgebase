@@ -53,7 +53,7 @@ class PasswordResetForm(forms.Form):
 class KBEntryForm(forms.ModelForm):
     class Meta:
         model = KBEntry
-        fields = ['title', 'article', 'meta_data']
+        fields = ['title', 'article']  # Excluding 'meta_data' here
         widgets = {
             'article': forms.Textarea(attrs={'required': False}),
         }

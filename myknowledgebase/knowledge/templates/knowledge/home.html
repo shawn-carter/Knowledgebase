@@ -3,10 +3,44 @@
 {% block title %}Home{% endblock %}
 
 {% block content %}
-    <h1>Welcome to my Knowledge Base!</h1>
-    {% if user.is_authenticated %}
-        <p>Welcome, {{ user.username }}!</p>
-    {% else %}
-        <p>You are not logged in.</p>
-    {% endif %}
+<!-- Add search bar and button with Bootstrap styling -->
+<br>
+<div class="mb-3 col-md-6 offset-md-3">
+    <form method="GET" class="form-inline">
+        <div class="input-group">
+            <input type="text" name="search" value="{{ search_term }}" placeholder="Search..." class="form-control" />
+            <div class="input-group-append">
+                <button type="submit" class="btn btn-primary">Search</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Display search results in a table -->
+{% if entries %}
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Article Extract</th>
+                <th>Metadata Tags</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for entry in entries %}
+            <tr>
+                <td><a href="/article/?id={{ entry.id }}">{{ entry.title }}</a></td>
+                <td>{{ entry.article|truncatechars:50 }}</td>
+                <td>
+                    {% for tag in entry.meta_data.all %}
+                        <a href="/?search={{ tag.name }}" class="btn btn-secondary btn-sm m-1">{{ tag.name }}</a>
+                    {% endfor %}
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% elif search_term %}
+    <p>No entries found for "{{ search_term }}".</p>
+{% endif %}
 {% endblock %}

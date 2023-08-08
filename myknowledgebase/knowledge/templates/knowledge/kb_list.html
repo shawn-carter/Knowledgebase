@@ -11,6 +11,7 @@
         <th scope="col">Article</th>
         <th scope="col">Created By</th>
         <th scope="col">Date Created</th>
+        <th scope="col">Tags</th>
       </tr>
     </thead>
     <tbody>
@@ -21,6 +22,13 @@
           <td>{{ entry.article|truncatechars:50 }}</td>
           <td>{{ entry.created_by.username }}</td>
           <td>{{ entry.created_datetime }}</td>
+          <td>
+            {% for tag in entry.meta_data.all %}
+                <span class="tag">{{ tag.name }}</span>{% if not forloop.last %}, {% endif %}
+            {% empty %}
+                No tags
+            {% endfor %}
+        </td>
         </tr>
       {% empty %}
         <tr>

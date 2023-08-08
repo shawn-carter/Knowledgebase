@@ -1,9 +1,9 @@
-<!-- knowledge/templates/knowledge/create.html -->
+<!-- knowledge/templates/knowledge/edit_article.html -->
 {% extends 'knowledge/base.html' %}
 {% load widget_tweaks %}
 {% load static %}
 {% block content %}
-  <h2>Create a New Knowledge Base Article</h2>
+  <h2>Edit an Existing Knowledge Base Article</h2>
   <form method="POST" id="kbEntryForm">
     {% csrf_token %}
     {% for field in form %}
@@ -75,44 +75,65 @@
 
 {% block extra_js %}
 <script>
+    document.addEventListener('DOMContentLoaded', (event) => {
+    var ToolbarOptions = [
+            ["bold", "italic", "underline", "strike"], // Text formatting options
+            [{ list: "ordered" }, { list: "bullet" }], // List options
+            [{ size: [false, "large"] }], // Font size
+            [{ indent: "-1" }, { indent: "+1" }], // Indentation options
+            [{ font: [] }], // Font family
+            [{ align: [] }], // Text alignment
+            ["link", "image", "video"], // Additional options like link, image, and video
+            ["clean"], // Remove formatting option
+    ];
+
     var quill = new Quill('#quillEditor', {
-      theme: 'snow'
+      theme: 'snow',
+      modules: {
+        toolbar: ToolbarOptions,
+      },
     });
+    quill.root.innerHTML = "{{ article.article|escapejs }}";
     var article = document.querySelector('textarea[name=article]');
     quill.on('text-change', function() {
       article.value = quill.root.innerHTML;
     });
-
     // Event listener for metatag lookup field
-    console.log({{all_metatags_json}})
-    const metatags = [];
 
-    //const metatags = 'javascript';
+    const meta_data_input = document.getElementById('meta_data_input');
 
-    console.log(metatags)
+    const metatags = {{ all_tags_json|safe }};
+    
+    const selectedMetatags = document.getElementById('selectedMetatags');
+
+    const initialMetatags = "{{ associated_metatags|join:','|default:''|safe }}".split(',');
+    initialMetatags.forEach(tag => {
+        addMetatagToSelected(tag);
+    });
 
     const metatagLookup = document.getElementById('metatagLookup');
-    const selectedMetatags = document.getElementById('selectedMetatags');
 
     const metatagDropdown = document.createElement('div');
     metatagDropdown.id = "metatagDropdown"; // set the id for CSS styling
     metatagLookup.parentNode.insertBefore(metatagDropdown, metatagLookup.nextSibling);
     
     const form = document.getElementById('kbEntryForm');
-    const meta_data_input = document.getElementById('meta_data_input');
     
-    form.onsubmit = function() {
-       // ... (your existing logic for the quill editor)
     
-       let selectedTags = Array.from(selectedMetatags.children).map(button => button.innerText);
-       meta_data_input.value = selectedTags.join(','); // Assuming comma-separated values
-    };
+    form.addEventListener('submit', function(event) {
+        event.preventDefault();
+        let selectedTags = Array.from(selectedMetatags.children).map(button => button.innerText);
+        meta_data_input.value = selectedTags.join(','); // Assuming comma-separated values       
+        form.submit();
+    });
+
     
     metatagLookup.addEventListener('keydown', function(event) {
+        console.log("Key pressed:", event.key);
         if (event.key === "Enter") {
             event.preventDefault(); // Stop the Enter key from submitting the form
         }
-    })
+    });
 
     metatagLookup.addEventListener('keyup', function(event) {
         if (event.key !== "Enter") {
@@ -131,6 +152,7 @@
                     addMetatagToSelected(match);
                     metatagDropdown.innerHTML = '';  // Clear the dropdown
                     metatagLookup.value = '';  // Clear the input
+                    updateMetaDataInput();  // Update the hidden input after adding a tag
                 };
                 metatagDropdown.appendChild(tagElement);
             });
@@ -143,22 +165,41 @@
             metatagDropdown.innerHTML = '';  // Clear the dropdown
             metatagLookup.value = '';  // Clear the input
         }
-    })
+    });
 
     function addMetatagToSelected(tag) {
+        if (!tag || !tag.trim()) return;  // Check if tag is empty or just spaces
+        // Check if the tag is already added
+        let existingTags = Array.from(selectedMetatags.children).map(button => button.innerText);
+        if (existingTags.includes(tag)) {
+            console.log(`Tag "${tag}" is already added.`);
+            return;
+        }
+        console.log("Tags before submission: ", meta_data_input.value);
         console.log("Current number of tags:", selectedMetatags.children.length);
         console.log("Adding tag:", tag);  // Debugging line
-        console.log(metatags);
+    
         let tagButton = document.createElement('button');
         tagButton.type = 'button';
         tagButton.innerText = tag;
         tagButton.className = 'btn btn-secondary m-1';
         tagButton.onclick = function() {
+            console.log("Attempting to remove tag:", tagButton.innerText);
             selectedMetatags.removeChild(tagButton);
+            updateMetaDataInput();  // Update the hidden input after removing a tag
         };
         selectedMetatags.appendChild(tagButton);
+    
         console.log("Updated number of tags:", selectedMetatags.children.length);
+        updateMetaDataInput();  // Update the hidden input after adding a tag
     }
 
+    function updateMetaDataInput() {
+        let selectedTags = Array.from(selectedMetatags.children).map(button => button.innerText);
+        console.log("Selected tags array:", selectedTags);
+        meta_data_input.value = selectedTags.join(','); // Assuming comma-separated values
+        console.log("Updated hidden input with tags:", meta_data_input.value);
+    }
+    });
   </script>
 {% endblock %}

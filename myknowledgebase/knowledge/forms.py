@@ -2,6 +2,7 @@
 from django import forms
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
+from django.contrib.auth.password_validation import validate_password
 from .models import KBEntry
 
 class NewUserForm(forms.ModelForm):
@@ -15,16 +16,37 @@ class NewUserForm(forms.ModelForm):
 
     def clean_username(self):
         username = self.cleaned_data.get('username')
-        if len(username) < 4:
-            raise ValidationError("Username must be at least 4 characters long.")
+        if User.objects.filter(username=username).exists():
+            raise ValidationError("Username is already taken.")
+        if username.isdigit():
+            raise ValidationError("Username cannot be all numbers.")
+        if '@' in username:
+            raise ValidationError("Username cannot contain '@'.")
+        if ' ' in username:
+            raise ValidationError("Username cannot contain spaces.")
+        if username == 'admin':
+            raise ValidationError("Username cannot be 'admin'.")
+        if len(username) > 50:
+            raise ValidationError("Username cannot be longer than 50 characters.")
+        if len(username) < 3:
+            raise ValidationError("Username must be at least 3 characters long.")
         return username
+
+    def clean_password1(self):
+        password1 = self.cleaned_data.get('password1')
+        validate_password(password1)  # This will raise a ValidationError if the password is not valid
+        return password1
 
     def clean(self):
         cleaned_data = super().clean()
         password1 = cleaned_data.get("password1")
         password2 = cleaned_data.get("password2")
-        if password1 != password2:
-            self.add_error('password2', "Passwords must match")
+
+        # Check if password1 is valid
+        if password1:
+            # Check if password1 matches password2
+            if password1 != password2:
+                self.add_error('password2', "Passwords must match")
         return cleaned_data
     
     def save(self, commit=True):

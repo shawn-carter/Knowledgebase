@@ -1,4 +1,5 @@
 # knowledge/views.py
+from django.forms import ValidationError
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseNotFound, HttpResponseForbidden
 from django.shortcuts import render, redirect
 from .forms import NewUserForm, PasswordResetForm, KBEntryForm
@@ -25,14 +26,14 @@ def undelete_article(article):
     article.deleted_datetime = None
     article.deleted_by = None
     article.save()
-    
+
 def register(request):
     if request.method == "POST":
         form = NewUserForm(request.POST)
         if form.is_valid():
             user = form.save()
             django_login(request, user)
-            messages.success(request, "Registration successful." )
+            messages.success(request, "Registration successful.")
             return redirect("home")
         messages.error(request, "Unsuccessful registration. Invalid information.")
     else:

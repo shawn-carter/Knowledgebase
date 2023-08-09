@@ -1,6 +1,7 @@
 {% extends 'knowledge/base.html' %}
 
 {% block content %}
+  <br>
   <h2>{{ article.title }}</h2>
   {% if user.is_superuser or article.created_by == user %}
   <a href="{% url 'edit_article' %}?id={{ article.id }}" class="btn btn-warning">Edit Article</a>
@@ -17,22 +18,13 @@
   <p><strong>Tags:</strong> {{ article.tags.count }}</p>
   <p><strong>Meta Data:</strong> {{ article.meta_data.count }}</p>
   <br>
-
-  <h3>Comments</h3>
-  {% for comment in article.comments.all %}
-    <p>{{ comment.comment }}</p>
-    <p><strong>Author:</strong> {{ comment.created_by }}</p>
-    <p><strong>Created Date:</strong> {{ comment.created_date|date:"H:i:s jS F, Y" }}</p>
-    <p><strong>Last Modified By:</strong> {{ comment.last_modified_by }}</p>
-    <p><strong>Last Modified Date:</strong> {{ comment.last_modified_date|date:"H:i:s jS F, Y" }}</p>
-    <br>
-  {% endfor %}
   
-  <!-- create a button for upvote and downvote -->
+  {% if user != article.created_by and not user.is_superuser %}
   <button class="btn btn-success" id="upvote">Upvote</button>
   <button class="btn btn-danger" id="downvote">Downvote</button>
-  <br>
-  
+  {% endif %}
+
+  <br><br>
   <h3>Metadata Tags</h3>
   <div class="mt-3">
     {% for tag in article.meta_data.all %}

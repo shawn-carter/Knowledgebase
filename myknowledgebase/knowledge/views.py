@@ -68,13 +68,13 @@ def home(request):
         entries = KBEntry.objects.filter(
             Q(title__icontains=search_term) |
             Q(article__icontains=search_term) |
-            Q(meta_data__name__icontains=search_term),
+            Q(meta_data__name__icontains=search_term) |
+            Q(created_by__username__icontains=search_term),  # New condition for author's username
             deleted_datetime__isnull=True
         ).distinct()
         for entry in entries:
             entry.article = strip_tags(entry.article.replace('<p>', ' '))
     return render(request, 'knowledge/home.html', {'entries': entries, 'search_term': search_term})
-
 
 @login_required
 def user_list(request):

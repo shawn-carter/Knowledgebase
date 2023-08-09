@@ -22,6 +22,7 @@
         <thead>
             <tr>
                 <th>Title</th>
+                <th>Author</th> <!-- New Column for Author -->
                 <th>Article Extract</th>
                 <th>Metadata Tags</th>
             </tr>
@@ -30,6 +31,7 @@
         {% for entry in entries %}
             <tr>
                 <td><a href="/article/?id={{ entry.id }}">{{ entry.title }}</a></td>
+                <td>{{ entry.created_by.username }}</td> <!-- Display the Author's Username -->
                 <td>{{ entry.article|truncatechars:50 }}</td>
                 <td>
                     {% for tag in entry.meta_data.all %}

@@ -109,12 +109,34 @@
             form.submit();
         });
 
-        // Handle metatag lookup: show dropdown on keyup, prevent form submission on Enter
-        metatagLookup.keydown(function(event) {
-            if (event.key === "Enter") {
-                event.preventDefault();  // Stop the Enter key from submitting the form
+      // Handle metatag lookup: show dropdown on keyup, prevent form submission on Enter
+      metatagLookup.keydown(function(event) {
+        console.log("Key pressed:", event.key);
+        if (event.key === "Enter") {
+            event.preventDefault(); // Stop the Enter key from submitting the form
+            
+            let value = metatagLookup.val().trim();
+            
+            // Check if the value matches any tag in the dropdown
+            let dropdownMatches = metatagDropdown.children().map(function() {
+                return $(this).text().trim();
+            }).get();
+
+            // If the typed tag matches an existing tag or a dropdown option, add it
+            if (value && (metatags.includes(value) || dropdownMatches.includes(value))) {
+                addMetatagToSelected(value, selectedMetatags, meta_data_input);
+            } 
+            // Otherwise, treat it as a new tag
+            else if (value) {
+                metatags.push(value);  // Add to mock data
+                addMetatagToSelected(value, selectedMetatags, meta_data_input);
             }
-        });
+
+            metatagDropdown.empty();  // Clear the dropdown
+            metatagLookup.val('');  // Clear the input
+        }
+      });
+
 
         metatagLookup.keyup(function(event) {
             if (event.key !== "Enter") {

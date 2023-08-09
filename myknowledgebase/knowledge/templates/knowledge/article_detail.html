@@ -11,9 +11,13 @@
   <p><strong>Created Date:</strong> {{ created_date|date:"H:i:s jS F, Y" }}</p>
   <p><strong>Last Modified By:</strong> {{ last_modified_by }}</p>
   <p><strong>Last Modified Date:</strong> {{ last_modified_date|date:"H:i:s jS F, Y" }}</p>
-
-
-  
+  <p><strong>Views:</strong> {{ article.views }}</p>
+  <p><strong>Rating:</strong> {{ article.rating }}</p>
+  <p><strong>Comments:</strong> {{ article.comments.count }}</p>
+  <p><strong>Tags:</strong> {{ article.tags.count }}</p>
+  <p><strong>Meta Data:</strong> {{ article.meta_data.count }}</p>
+  <br>
+    
   <h3>Metadata Tags</h3>
   <div class="mt-3">
     {% for tag in article.meta_data.all %}

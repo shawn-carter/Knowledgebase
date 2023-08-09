@@ -11,6 +11,7 @@
         <th scope="col">Article</th>
         <th scope="col">Created By</th>
         <th scope="col">Date Created</th>
+        <th scope="col">Date Deleted</th>
         <th scope="col">Tags</th>
       </tr>
     </thead>
@@ -19,9 +20,10 @@
         <tr>
           <th scope="row">{{ entry.id }}</th>
           <td>{{ entry.title }}</td>
-          <td>{{ entry.article|truncatechars:50 }}</td>
+          <td>{{ entry.article|striptags|truncatechars:50 }}</td>
           <td>{{ entry.created_by.username }}</td>
           <td>{{ entry.created_datetime }}</td>
+          <td>{{ entry.deleted_datetime }}</td>
           <td>
             {% for tag in entry.meta_data.all %}
                 <span class="tag">{{ tag.name }}</span>{% if not forloop.last %}, {% endif %}

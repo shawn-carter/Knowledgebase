@@ -64,7 +64,9 @@ class KBEntryForm(forms.ModelForm):
 
     def save(self, commit=True):
         instance = super(KBEntryForm, self).save(commit=False)
-        instance.created_by = self.request.user
+        if not instance.pk:  # Check if the instance has a primary key (i.e., if it's been saved before)
+            instance.created_by = self.request.user
+        instance.last_modified_by = self.request.user
         if commit:
             instance.save()
             self.save_m2m()

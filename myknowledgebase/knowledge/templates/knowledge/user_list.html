@@ -2,12 +2,49 @@
 {% extends 'knowledge/base.html' %}
 
 {% block content %}
-  <h2>All Users</h2>
-  <ul>
-    {% for user in users %}
-      <li>{{ user.username }} ({{ user.email }}) ({{ user.password }})</li>
-    {% empty %}
-      <li>No users have been created yet.</li>
-    {% endfor %}
-  </ul>
+<br>
+<h2>All Users</h2>
+<table class="table">
+    <thead>
+        <tr>
+            <th>User ID</th>
+            <th>Username</th>
+            <th>Email</th>
+            <th>User Level</th>
+            <th>Date Joined</th>
+            <th>Active</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for user in users %}
+        <tr>
+            <td>{{ user.id }}</td>
+            <td>{{ user.username }}</td>
+            <td>{{ user.email }}</td>
+            <td>
+                {% if user.is_superuser %}
+                    Superuser
+                {% else %}
+                    User
+                {% endif %}
+            </td>
+            <td>{{ user.date_joined }}</td>
+            <td>
+              {% if user.is_active %}
+                  Active 
+                  <a href="{% url 'toggle_user_active_status' user.id %}" class="btn btn-danger">Deactivate</a>
+              {% else %}
+                  Inactive 
+                  <a href="{% url 'toggle_user_active_status' user.id %}" class="btn btn-success">Activate</a>
+              {% endif %}
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="6">No users have been created yet.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
 {% endblock %}

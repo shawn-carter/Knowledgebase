@@ -1,164 +1,152 @@
 <!-- knowledge/templates/knowledge/create.html -->
-{% extends 'knowledge/base.html' %}
-{% load widget_tweaks %}
-{% load static %}
+{% extends 'knowledge/base.html' %} {% load widget_tweaks %} {% load static %}
 {% block content %}
-  <h2>Create a New Knowledge Base Article</h2>
-  <form method="POST" id="kbEntryForm">
-    {% csrf_token %}
-    {% for field in form %}
-        {% if not field.name == "meta_data" %}
-            <div class="form-group">
-        {% if field.name == "article" %}
-            <label for="quillEditor">{{ field.label }}</label>
-            <div id="quillEditor" style="height: 200px;">{{ field.value }}</div>
-            {{ field|attr:"style:display:none;" }}
-        {% else %}
-            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-            {{ field|add_class:"form-control" }}
-        {% endif %}
-        {% endif %}
-            </div>
-    {% endfor %}
-
+<h2>Create a New Knowledge Base Article</h2>
+<form method="POST" id="kbEntryForm">
+  {% csrf_token %} 
+  {% for field in form %}
+    {% if not field.name == "meta_data"%}
     <div class="form-group">
-        <label for="metatagLookup">Lookup/Add Metatag:</label>
-        <input type="text" id="metatagLookup" class="form-control" placeholder="Type to search or add a new tag..." />
+      {% if field.name == "article" %}
+      <label for="quillEditor">{{ field.label }}</label>
+      <div id="quillEditor" style="height: 200px">{{ field.value }}</div>
+      {{ field|attr:"style:display:none;" }} {% else %}
+      <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+      {{ field|add_class:"form-control" }}
+      {% endif %}
+    {% endif %}
     </div>
-    
-    <div class="form-group">
-        <label>Selected Meta Data:</label>
-        <div id="selectedMetatags"></div>
-        <input type="hidden" name="meta_data" id="meta_data_input">
-    </div>
+  {% endfor %}
 
-    <button type="submit" class="btn btn-primary">Submit</button>
-  </form>
-
-  {% if form.errors %}
-  <div class="alert alert-danger">
-    <ul>
-      {% for field, errors in form.errors.items %}
-        {% for error in errors %}
-          <li><strong>{{ field }}:</strong> {{ error|escape }}</li>
-        {% endfor %}
-      {% endfor %}
-    </ul>
+  <div class="form-group">
+    <label for="metatagLookup">Lookup/Add Metatag:</label>
+    <input
+      type="text"
+      id="metatagLookup"
+      class="form-control"
+      placeholder="Type to search or add a new tag..."
+    />
   </div>
-  {% endif %}
-    <style>
-        #metatagDropdown {
-            border: 1px solid #ccc;
-            max-height: 100px;
-            overflow-y: auto;
-            position: absolute;          
-            z-index: 1000; /* to ensure it appears on top */
-            background-color: white;
-        }
-        
-        #metatagDropdown div {
-            padding: 5px 10px;
-            cursor: pointer;
-            border-bottom: 1px solid #eee;
-            transition: background-color 0.2s;
-        }
-        
-        #metatagDropdown div:last-child {
-            border-bottom: none;
-        }
-        
-        #metatagDropdown div:hover {
-            background-color: #f7f7f7;
-        }
-    </style>
-{% endblock %}
 
-{% block extra_js %}
+  <div class="form-group">
+    <label>Selected Meta Data:</label>
+    <div id="selectedMetatags"></div>
+    <input type="hidden" name="meta_data" id="meta_data_input" />
+  </div>
+
+  <button type="submit" class="btn btn-primary">Submit</button>
+</form>
+
+{% if form.errors %}
+<div class="alert alert-danger">
+  <ul>
+    {% for field, errors in form.errors.items %} {% for error in errors %}
+    <li><strong>{{ field }}:</strong> {{ error|escape }}</li>
+    {% endfor %} {% endfor %}
+  </ul>
+</div>
+{% endif %}
+<style>
+  #metatagDropdown {
+    border: 1px solid #ccc;
+    max-height: 100px;
+    overflow-y: auto;
+    position: absolute;
+    z-index: 1000; /* to ensure it appears on top */
+    background-color: white;
+  }
+
+  #metatagDropdown div {
+    padding: 5px 10px;
+    cursor: pointer;
+    border-bottom: 1px solid #eee;
+    transition: background-color 0.2s;
+  }
+
+  #metatagDropdown div:last-child {
+    border-bottom: none;
+  }
+
+  #metatagDropdown div:hover {
+    background-color: #f7f7f7;
+  }
+</style>
+{% endblock %} {% block extra_js %}
 <script>
-    var quill = new Quill('#quillEditor', {
-      theme: 'snow'
-    });
-    var article = document.querySelector('textarea[name=article]');
-    quill.on('text-change', function() {
-      article.value = quill.root.innerHTML;
-    });
+  $(document).ready(function() {
 
-    // Event listener for metatag lookup field
-    console.log({{all_metatags_json}})
-    const metatags = [];
+        // Initialize Quill editor with custom toolbar options
+        var quill = new Quill('#quillEditor', {
+            theme: 'snow',
+            modules: {
+                toolbar: ToolbarOptions,
+            },
+        });
 
-    //const metatags = 'javascript';
+        // Update the value of the hidden article textarea whenever the Quill content changes
+        var article = $('textarea[name=article]');
 
-    console.log(metatags)
+        quill.on('text-change', function() {
+            article.val(quill.root.innerHTML);
+        });
 
-    const metatagLookup = document.getElementById('metatagLookup');
-    const selectedMetatags = document.getElementById('selectedMetatags');
+        // References to important DOM elements
+        const meta_data_input = $('#meta_data_input');
+        const metatags = {{ all_tags_json|safe }};
+        const selectedMetatags = $('#selectedMetatags');
+        const metatagLookup = $('#metatagLookup');
 
-    const metatagDropdown = document.createElement('div');
-    metatagDropdown.id = "metatagDropdown"; // set the id for CSS styling
-    metatagLookup.parentNode.insertBefore(metatagDropdown, metatagLookup.nextSibling);
-    
-    const form = document.getElementById('kbEntryForm');
-    const meta_data_input = document.getElementById('meta_data_input');
-    
-    form.onsubmit = function() {
-       // ... (your existing logic for the quill editor)
-    
-       let selectedTags = Array.from(selectedMetatags.children).map(button => button.innerText);
-       meta_data_input.value = selectedTags.join(','); // Assuming comma-separated values
-    };
-    
-    metatagLookup.addEventListener('keydown', function(event) {
-        if (event.key === "Enter") {
-            event.preventDefault(); // Stop the Enter key from submitting the form
-        }
-    })
+        // Create and set up the dropdown for metatag lookup using jQuery
+        const metatagDropdown = $('<div>').attr('id', 'metatagDropdown');
+            metatagLookup.after(metatagDropdown);
 
-    metatagLookup.addEventListener('keyup', function(event) {
-        if (event.key !== "Enter") {
-            // Clear the dropdown first
-            metatagDropdown.innerHTML = '';
-            
-            // Filter the metatags based on user input
-            let value = metatagLookup.value.trim();
-            let matches = metatags.filter(tag => tag.includes(value));
-            
-            // Populate the dropdown with matching tags
+        // Handle form submission: update hidden input and submit form
+        const form = $('#kbEntryForm');
+        form.on('submit', function(event) {
+            event.preventDefault();
+            updateMetaDataInput(selectedMetatags, meta_data_input);  // Update the hidden input before submitting
+            form.off('submit');
+            form.submit();
+        });
+
+        // Handle metatag lookup: show dropdown on keyup, prevent form submission on Enter
+        metatagLookup.keydown(function(event) {
+            if (event.key === "Enter") {
+                event.preventDefault();  // Stop the Enter key from submitting the form
+            }
+        });
+
+        metatagLookup.keyup(function(event) {
+            if (event.key !== "Enter") {
+                // Clear the dropdown first
+
+                  metatagDropdown.empty();
+
+                  // Filter the metatags based on user input
+                  let value = metatagLookup.val().trim();
+                  let matches = metatags.filter(tag => tag.includes(value));
+
+                  // Populate the dropdown with matching tags
             matches.forEach(match => {
-                let tagElement = document.createElement('div');
-                tagElement.innerText = match;
-                tagElement.onclick = function() {
-                    addMetatagToSelected(match);
-                    metatagDropdown.innerHTML = '';  // Clear the dropdown
-                    metatagLookup.value = '';  // Clear the input
-                };
-                metatagDropdown.appendChild(tagElement);
+                let tagElement = $('<div>').text(match);
+                tagElement.click(function() {
+                    addMetatagToSelected(match, selectedMetatags, meta_data_input);
+                    metatagDropdown.empty();  // Clear the dropdown
+                    metatagLookup.val('');  // Clear the input
+                });
+                metatagDropdown.append(tagElement);
             });
         } else {
-            let value = metatagLookup.value.trim();
+            let value = metatagLookup.val().trim();
             if (!metatags.includes(value)) {
                 metatags.push(value);  // Add to mock data
-                addMetatagToSelected(value);
+                addMetatagToSelected(value, selectedMetatags, meta_data_input);
             }
-            metatagDropdown.innerHTML = '';  // Clear the dropdown
-            metatagLookup.value = '';  // Clear the input
+            metatagDropdown.empty();  // Clear the dropdown
+            metatagLookup.val('');  // Clear the input
         }
+      });
+
     })
-
-    function addMetatagToSelected(tag) {
-        console.log("Current number of tags:", selectedMetatags.children.length);
-        console.log("Adding tag:", tag);  // Debugging line
-        console.log(metatags);
-        let tagButton = document.createElement('button');
-        tagButton.type = 'button';
-        tagButton.innerText = tag;
-        tagButton.className = 'btn btn-secondary m-1';
-        tagButton.onclick = function() {
-            selectedMetatags.removeChild(tagButton);
-        };
-        selectedMetatags.appendChild(tagButton);
-        console.log("Updated number of tags:", selectedMetatags.children.length);
-    }
-
-  </script>
+</script>
 {% endblock %}

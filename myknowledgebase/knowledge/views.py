@@ -2,8 +2,8 @@
 from django.forms import ValidationError
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseNotFound, HttpResponseForbidden
 from django.shortcuts import render, redirect
-from .forms import NewUserForm, PasswordResetForm, KBEntryForm
-from django.contrib.auth.forms import AuthenticationForm  # add this import
+from .forms import NewUserForm, PasswordResetForm, KBEntryForm, CustomPasswordChangeForm
+from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import authenticate, login as django_login
 from django.contrib.auth import logout as django_logout
 from django.contrib.auth.models import User
@@ -93,7 +93,7 @@ def logout(request):
 @login_required
 def changepassword(request):
     if request.method == 'POST':
-        form = PasswordChangeForm(request.user, request.POST)
+        form = CustomPasswordChangeForm(request.user, request.POST)
         if form.is_valid():
             user = form.save()
             # Updating the session hash prevents a password change from logging the user out.
@@ -101,9 +101,9 @@ def changepassword(request):
             messages.success(request, 'Your password was successfully updated!')
             return redirect('home')
         else:
-            messages.error(request, 'Please correct the error below.')
+            messages.error(request, 'Please correct the error above.')
     else:
-        form = PasswordChangeForm(request.user)
+        form = CustomPasswordChangeForm(request.user)
     return render(request, 'knowledge/change_password.html', {'form': form})
 
 def resetpassword(request):

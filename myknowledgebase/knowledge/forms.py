@@ -3,6 +3,7 @@ from django import forms
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.contrib.auth.password_validation import validate_password
+from django.contrib.auth.forms import PasswordChangeForm
 from .models import KBEntry
 
 class NewUserForm(forms.ModelForm):
@@ -60,6 +61,12 @@ class PasswordResetForm(forms.Form):
     username = forms.CharField(max_length=150)
     new_password1 = forms.CharField(widget=forms.PasswordInput, label='Password')
     new_password2 = forms.CharField(widget=forms.PasswordInput, label='Confirm Password')
+
+    def clean_new_password1(self):
+        new_password1 = self.cleaned_data.get('new_password1')
+        validate_password(new_password1)  # This will raise a ValidationError if the password is not valid
+        return new_password1
+
     def clean(self):
         cleaned_data = super().clean()
         username = cleaned_data.get('username')
@@ -71,6 +78,16 @@ class PasswordResetForm(forms.Form):
 
         if new_password1 and new_password2 and new_password1 != new_password2:
             self.add_error('new_password2', 'The two password fields didn’t match.')
+
+class CustomPasswordChangeForm(PasswordChangeForm):
+
+    def clean_new_password1(self):
+        password1 = self.cleaned_data.get('new_password1')
+        
+        # Run the default password validations
+        validate_password(password1)
+        
+        return password1
 
 class KBEntryForm(forms.ModelForm):
     class Meta:

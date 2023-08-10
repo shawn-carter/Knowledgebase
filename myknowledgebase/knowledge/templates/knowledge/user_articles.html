@@ -1,0 +1,39 @@
+{% extends 'knowledge/base.html' %}
+
+{% block content %}
+<br>
+<h2>Articles by {{ author.username }}</h2>
+
+{% if entries %}
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Article Extract</th>
+                <th>Created Date</th>
+                <th>Last Modified</th>
+                <th>Modified By</th>
+                <th>Metadata Tags</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for entry in entries %}
+            <tr>
+                <td><a href="/article/?id={{ entry.id }}">{{ entry.title }}</a></td>
+                <td>{{ entry.article|striptags|truncatechars:50 }}</td>
+                <td>{{ entry.created_datetime|date:"H:i:s jS F, Y" }}</td>
+                <td>{{ entry.modified_datetime|date:"H:i:s jS F, Y" }}</td>
+                <td>{{ entry.last_modified_by.username }}</td>
+                <td>
+                    {% for tag in entry.meta_data.all %}
+                        <a href="/?search={{ tag.name }}" class="btn btn-secondary btn-sm m-1">{{ tag.name }}</a>
+                    {% endfor %}
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <p>{{ author.username }} has not written any articles yet.</p>
+{% endif %}
+{% endblock %}

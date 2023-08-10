@@ -320,3 +320,18 @@ def toggle_user_active_status(request, user_id):
 def my_articles(request):
     user_articles = KBEntry.objects.filter(created_by=request.user, deleted_datetime__isnull=True)
     return render(request, 'knowledge/my_articles.html', {'articles': user_articles})
+
+@login_required
+def user_articles(request, user_id):
+    try:
+        # Fetch the user based on the provided user_id
+        user_obj = User.objects.get(pk=user_id)
+        
+        # Fetch all articles created by this user and not deleted
+        user_entries = KBEntry.objects.filter(created_by=user_obj, deleted_datetime__isnull=True)
+        
+        # Render the template with the user's articles
+        return render(request, 'knowledge/user_articles.html', {'entries': user_entries, 'author': user_obj})
+    except User.DoesNotExist:
+        messages.error(request, 'User not found.')
+        return redirect('home')

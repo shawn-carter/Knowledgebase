@@ -31,7 +31,7 @@
         {% for entry in entries %}
             <tr>
                 <td><a href="/article/?id={{ entry.id }}">{{ entry.title }}</a></td>
-                <td>{{ entry.created_by.username }}</td> <!-- Display the Author's Username -->
+                <td><a href="{% url 'user_articles' entry.created_by.id %}">{{ entry.created_by.username }}</a></td>
                 <td>{{ entry.article|truncatechars:50 }}</td>
                 <td>
                     {% for tag in entry.meta_data.all %}

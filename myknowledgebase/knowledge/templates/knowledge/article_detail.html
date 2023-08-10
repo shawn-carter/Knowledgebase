@@ -4,11 +4,11 @@
   <br>
   <h2>{{ article.title }}</h2>
   {% if user.is_superuser or article.created_by == user %}
-  <a href="{% url 'edit_article' %}?id={{ article.id }}" class="btn btn-warning">Edit Article</a>
+  <a href="{% url 'edit_article' article.id %}" class="btn btn-warning">Edit Article</a>
   {% endif %}
   <p>{{ article.article|safe }}</p>
 
-  <p><strong>Author:</strong> {{ author_name }}</p>
+  <p><strong>Author:</strong> <a href="{% url 'user_articles' article.created_by.id %}" title="See all articles by {{ author_name }}">{{ author_name }}</a></p>
   <p><strong>Created Date:</strong> {{ created_date|date:"H:i:s jS F, Y" }}</p>
   <p><strong>Last Modified By:</strong> {{ last_modified_by }}</p>
   <p><strong>Last Modified Date:</strong> {{ last_modified_date|date:"H:i:s jS F, Y" }}</p>

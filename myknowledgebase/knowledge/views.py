@@ -132,12 +132,7 @@ def kblist(request):
     return render(request, 'knowledge/kb_list.html', {'entries': entries})
 
 @login_required
-def article_detail(request):
-    article_id = request.GET.get('id', None)  # Get the id from the query parameter
-    if not article_id:
-        messages.error(request, 'Article ID not provided.')
-        return redirect('home')
-
+def article_detail(request, article_id):  # Add the article_id parameter here
     try:
         article = KBEntry.objects.get(pk=article_id, deleted_datetime__isnull=True)
     except KBEntry.DoesNotExist:
@@ -155,8 +150,7 @@ def article_detail(request):
 
 
 @login_required
-def edit_article(request):
-    article_id = request.GET.get('id')
+def edit_article(request, article_id):
     if not article_id:
         # Handle the case where no article_id is provided
         return HttpResponseBadRequest("Article ID is required.")
@@ -177,7 +171,7 @@ def edit_article(request):
     # Check if user is authorized to edit
     if not (request.user.is_superuser or article.created_by == request.user):
         messages.error(request, 'You are not authorized to edit this article.')
-        return redirect(f'/article/?id={article_id}')  # Redirect to article detail or some other appropriate page
+        return redirect(f'/article/{article_id}')  # Redirect to article detail or some other appropriate page
 
     if request.method == 'POST':
         form = KBEntryForm(request.POST, instance=article, request=request)
@@ -197,7 +191,7 @@ def edit_article(request):
                 article.meta_data.add(tag)
 
             # Redirect to the updated article or some success page
-            return redirect(f'/article/?id={article_id}')
+            return redirect(f'/article/{article_id}')
 
     else:
         form = KBEntryForm(instance=article, request=request)
@@ -232,7 +226,7 @@ def create(request):
             messages.success(request, 'Your knowledge base entry was successfully created!')
             
             # Redirect to the article_detail view for the newly created article
-            return redirect(f'/article/?id={kb_entry.id}')  # Assuming the URL pattern for article_detail is '/article/?id=ARTICLE_ID'
+            return redirect(f'/article/{kb_entry.id}')  # Assuming the URL pattern for article_detail is '/article/?id=ARTICLE_ID'
         
         else:
             messages.error(request, 'Please correct the error below.')
@@ -313,7 +307,6 @@ def toggle_user_active_status(request, user_id):
         messages.success(request, f"{user_to_toggle.username}'s account has been activated.")
     else:
         messages.success(request, f"{user_to_toggle.username}'s account has been deactivated.")
-    
     return redirect('user-list')
 
 @login_required

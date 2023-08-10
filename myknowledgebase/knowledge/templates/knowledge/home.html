@@ -30,7 +30,7 @@
         <tbody>
         {% for entry in entries %}
             <tr>
-                <td><a href="/article/?id={{ entry.id }}">{{ entry.title }}</a></td>
+                <td><a href="{% url 'article_detail' entry.id %}">{{ entry.title }}</a></td>
                 <td><a href="{% url 'user_articles' entry.created_by.id %}">{{ entry.created_by.username }}</a></td>
                 <td>{{ entry.article|truncatechars:50 }}</td>
                 <td>

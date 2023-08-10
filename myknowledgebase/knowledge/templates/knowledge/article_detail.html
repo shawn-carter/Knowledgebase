@@ -13,15 +13,13 @@
   <p><strong>Last Modified By:</strong> {{ last_modified_by }}</p>
   <p><strong>Last Modified Date:</strong> {{ last_modified_date|date:"H:i:s jS F, Y" }}</p>
   <p><strong>Views:</strong> {{ article.views }}</p>
-  <p><strong>Rating:</strong> {{ article.rating }}</p>
-  <p><strong>Comments:</strong> {{ article.comments.count }}</p>
-  <p><strong>Tags:</strong> {{ article.tags.count }}</p>
+  <p><strong>Rating:</strong> <span id="rating">{{ rating }}</span></p>
   <p><strong>Meta Data:</strong> {{ article.meta_data.count }}</p>
   <br>
   
   {% if user != article.created_by and not user.is_superuser %}
-  <button class="btn btn-success" id="upvote">Upvote</button>
-  <button class="btn btn-danger" id="downvote">Downvote</button>
+  <button class="btn btn-success mb-5" id="upvote" {% if user_has_upvoted %} disabled {% endif %}>Upvote</button>
+  <button class="btn btn-danger mb-5" id="downvote" {% if user_has_downvoted %} disabled {% endif %}>Downvote</button>
   {% endif %}
 
   <h3>Metadata Tags</h3>
@@ -37,4 +35,41 @@
   <br>
   {% endif %}
   <br>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  $('#upvote').click(function(){
+    $.ajax({
+        url: "{% url 'upvote_article' article.id %}",
+        type: "POST",
+        data: {
+            csrfmiddlewaretoken: '{{ csrf_token }}',
+        },
+        success: function(response){
+          // Assuming the response contains the updated rating
+          $('#rating').text(response.rating);
+          $('#upvote').prop('disabled', true);
+          $('#downvote').prop('disabled', false);
+      }
+    });
+  });
+
+$('#downvote').click(function(){
+    $.ajax({
+        url: "{% url 'downvote_article' article.id %}",
+        type: "POST",
+        data: {
+            csrfmiddlewaretoken: '{{ csrf_token }}',
+        },
+        success: function(response){
+          // Assuming the response contains the updated rating
+          $('#rating').text(response.rating);
+          $('#downvote').prop('disabled', true);
+          $('#upvote').prop('disabled', false);
+    }
+  })
+});
+
+</script>
 {% endblock %}

@@ -1,7 +1,7 @@
 # knowledge/views.py
 from django.forms import ValidationError
-from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseNotFound, HttpResponseForbidden
-from django.shortcuts import render, redirect
+from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseNotFound, HttpResponseForbidden, JsonResponse
+from django.shortcuts import get_object_or_404, render, redirect
 from .forms import NewUserForm, PasswordResetForm, KBEntryForm, CustomPasswordChangeForm
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import authenticate, login as django_login
@@ -17,15 +17,27 @@ from django.utils.html import strip_tags
 from django.utils import timezone
 import json
 
+# Functions to be used inside Views
+
+# -- This is to soft delete an article
 def soft_delete_article(article, user):
     article.deleted_datetime = timezone.now()
     article.deleted_by = user
     article.save()
     
+# -- This can be used to 'undelete' an article
 def undelete_article(article):
     article.deleted_datetime = None
     article.deleted_by = None
     article.save()
+
+# -- This is used to calculate the rating based on the number of upvotes and total votes
+def calculate_rating(article):
+    total_votes = article.upvotes.count() + article.downvotes.count()
+    if total_votes == 0:
+        return 0  # To handle the case where there are no votes yet
+    rating_percentage = (article.upvotes.count() / total_votes) * 100
+    return round(rating_percentage, 1)  # Rounding off to one decimal place
 
 def register(request):
     if request.method == "POST":
@@ -138,11 +150,17 @@ def article_detail(request, article_id):  # Add the article_id parameter here
     except KBEntry.DoesNotExist:
         messages.error(request, 'Article not found or has been deleted.')
         return redirect('home')
-
+    
+    rating = calculate_rating(article)
+    user_has_upvoted = request.user in article.upvotes.all()
+    user_has_downvoted = request.user in article.downvotes.all()
     context = {
         'article': article,
         'author_name': article.created_by.username if article.created_by else None,
         'created_date': article.created_datetime,
+        'rating' : rating,
+        'user_has_upvoted': user_has_upvoted,
+        'user_has_downvoted': user_has_downvoted,
         'last_modified_by': article.last_modified_by.username if article.last_modified_by else None,
         'last_modified_date': article.modified_datetime
     }
@@ -328,3 +346,26 @@ def user_articles(request, user_id):
     except User.DoesNotExist:
         messages.error(request, 'User not found.')
         return redirect('home')
+
+@login_required
+def upvote_article(request, article_id):
+    try:
+        article = KBEntry.objects.get(pk=article_id)
+        # Assuming upvotes and downvotes are ManyToMany fields with the User model
+        article.upvotes.add(request.user)
+        article.downvotes.remove(request.user)  # remove downvote if user previously downvoted
+        rating = calculate_rating(article)  # a function to calculate the rating
+        return JsonResponse({'status': 'success', 'rating': rating})
+    except KBEntry.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'Article not found'})
+
+@login_required
+def downvote_article(request, article_id):
+    try:
+        article = KBEntry.objects.get(pk=article_id)
+        article.downvotes.add(request.user)
+        article.upvotes.remove(request.user)  # remove upvote if user previously upvoted
+        rating = calculate_rating(article)  # a function to calculate the rating
+        return JsonResponse({'status': 'success', 'rating': rating})
+    except KBEntry.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'Article not found'})

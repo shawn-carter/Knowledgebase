@@ -21,5 +21,7 @@ urlpatterns = [
     path('toggle_user_active_status/<int:user_id>/',toggle_user_active_status, name='toggle_user_active_status'),
     path('myarticles/', my_articles, name='my_articles'),
     path('user_articles/<int:user_id>/', views.user_articles, name='user_articles'),
+    path('article/<int:article_id>/upvote/', views.upvote_article, name='upvote_article'),
+    path('article/<int:article_id>/downvote/', views.downvote_article, name='downvote_article'),
     path('', home, name='home'),
 ]

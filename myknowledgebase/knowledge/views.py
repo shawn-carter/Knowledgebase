@@ -315,3 +315,8 @@ def toggle_user_active_status(request, user_id):
         messages.success(request, f"{user_to_toggle.username}'s account has been deactivated.")
     
     return redirect('user-list')
+
+@login_required
+def my_articles(request):
+    user_articles = KBEntry.objects.filter(created_by=request.user, deleted_datetime__isnull=True)
+    return render(request, 'knowledge/my_articles.html', {'articles': user_articles})

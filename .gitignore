@@ -36,5 +36,3 @@ __pycache__/
 
 # Ignore the virtual environment
 venv/
-
-myknowledgebase/staticfiles/

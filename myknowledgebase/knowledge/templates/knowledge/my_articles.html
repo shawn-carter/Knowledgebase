@@ -1,0 +1,30 @@
+{% extends 'knowledge/base.html' %}
+
+{% block content %}
+<br>
+<h2>My Articles</h2>
+{% if articles %}
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Article Extract</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for article in articles %}
+            <tr>
+                <td><a href="/article/?id={{ article.id }}">{{ article.title }}</a></td>
+                <td>{{ article.article|striptags|truncatechars:50 }}</td>
+                <td>
+                    <a href="{% url 'edit_article' %}?id={{ article.id }}" class="btn btn-warning">Edit</a>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <p>You haven't written any articles yet.</p>
+{% endif %}
+{% endblock %}

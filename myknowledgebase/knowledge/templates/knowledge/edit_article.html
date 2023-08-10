@@ -124,7 +124,7 @@
         
         // Filter out empty tags
         let selectedTags = selectedMetatags.children().map(function() {
-            return $(this).text();
+            return $(this).find('.tag-text').text();  // Only get the text from .tag-text span
         }).get().filter(tag => tag.trim() !== "");
         meta_data_input.val(selectedTags.join(','));
         

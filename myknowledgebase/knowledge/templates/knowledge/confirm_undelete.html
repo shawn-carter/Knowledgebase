@@ -1,0 +1,10 @@
+{% extends 'knowledge/base.html' %}
+{% block content %}
+<h2>Confirm Restoration</h2>
+<p>Are you sure you want to undelete the article titled "{{ article.title }}"?</p>
+<form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">Yes, UnDelete</button>
+    <a href="{% url 'article_detail' article.id %}" class="btn btn-secondary">Cancel</a>
+</form>
+{% endblock %}

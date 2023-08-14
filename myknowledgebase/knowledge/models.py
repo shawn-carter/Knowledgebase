@@ -24,5 +24,12 @@ class Tag(models.Model):
 class Audit(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     action_datetime = models.DateTimeField(auto_now_add=True)
-    kb_entry = models.ForeignKey(KBEntry, on_delete=models.CASCADE)
+    kb_entry = models.ForeignKey(KBEntry, on_delete=models.SET_NULL, null=True)
     action_details = models.CharField(max_length=255)
+    
+def calculate_rating(article):
+    total_votes = article.upvotes.count() + article.downvotes.count()
+    if total_votes == 0:
+        return 0  # To handle the case where there are no votes yet
+    rating_percentage = (article.upvotes.count() / total_votes) * 100
+    return round(rating_percentage, 1)  # Rounding off to one decimal place

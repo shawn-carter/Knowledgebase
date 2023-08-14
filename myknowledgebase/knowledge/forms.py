@@ -32,6 +32,13 @@ class NewUserForm(forms.ModelForm):
         if len(username) < 3:
             raise ValidationError("Username must be at least 3 characters long.")
         return username
+    
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        # Check if email already exists
+        if User.objects.filter(email=email).exists():
+            raise forms.ValidationError("This email address is already in use.")
+        return email
 
     def clean_password1(self):
         password1 = self.cleaned_data.get('password1')
@@ -58,7 +65,7 @@ class NewUserForm(forms.ModelForm):
         return user
 
 class PasswordResetForm(forms.Form):
-    username = forms.CharField(max_length=150)
+    username = forms.CharField(max_length=50)
     new_password1 = forms.CharField(widget=forms.PasswordInput, label='Password')
     new_password2 = forms.CharField(widget=forms.PasswordInput, label='Confirm Password')
 
@@ -88,6 +95,13 @@ class CustomPasswordChangeForm(PasswordChangeForm):
         validate_password(password1)
         
         return password1
+
+class RequestPasswordResetForm(forms.Form):
+    email = forms.EmailField()
+
+class PasswordResetConfirmForm(forms.Form):
+    new_password1 = forms.CharField(widget=forms.PasswordInput, label='New Password')
+    new_password2 = forms.CharField(widget=forms.PasswordInput, label='Confirm New Password')
 
 class KBEntryForm(forms.ModelForm):
     class Meta:

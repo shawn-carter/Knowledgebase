@@ -34,12 +34,14 @@
                 No tags
             {% endfor %}
           </td>
-          {% if user.is_superuser and article.deleted_datetime %}
+          {% if user.is_superuser %}
           <td>
-              <button class="btn btn-warning" data-article-id="{{ article.id }}" id="undelete-btn">Undelete</button>
+              {% if article.deleted_datetime %}
+                  <a href="{% url 'undelete_article' article.id %}" class="btn btn-warning">Undelete</a>
+              {% else %}
+                  <a href="{% url 'delete_article' article.id %}" class="btn btn-danger">Delete</a>
+              {% endif %}
           </td>
-          {% elif user.is_superuser %}
-          <td></td> <!-- Empty cell for alignment -->
           {% endif %}
         </tr>
       {% empty %}

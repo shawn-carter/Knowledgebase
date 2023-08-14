@@ -1,7 +1,7 @@
 # knowledge/views.py
 from django.forms import ValidationError
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseNotFound, HttpResponseForbidden, JsonResponse
-from django.shortcuts import render, redirect
+from django.shortcuts import get_object_or_404, render, redirect
 from .forms import NewUserForm, PasswordResetForm, KBEntryForm, CustomPasswordChangeForm
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import authenticate, login as django_login
@@ -12,7 +12,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth import update_session_auth_hash
-from .models import KBEntry, Tag, Audit
+from .models import KBEntry, Tag, Audit, calculate_rating
 from django.utils.html import strip_tags
 from django.utils import timezone
 import json
@@ -30,14 +30,6 @@ def undeleteArticle(article):
     article.deleted_datetime = None
     article.deleted_by = None
     article.save()
-
-# -- This is used to calculate the rating based on the number of upvotes and total votes
-def calculate_rating(article):
-    total_votes = article.upvotes.count() + article.downvotes.count()
-    if total_votes == 0:
-        return 0  # To handle the case where there are no votes yet
-    rating_percentage = (article.upvotes.count() / total_votes) * 100
-    return round(rating_percentage, 1)  # Rounding off to one decimal place
 
 def register(request):
     if request.method == "POST":
@@ -73,22 +65,22 @@ def login_view(request):
 @login_required
 def home(request):
     search_term = request.GET.get('search', '')
-    entries = KBEntry.objects.none()  # Default to no entries
+    articles = KBEntry.objects.none()  # Default to no entries
 
     if search_term:
         from django.db.models import Q
-        entries = KBEntry.objects.filter(
+        articles = KBEntry.objects.filter(
             Q(title__icontains=search_term) |
             Q(article__icontains=search_term) |
             Q(meta_data__name__icontains=search_term) |
             Q(created_by__username__icontains=search_term),  # New condition for author's username
             deleted_datetime__isnull=True
         ).distinct()
-        for entry in entries:
-            entry.article = strip_tags(entry.article.replace('<p>', ' '))
+        for article in articles:
+            article.article = strip_tags(article.article.replace('<p>', ' '))
 
     # If search results are minimal or no query:
-    if len(entries) < 5 or not search_term:
+    if len(articles) < 5 or not search_term:
         newest_articles = KBEntry.objects.filter(deleted_datetime__isnull=True).order_by('-created_datetime')[:5]
         # Assuming you have a rating field which can be ordered
         top_rated_articles = KBEntry.objects.filter(deleted_datetime__isnull=True).order_by('-rating')[:5]
@@ -97,7 +89,7 @@ def home(request):
         top_rated_articles = []
 
     context = {
-        'entries': entries,
+        'entries': articles,
         'newest_articles': newest_articles,
         'top_rated_articles': top_rated_articles,
         'search_term': search_term
@@ -162,24 +154,36 @@ def allarticles(request):
     return render(request, 'knowledge/all_articles.html', {'articles': articles})
 
 @login_required
-def article_detail(request, article_id):  # Add the article_id parameter here
+def article_detail(request, article_id):
     try:
-        article = KBEntry.objects.get(pk=article_id, deleted_datetime__isnull=True)
-        article.views += 1
-        print(article.views)
-        article.save()
+        if request.user.is_superuser:
+            # Superusers can view all articles, including deleted ones
+            article = KBEntry.objects.get(pk=article_id)
+        else:
+            # Regular users can only view non-deleted articles
+            article = KBEntry.objects.get(pk=article_id, deleted_datetime__isnull=True)
+            
+        # Increment the view count only if the article is not deleted
+        if article.deleted_datetime is None:
+            article.views += 1
+            article.save()
+
     except KBEntry.DoesNotExist:
         messages.error(request, 'Article not found or has been deleted.')
         return redirect('home')
     
     user_has_upvoted = request.user in article.upvotes.all()
     user_has_downvoted = request.user in article.downvotes.all()
+    
     context = {
         'article': article,
         'user_has_upvoted': user_has_upvoted,
         'user_has_downvoted': user_has_downvoted,
+        'is_deleted': article.deleted_datetime is not None  # Indicates if the article is deleted
     }
+    
     return render(request, 'knowledge/article_detail.html', context)
+
 
 
 @login_required
@@ -213,8 +217,7 @@ def edit_article(request, article_id):
             article.last_modified_by = request.user
             article.save()
             # Create an Audit record : Article Editted
-            audit = Audit(user=request.user, kb_entry=article, action_details="Edited an article.")
-            audit.save()
+            Audit(user=request.user, kb_entry=article, action_details=f"Editted Article : '{article.title[:50]}'").save()
             article.meta_data.clear()
             # Process tags
             tag_names = request.POST.get('meta_data', '').split(',')
@@ -247,8 +250,8 @@ def create(request):
             article = form.save(commit=False)  # Temporarily save without committing to DB
             article.save()  # Save the KBEntry instance to the database
             # Create an Audit Entry for the Newly Created Article
-            audit = Audit(user=request.user, kb_entry=article, action_details="Created a new article.")
-            audit.save()
+            Audit(user=request.user, kb_entry=article, action_details=f"Created a new article: '{article.title[:50]}'").save()
+            
             # Process tags
             tag_names = request.POST.get('meta_data', '').split(',')
             for tag_name in tag_names:
@@ -259,7 +262,7 @@ def create(request):
             messages.success(request, 'Your knowledge base entry was successfully created!')
             
             # Redirect to the article_detail view for the newly created article
-            return redirect(f'/article/{article.id}')  # Assuming the URL pattern for article_detail is '/article/?id=ARTICLE_ID'
+            return redirect(f'/article/{article.id}')  # The URL pattern for article_detail is '/article/?id=ARTICLE_ID'
         
         else:
             messages.error(request, 'Please correct the error below.')
@@ -290,10 +293,10 @@ def delete_article(request, article_id):
 
     if request.method == "POST":
         softDeleteArticle(article, request.user)
-        audit = Audit(user=request.user, kb_entry=article, action_details="Deleted an article.")
-        audit.save()
+        Audit(user=request.user, kb_entry=article, action_details=f"Soft deleted article: '{article.title[:50]}'").save()
+
         messages.success(request, 'Article successfully deleted.')
-        return redirect('home')  # or wherever you want to redirect to after deletion
+        return redirect('article_detail', article_id=article.id)
 
     return render(request, 'knowledge/confirm_delete.html', {'article': article})
 
@@ -393,3 +396,62 @@ def downvote_article(request, article_id):
         return JsonResponse({'status': 'success', 'rating': rating})
     except KBEntry.DoesNotExist:
         return JsonResponse({'status': 'error', 'message': 'Article not found'})
+    
+@login_required
+def undelete_article(request, article_id):
+    article = get_object_or_404(KBEntry, pk=article_id)
+    
+    # Check if the user is a superuser
+    if not request.user.is_superuser:
+        messages.error(request, 'You do not have permission to undelete articles.')
+        return redirect('home')
+    
+    # Check if the article is already undeleted
+    if article.deleted_datetime is None:
+        messages.info(request, 'This article is not deleted.')
+        return redirect('article_detail', article_id=article.id)
+    
+    # Handle the POST request to confirm undeletion
+    if request.method == 'POST':
+        article.deleted_datetime = None
+        article.save()
+        # Add the audit entry for undeletion
+        Audit(user=request.user, kb_entry=article, action_details=f"Undeleted article: '{article.title[:50]}'").save()
+        
+        messages.success(request, 'The article has been successfully undeleted.')
+        return redirect('article_detail', article_id=article.id)
+    
+    # Render the confirmation template for undeletion
+    return render(request, 'knowledge/confirm_undelete.html', {'article': article})
+
+@login_required
+def confirm_permanent_delete(request, article_id):
+    try:
+        article = KBEntry.objects.get(pk=article_id)
+        if not request.user.is_superuser or not article.deleted_datetime:
+            messages.error(request, 'You are not allowed to permanently delete any articles')
+            return redirect('home')
+        return render(request, 'knowledge/confirm_permanent_delete.html', {'article': article})
+    except KBEntry.DoesNotExist:
+        messages.error(request, 'Article not found.')
+        return redirect('home')
+
+@login_required
+def perform_permanent_delete(request, article_id):
+    try:
+        article = KBEntry.objects.get(pk=article_id)
+        if not request.user.is_superuser or not article.deleted_datetime:
+            messages.error(request, 'You are not allowed to permanently delete any articles')
+            return redirect('home')
+
+        # Create a new audit log entry noting the permanent deletion BEFORE deleting the article
+        Audit(user=request.user, action_details=f"Permanently deleted article: {article.title[:50]}").save()
+
+        # Now, delete the article
+        article.delete()
+
+        messages.success(request, 'Article was permanently deleted.')
+    except KBEntry.DoesNotExist:
+        messages.error(request, 'Article not found.')
+
+    return redirect('home')

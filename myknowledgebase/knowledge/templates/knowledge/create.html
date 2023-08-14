@@ -1,6 +1,7 @@
 <!-- knowledge/templates/knowledge/create.html -->
 {% extends 'knowledge/base.html' %} {% load widget_tweaks %} {% load static %}
 {% block content %}
+<br>
 <h2>Create a New Knowledge Base Article</h2>
 <form method="POST" id="kbEntryForm">
   {% csrf_token %} 

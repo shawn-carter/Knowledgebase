@@ -1,14 +1,14 @@
 # knowledge/views.py
 from django.forms import ValidationError
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseNotFound, HttpResponseForbidden, JsonResponse
-from django.shortcuts import get_object_or_404, render, redirect
+from django.shortcuts import render, redirect
 from .forms import NewUserForm, PasswordResetForm, KBEntryForm, CustomPasswordChangeForm
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import authenticate, login as django_login
 from django.contrib.auth import logout as django_logout
 from django.contrib.auth.models import User
 from django.contrib.auth import get_user_model
-from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth import update_session_auth_hash
@@ -20,13 +20,13 @@ import json
 # Functions to be used inside Views
 
 # -- This is to soft delete an article
-def soft_delete_article(article, user):
+def softDeleteArticle(article, user):
     article.deleted_datetime = timezone.now()
     article.deleted_by = user
     article.save()
     
 # -- This can be used to 'undelete' an article
-def undelete_article(article):
+def undeleteArticle(article):
     article.deleted_datetime = None
     article.deleted_by = None
     article.save()
@@ -86,7 +86,24 @@ def home(request):
         ).distinct()
         for entry in entries:
             entry.article = strip_tags(entry.article.replace('<p>', ' '))
-    return render(request, 'knowledge/home.html', {'entries': entries, 'search_term': search_term})
+
+    # If search results are minimal or no query:
+    if len(entries) < 5 or not search_term:
+        newest_articles = KBEntry.objects.filter(deleted_datetime__isnull=True).order_by('-created_datetime')[:5]
+        # Assuming you have a rating field which can be ordered
+        top_rated_articles = KBEntry.objects.filter(deleted_datetime__isnull=True).order_by('-rating')[:5]
+    else:
+        newest_articles = []
+        top_rated_articles = []
+
+    context = {
+        'entries': entries,
+        'newest_articles': newest_articles,
+        'top_rated_articles': top_rated_articles,
+        'search_term': search_term
+    }
+
+    return render(request, 'knowledge/home.html', context)
 
 @login_required
 def user_list(request):
@@ -136,33 +153,31 @@ def resetpassword(request):
     return render(request, 'knowledge/reset_password.html', {'form': form})
 
 @login_required
-def kblist(request):
-    if not request.user.is_superuser:
-        messages.error(request, "You don't have permission to view this page.")
-        return redirect('home')
-    entries = KBEntry.objects.all()  # get all KB Articles
-    return render(request, 'knowledge/kb_list.html', {'entries': entries})
+def allarticles(request):
+    if request.user.is_superuser:
+        articles = KBEntry.objects.all()
+    else:
+        articles = KBEntry.objects.filter(deleted_datetime__isnull=True)
+    
+    return render(request, 'knowledge/all_articles.html', {'articles': articles})
 
 @login_required
 def article_detail(request, article_id):  # Add the article_id parameter here
     try:
         article = KBEntry.objects.get(pk=article_id, deleted_datetime__isnull=True)
+        article.views += 1
+        print(article.views)
+        article.save()
     except KBEntry.DoesNotExist:
         messages.error(request, 'Article not found or has been deleted.')
         return redirect('home')
     
-    rating = calculate_rating(article)
     user_has_upvoted = request.user in article.upvotes.all()
     user_has_downvoted = request.user in article.downvotes.all()
     context = {
         'article': article,
-        'author_name': article.created_by.username if article.created_by else None,
-        'created_date': article.created_datetime,
-        'rating' : rating,
         'user_has_upvoted': user_has_upvoted,
         'user_has_downvoted': user_has_downvoted,
-        'last_modified_by': article.last_modified_by.username if article.last_modified_by else None,
-        'last_modified_date': article.modified_datetime
     }
     return render(request, 'knowledge/article_detail.html', context)
 
@@ -229,22 +244,22 @@ def create(request):
     if request.method == 'POST':
         form = KBEntryForm(request.POST, request=request)
         if form.is_valid():
-            kb_entry = form.save(commit=False)  # Temporarily save without committing to DB
-            kb_entry.save()  # Save the KBEntry instance to the database
+            article = form.save(commit=False)  # Temporarily save without committing to DB
+            article.save()  # Save the KBEntry instance to the database
             # Create an Audit Entry for the Newly Created Article
-            audit = Audit(user=request.user, kb_entry=kb_entry, action_details="Created a new article.")
+            audit = Audit(user=request.user, kb_entry=article, action_details="Created a new article.")
             audit.save()
             # Process tags
             tag_names = request.POST.get('meta_data', '').split(',')
             for tag_name in tag_names:
                 tag_name = tag_name.strip()
                 tag, created = Tag.objects.get_or_create(name=tag_name)
-                kb_entry.meta_data.add(tag)
+                article.meta_data.add(tag)
 
             messages.success(request, 'Your knowledge base entry was successfully created!')
             
             # Redirect to the article_detail view for the newly created article
-            return redirect(f'/article/{kb_entry.id}')  # Assuming the URL pattern for article_detail is '/article/?id=ARTICLE_ID'
+            return redirect(f'/article/{article.id}')  # Assuming the URL pattern for article_detail is '/article/?id=ARTICLE_ID'
         
         else:
             messages.error(request, 'Please correct the error below.')
@@ -274,7 +289,7 @@ def delete_article(request, article_id):
         return redirect('article_detail', id=article_id)
 
     if request.method == "POST":
-        soft_delete_article(article, request.user)
+        softDeleteArticle(article, request.user)
         audit = Audit(user=request.user, kb_entry=article, action_details="Deleted an article.")
         audit.save()
         messages.success(request, 'Article successfully deleted.')
@@ -354,7 +369,11 @@ def upvote_article(request, article_id):
         # Assuming upvotes and downvotes are ManyToMany fields with the User model
         article.upvotes.add(request.user)
         article.downvotes.remove(request.user)  # remove downvote if user previously downvoted
+        
         rating = calculate_rating(article)  # a function to calculate the rating
+        article.rating = rating  # Saving the calculated rating to the article
+        article.save()  # Committing the change to the database
+        
         return JsonResponse({'status': 'success', 'rating': rating})
     except KBEntry.DoesNotExist:
         return JsonResponse({'status': 'error', 'message': 'Article not found'})
@@ -363,9 +382,14 @@ def upvote_article(request, article_id):
 def downvote_article(request, article_id):
     try:
         article = KBEntry.objects.get(pk=article_id)
-        article.downvotes.add(request.user)
-        article.upvotes.remove(request.user)  # remove upvote if user previously upvoted
+        # Assuming upvotes and downvotes are ManyToMany fields with the User model
+        article.upvotes.remove(request.user)
+        article.downvotes.add(request.user)  # remove downvote if user previously downvoted
+        
         rating = calculate_rating(article)  # a function to calculate the rating
+        article.rating = rating  # Saving the calculated rating to the article
+        article.save()  # Committing the change to the database
+        
         return JsonResponse({'status': 'success', 'rating': rating})
     except KBEntry.DoesNotExist:
         return JsonResponse({'status': 'error', 'message': 'Article not found'})

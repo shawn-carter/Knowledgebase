@@ -3,7 +3,7 @@
 from django.urls import path
 from django.contrib.auth.views import LogoutView
 from . import views
-from .views import home, register, login_view, user_list,logout,changepassword,resetpassword, create, kblist, article_detail, edit_article, delete_article, audit_logs, toggle_user_active_status, my_articles
+from .views import home, register, login_view, user_list,logout,changepassword,resetpassword, create, allarticles, article_detail, edit_article, delete_article, audit_logs, toggle_user_active_status, my_articles
 
 urlpatterns = [
     path('login/', login_view, name='login'),
@@ -13,7 +13,7 @@ urlpatterns = [
     path('changepassword/', changepassword, name='change_password'),
     path('resetpassword/', resetpassword, name='reset_password'),
     path('create/', create, name='create'),
-    path('kblist/', kblist, name='kb_list'),
+    path('allarticles/', allarticles, name='allarticles'),
     path('article/<int:article_id>/', article_detail, name='article_detail'),
     path('edit/<int:article_id>/', edit_article, name='edit_article'),
     path('delete_article/<int:article_id>/', delete_article, name='delete_article'),

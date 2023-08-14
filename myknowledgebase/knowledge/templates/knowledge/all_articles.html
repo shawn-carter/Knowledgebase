@@ -1,0 +1,52 @@
+{% extends 'knowledge/base.html' %}
+
+{% block content %}
+  <br>
+  <h2>All Knowledge Base Articles</h2>
+  <table class="table">
+    <thead class="thead-dark">
+      <tr>
+        <th scope="col">Title</th>
+        <th scope="col">Article Summary</th>
+        <th scope="col">Created By</th>
+        <th scope="col">Date Created</th>
+        <th scope="col">Tags</th>
+        {% if user.is_superuser %}
+        <th scope="col">Actions</th> <!-- This column is only for superusers -->
+        {% endif %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for article in articles %}
+        <tr>
+          <td>
+            <a href="{% url 'article_detail' article.id %}">{{ article.title }}</a>
+          </td>
+          <td>{{ article.article|striptags|truncatechars:50 }}</td>
+          <td>
+            <a href="{% url 'user_articles' article.created_by.id %}">{{ article.created_by.username }}</a>
+          </td>
+          <td>{{ article.created_datetime }}</td>
+          <td>
+            {% for tag in article.meta_data.all %}
+                <a href="{% url 'home' %}?search={{ tag.name }}" class="btn btn-secondary m-1">{{ tag.name }}</a>
+            {% empty %}
+                No tags
+            {% endfor %}
+          </td>
+          {% if user.is_superuser and article.deleted_datetime %}
+          <td>
+              <button class="btn btn-warning" data-article-id="{{ article.id }}" id="undelete-btn">Undelete</button>
+          </td>
+          {% elif user.is_superuser %}
+          <td></td> <!-- Empty cell for alignment -->
+          {% endif %}
+        </tr>
+      {% empty %}
+        <tr>
+          <td colspan="{% if user.is_superuser %}6{% else %}5{% endif %}">No entries found.</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}

@@ -12,6 +12,8 @@ class KBEntry(models.Model):
     deleted_by = models.ForeignKey(User, related_name="deleted_kb_entries", on_delete=models.SET_NULL, null=True, blank=True)
     upvotes = models.ManyToManyField(User, related_name="upvoted_kb_entries", blank=True)
     downvotes = models.ManyToManyField(User, related_name="downvoted_kb_entries", blank=True)
+    rating = models.FloatField(default=0.0)
+    views = models.PositiveIntegerField(default=0)
     meta_data = models.ManyToManyField('Tag', blank=True) # Assuming you will have a 'Tag' model
 
 class Tag(models.Model):

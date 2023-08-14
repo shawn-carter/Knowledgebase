@@ -6,14 +6,15 @@
   {% if user.is_superuser or article.created_by == user %}
   <a href="{% url 'edit_article' article.id %}" class="btn btn-warning">Edit Article</a>
   {% endif %}
-  <p>{{ article.article|safe }}</p>
-
-  <p><strong>Author:</strong> <a href="{% url 'user_articles' article.created_by.id %}" title="See all articles by {{ author_name }}">{{ author_name }}</a></p>
-  <p><strong>Created Date:</strong> {{ created_date|date:"H:i:s jS F, Y" }}</p>
-  <p><strong>Last Modified By:</strong> {{ last_modified_by }}</p>
-  <p><strong>Last Modified Date:</strong> {{ last_modified_date|date:"H:i:s jS F, Y" }}</p>
+  <div class='ql-editor'>
+  {{ article.article|safe }}
+  </div>
+  <p><strong>Author:</strong> <a href="{% url 'user_articles' article.created_by.id %}" title="See all articles by {{ article.created_by.username }}">{{ article.created_by.username }}</a></p>
+  <p><strong>Created Date:</strong> {{ article.created_datetime|date:"H:i:s jS F, Y" }}</p>
+  <p><strong>Last Modified By:</strong> {{ article.last_modified_by }}</p>
+  <p><strong>Last Modified Date:</strong> {{ article.last_modified_date|date:"H:i:s jS F, Y" }}</p>
   <p><strong>Views:</strong> {{ article.views }}</p>
-  <p><strong>Rating:</strong> <span id="rating">{{ rating }}</span></p>
+  <p><strong>Rating:</strong> <span id="rating">{{ article.rating }}</span></p>
   <p><strong>Meta Data:</strong> {{ article.meta_data.count }}</p>
   <br>
   

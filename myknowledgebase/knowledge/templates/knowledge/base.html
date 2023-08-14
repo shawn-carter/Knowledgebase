@@ -70,7 +70,6 @@
                 </a>
                 <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
                   <li><a class="dropdown-item" href="{% url 'audit_logs' %}"">Audit Logs</a></li>
-                  <li><a class="dropdown-item" href="{% url 'kb_list' %}">List All KB Articles</a></li>
                   <li><a class="dropdown-item" href="{% url 'user-list' %}">List All Users</a></li>
                 </ul>
               </li>
@@ -87,6 +86,10 @@
             <li class="nav-item">
               <a class="nav-link" href="{% url 'create' %}"
                 >Create New Article</a
+              >
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'allarticles' %}"
+                  >All Articles</a
               >
             <li class="nav-item">
               <a class="nav-link" href="{% url 'my_articles' %}"

@@ -3,6 +3,8 @@
 {% block title %}Home{% endblock %}
 
 {% block content %}
+<br>
+<h2>Search the Knowledgebase</h2>
 <!-- Add search bar and button with Bootstrap styling -->
 <br>
 <div class="mb-3 col-md-6 offset-md-3">
@@ -43,6 +45,23 @@
         </tbody>
     </table>
 {% elif search_term %}
-    <p>No entries found for "{{ search_term }}".</p>
+    <p>No Articles found that match the search term: "{{ search_term }}"</p>
 {% endif %}
+{% if not entries or entries|length < 5 %}
+   <div class="row">
+      <div class="col-md-6">
+         <h3>Newest Articles</h3>
+         {% for article in newest_articles %}
+            <a href="{% url 'article_detail' article.id %}">{{ article.title }}</a><br>
+         {% endfor %}
+      </div>
+      <div class="col-md-6">
+         <h3>Top Rated Articles</h3>
+         {% for article in top_rated_articles %}
+            <a href="{% url 'article_detail' article.id %}">{{ article.title }}</a><br>
+         {% endfor %}
+      </div>
+   </div>
+{% endif %}
+
 {% endblock %}

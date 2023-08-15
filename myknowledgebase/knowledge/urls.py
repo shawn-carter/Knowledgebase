@@ -3,7 +3,7 @@
 from django.urls import path
 from django.contrib.auth.views import LogoutView
 from . import views
-from .views import home, register, login_view, user_list,logout,changepassword,resetpassword, create, allarticles, article_detail, edit_article, delete_article, audit_logs, toggle_user_active_status, my_articles, undelete_article
+from .views import home, register, login_view, user_list,logout,changepassword, create, allarticles, article_detail, edit_article, delete_article, audit_logs, toggle_user_active_status, my_articles, undelete_article, password_reset_request
 
 urlpatterns = [
     path('login/', login_view, name='login'),
@@ -11,7 +11,6 @@ urlpatterns = [
     path('users/', user_list, name='user-list'),
     path('logout/', logout, name='logout'),
     path('changepassword/', changepassword, name='change_password'),
-    path('resetpassword/', resetpassword, name='reset_password'),
     path('create/', create, name='create'),
     path('allarticles/', allarticles, name='allarticles'),
     path('article/<int:article_id>/', article_detail, name='article_detail'),
@@ -25,6 +24,9 @@ urlpatterns = [
     path('article/<int:article_id>/upvote/', views.upvote_article, name='upvote_article'),
     path('article/<int:article_id>/downvote/', views.downvote_article, name='downvote_article'),
     path('confirm_permanent_delete/<int:article_id>/', views.confirm_permanent_delete, name='confirm_permanent_delete'),
-    path('perform_permanent_delete/<int:article_id>/', views.perform_permanent_delete, name='perform_permanent_delete'),
+    path('perform_permanent_delete/<int:article_id>/', views.perform_permanent_delete, name='perform_permanent_delete'),    
+    path('resetpassword/', views.password_reset_request, name='password_reset_request'),
+    path('reset/<int:user_id>/<str:token>/', views.password_reset_confirm, name='password_reset_confirm'),
+    path('password_reset_complete/', views.password_reset_complete, name='password_reset_complete'),
     path('', home, name='home'),
 ]

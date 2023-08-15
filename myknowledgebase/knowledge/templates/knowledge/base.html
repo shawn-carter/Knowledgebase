@@ -108,15 +108,15 @@
             </li>
             {% else %}
             <li class="nav-item">
-              <a class="nav-link" id="logout" href="{% url 'login' %}">Login</a>
+              <a class="nav-link" id="login" href="{% url 'login' %}">Login</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" id="logout" href="{% url 'register' %}"
+              <a class="nav-link" id="register" href="{% url 'register' %}"
                 >Register</a
               >
             </li>
             <li class="nav-item">
-              <a class="nav-link" id="logout" href="{% url 'reset_password' %}"
+              <a class="nav-link" id="passwordreset" href="{% url 'password_reset_request' %}"
                 >Reset Password</a
               >
             </li>
@@ -127,7 +127,7 @@
     </nav>
 
     <!-- Page Content -->
-    <div class="container">{% block content %} {% endblock %}</div>
+    <div class="container"><br>{% block content %} {% endblock %}</div>
 
     <!-- jQuery and Bootstrap Bundle (includes Popper) -->
     <script src="https://code.jquery.com/jquery-3.6.1.min.js"></script>

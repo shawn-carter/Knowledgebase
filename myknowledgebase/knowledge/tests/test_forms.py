@@ -170,6 +170,3 @@ class NewUserFormTestCase(TestCase):
         form = NewUserForm(data=form_data)
         self.assertFalse(form.is_valid())
         self.assertIn("Enter a valid email address.", form.errors['email'])
-
-#class PasswordResetFormTestCase(TestCase):
-    

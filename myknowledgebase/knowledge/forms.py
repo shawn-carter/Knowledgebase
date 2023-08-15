@@ -64,28 +64,6 @@ class NewUserForm(forms.ModelForm):
             user.save()
         return user
 
-class PasswordResetForm(forms.Form):
-    username = forms.CharField(max_length=50)
-    new_password1 = forms.CharField(widget=forms.PasswordInput, label='Password')
-    new_password2 = forms.CharField(widget=forms.PasswordInput, label='Confirm Password')
-
-    def clean_new_password1(self):
-        new_password1 = self.cleaned_data.get('new_password1')
-        validate_password(new_password1)  # This will raise a ValidationError if the password is not valid
-        return new_password1
-
-    def clean(self):
-        cleaned_data = super().clean()
-        username = cleaned_data.get('username')
-        new_password1 = cleaned_data.get('new_password1')
-        new_password2 = cleaned_data.get('new_password2')
-
-        if not User.objects.filter(username=username).exists():
-            self.add_error('username', 'No user with this username exists.')
-
-        if new_password1 and new_password2 and new_password1 != new_password2:
-            self.add_error('new_password2', 'The two password fields didn’t match.')
-
 class CustomPasswordChangeForm(PasswordChangeForm):
 
     def clean_new_password1(self):
@@ -124,3 +102,25 @@ class KBEntryForm(forms.ModelForm):
             instance.save()
             self.save_m2m()
         return instance
+
+class RequestPasswordResetForm(forms.Form):
+    email = forms.EmailField()
+    
+class PasswordResetConfirmForm(forms.Form):
+    new_password1 = forms.CharField(widget=forms.PasswordInput, label='New Password')
+    new_password2 = forms.CharField(widget=forms.PasswordInput, label='Confirm New Password')
+    
+    def clean_new_password1(self):
+        new_password1 = self.cleaned_data.get('new_password1')
+        validate_password(new_password1)  # This will raise a ValidationError if the password is not valid
+        return new_password1
+
+    def clean(self):
+        cleaned_data = super().clean()
+        new_password1 = cleaned_data.get('new_password1')
+        new_password2 = cleaned_data.get('new_password2')
+
+        if new_password1 and new_password2 and new_password1 != new_password2:
+            self.add_error('new_password2', 'The two password fields didn’t match.')
+
+        return cleaned_data

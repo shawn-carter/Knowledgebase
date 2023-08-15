@@ -10,7 +10,7 @@ from django.shortcuts import get_object_or_404, render, redirect
 from django.utils import timezone
 from django.utils.html import strip_tags
 from django.urls import reverse
-from .forms import NewUserForm, PasswordResetConfirmForm, KBEntryForm, CustomPasswordChangeForm, RequestPasswordResetForm
+from .forms import KBEntryForm, NewUserForm, PasswordResetConfirmForm, RequestPasswordResetForm
 from .models import KBEntry, Tag, Audit, calculate_rating
 import json
 
@@ -368,9 +368,10 @@ def create(request):
             # Process tags
             tag_names = request.POST.get('meta_data', '').split(',')
             for tag_name in tag_names:
-                tag_name = tag_name.strip()
-                tag, created = Tag.objects.get_or_create(name=tag_name)
-                article.meta_data.add(tag)
+                if tag_name:
+                    tag_name = tag_name.strip()
+                    tag, created = Tag.objects.get_or_create(name=tag_name)
+                    article.meta_data.add(tag)
 
             messages.success(request, 'Your knowledge base entry was successfully created!')
             
@@ -378,7 +379,7 @@ def create(request):
             return redirect(f'/article/{article.id}')  # The URL pattern for article_detail is '/article/?id=ARTICLE_ID'
         
         else:
-            messages.error(request, 'Please correct the error below.')
+            messages.error(request, 'Please correct the error above.')
     else:
         form = KBEntryForm(request=request)
     

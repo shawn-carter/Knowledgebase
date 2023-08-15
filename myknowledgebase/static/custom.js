@@ -63,3 +63,8 @@ function updateMetaDataInput(selectedMetatags, meta_data_input) {
     meta_data_input.val(selectedTags.join(",")); // Set value using jQuery
     console.log("Setting hidden input with tags:", meta_data_input.val());
   }
+
+  // Function to strip HTML tags from a string
+  function stripTags(input) {
+    return input.replace(/<\/?[^>]+(>|$)/g, "");
+  }

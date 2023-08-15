@@ -1,6 +1,8 @@
 from django.test import TestCase
-from knowledge.forms import NewUserForm
+from knowledge.forms import NewUserForm, KBEntryForm, RequestPasswordResetForm, PasswordResetConfirmForm, CustomPasswordChangeForm
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
+from unittest import mock
 
 class NewUserFormTestCase(TestCase):
     
@@ -170,3 +172,176 @@ class NewUserFormTestCase(TestCase):
         form = NewUserForm(data=form_data)
         self.assertFalse(form.is_valid())
         self.assertIn("Enter a valid email address.", form.errors['email'])
+
+class KBEntryFormTestCase(TestCase):
+    
+    def setUp(self):
+        self.user = User.objects.create_user(username='testuser', password='testpass')
+        self.request = mock.Mock()
+        self.request.user = self.user
+    
+    def test_valid_form(self):
+        form_data = {
+            'title': 'Sample Article',
+            'article': '<p>This is a sample article.</p>',
+        }
+        form = KBEntryForm(data=form_data, request=self.user)
+        self.assertTrue(form.is_valid())
+        
+    def test_missing_title(self):
+        form_data = {
+            'title': '',
+            'article': '<p>This is a sample article without title.</p>',
+        }
+        form = KBEntryForm(data=form_data, request=self.user)
+        self.assertFalse(form.is_valid())
+        self.assertIn('title', form.errors)
+
+    def test_short_title(self):
+        form_data = {
+            'title': 'Ab',
+            'article': '<p>This is a sample article with short title.</p>',
+        }
+        form = KBEntryForm(data=form_data, request=self.user)
+        self.assertFalse(form.is_valid())
+        self.assertIn('title', form.errors)
+
+    def test_missing_article(self):
+        form_data = {
+            'title': 'Article without body',
+            'article': '',
+        }
+        form = KBEntryForm(data=form_data, request=self.user)
+        self.assertFalse(form.is_valid())
+        self.assertIn('article', form.errors)
+        
+    def test_short_article(self):
+        form_data = {
+            'title': 'Article with short body',
+            'article': '<p>Hi</p>',
+        }
+        form = KBEntryForm(data=form_data, request=self.user)
+        self.assertFalse(form.is_valid())
+        self.assertIn('article', form.errors)
+        
+    def test_edit_article(self):
+        # Create an article
+        form_data = {
+            'title': 'Initial Article',
+            'article': '<p>This is the initial version of the article.</p>',
+        }
+        form = KBEntryForm(data=form_data, request=self.request)
+        self.assertTrue(form.is_valid())
+        article = form.save()
+        
+        # Edit the article
+        form_data_edit = {
+            'title': 'Edited Article',
+            'article': '<p>This is the edited version of the article.</p>',
+        }
+        form_edit = KBEntryForm(data=form_data_edit, instance=article, request=self.request)
+        self.assertTrue(form_edit.is_valid())
+        article_edited = form_edit.save()
+        
+        self.assertEqual(article_edited.title, 'Edited Article')
+        self.assertEqual(article_edited.last_modified_by, self.user)
+
+class RequestPasswordResetFormTestCase(TestCase):
+    
+    def test_valid_email(self):
+        form = RequestPasswordResetForm(data={'email': 'john@example.com'})
+        self.assertTrue(form.is_valid())
+        
+    def test_invalid_email_without_at(self):
+        form = RequestPasswordResetForm(data={'email': 'johnexample.com'})
+        self.assertFalse(form.is_valid())
+        self.assertIn('Enter a valid email address.', form.errors['email'])
+        
+    def test_invalid_email_without_dot(self):
+        form = RequestPasswordResetForm(data={'email': 'john@examplecom'})
+        self.assertFalse(form.is_valid())
+        self.assertIn('Enter a valid email address.', form.errors['email'])
+        
+class PasswordResetConfirmFormTestCase(TestCase):
+
+    def test_valid_passwords(self):
+        form = PasswordResetConfirmForm(data={
+            'new_password1': 'SecureP@ss123',
+            'new_password2': 'SecureP@ss123',
+        })
+        self.assertTrue(form.is_valid())
+
+    def test_passwords_dont_match(self):
+        form = PasswordResetConfirmForm(data={
+            'new_password1': 'SecureP@ss123',
+            'new_password2': 'DifferentP@ss',
+        })
+        self.assertFalse(form.is_valid())
+        self.assertIn('The two password fields didn’t match.', form.errors['new_password2'])
+
+    def test_short_passwords(self):
+        form = PasswordResetConfirmForm(data={
+            'new_password1': 'A4!i0s',
+            'new_password2': 'A4!i0s',
+        })
+        self.assertFalse(form.is_valid())
+        self.assertIn('This password is too short. It must contain at least 8 characters.', form.errors['new_password1'])
+    
+    def test_common_password(self):
+        form = PasswordResetConfirmForm(data={
+            'new_password1': 'password123',
+            'new_password2': 'password123',
+        })
+        self.assertFalse(form.is_valid())
+        self.assertIn('This password is too common.', form.errors['new_password1'])
+
+class CustomPasswordChangeFormTestCase(TestCase):
+    
+    def test_valid_password_change(self):
+        user = User.objects.create_user(username='john', password='old_password')
+        form = CustomPasswordChangeForm(user, data={
+            'old_password': 'old_password',
+            'new_password1': 'new_secure_password1',
+            'new_password2': 'new_secure_password1',
+        })
+        self.assertTrue(form.is_valid())
+        
+    def test_incorrect_old_password(self):
+        user = User.objects.create_user(username='john', password='old_password')
+        form = CustomPasswordChangeForm(user, data={
+            'old_password': 'wrong_old_password',
+            'new_password1': 'new_secure_password1',
+            'new_password2': 'new_secure_password1',
+        })
+        self.assertFalse(form.is_valid())
+        self.assertIn('old_password', form.errors)
+        
+    def test_new_passwords_dont_match(self):
+        user = User.objects.create_user(username='john', password='old_password')
+        form = CustomPasswordChangeForm(user, data={
+            'old_password': 'old_password',
+            'new_password1': 'new_secure_password1',
+            'new_password2': 'different_new_password',
+        })
+        self.assertFalse(form.is_valid())
+        self.assertIn('new_password2', form.errors)
+        
+    def test_short_new_password(self):
+        user = User.objects.create_user(username='john', password='old_password')
+        form = CustomPasswordChangeForm(user, data={
+            'old_password': 'old_password',
+            'new_password1': 'short',
+            'new_password2': 'short',
+        })
+        self.assertFalse(form.is_valid())
+        self.assertIn('new_password1', form.errors)
+        
+    def test_common_new_password(self):
+        user = User.objects.create_user(username='john', password='old_password')
+        form = CustomPasswordChangeForm(user, data={
+            'old_password': 'old_password',
+            'new_password1': 'password123',
+            'new_password2': 'password123',
+        })
+        self.assertFalse(form.is_valid())
+        self.assertIn('new_password1', form.errors)

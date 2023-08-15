@@ -1,12 +1,17 @@
 # knowledge/forms.py
 from django import forms
-from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
-from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth.forms import PasswordChangeForm
+from django.contrib.auth.models import User
+from django.contrib.auth.password_validation import validate_password
+from django.utils.html import strip_tags
 from .models import KBEntry
 
 class NewUserForm(forms.ModelForm):
+    """
+    A form for creating new users. Includes all the required fields,
+    plus a repeated password field for validation.
+    """
     password1 = forms.CharField(label='Password', widget=forms.PasswordInput)
     password2 = forms.CharField(label='Confirm Password', widget=forms.PasswordInput)
     email = forms.EmailField(required=True)  # Ensure email is required
@@ -15,6 +20,9 @@ class NewUserForm(forms.ModelForm):
         model = User
         fields = ('username', 'email')
 
+    # Check the username to make sure it is not already in use
+    # Additional validation to make sure the username does not contain only numbers, and cannot contain @ or spaces
+    # Checks to ensure the username is within defined length and is not 'admin'
     def clean_username(self):
         username = self.cleaned_data.get('username')
         if User.objects.filter(username=username).exists():
@@ -33,6 +41,7 @@ class NewUserForm(forms.ModelForm):
             raise ValidationError("Username must be at least 3 characters long.")
         return username
     
+    # Check that email address is unique and not already in use
     def clean_email(self):
         email = self.cleaned_data.get('email')
         # Check if email already exists
@@ -40,11 +49,14 @@ class NewUserForm(forms.ModelForm):
             raise forms.ValidationError("This email address is already in use.")
         return email
 
+    # Check if the password is valid using Django built in validate_password function
+    # This checks for common and simple password
     def clean_password1(self):
         password1 = self.cleaned_data.get('password1')
         validate_password(password1)  # This will raise a ValidationError if the password is not valid
         return password1
 
+    # Check that passwords match
     def clean(self):
         cleaned_data = super().clean()
         password1 = cleaned_data.get("password1")
@@ -57,6 +69,7 @@ class NewUserForm(forms.ModelForm):
                 self.add_error('password2', "Passwords must match")
         return cleaned_data
     
+    # Save the user with new password = password1
     def save(self, commit=True):
         user = super(NewUserForm, self).save(commit=False)
         user.set_password(self.cleaned_data["password1"])
@@ -65,7 +78,11 @@ class NewUserForm(forms.ModelForm):
         return user
 
 class CustomPasswordChangeForm(PasswordChangeForm):
-
+    """
+    A form that allows a user to change their existing password
+    Includes existing password
+    plus a repeated password field for validation.
+    """
     def clean_new_password1(self):
         password1 = self.cleaned_data.get('new_password1')
         
@@ -75,24 +92,50 @@ class CustomPasswordChangeForm(PasswordChangeForm):
         return password1
 
 class RequestPasswordResetForm(forms.Form):
+    """
+    A simple form for requesting a password reset.
+    This just contains an email address
+    This is validated with Django built in functions
+    """
     email = forms.EmailField()
 
-class PasswordResetConfirmForm(forms.Form):
-    new_password1 = forms.CharField(widget=forms.PasswordInput, label='New Password')
-    new_password2 = forms.CharField(widget=forms.PasswordInput, label='Confirm New Password')
-
 class KBEntryForm(forms.ModelForm):
+    """
+    A form for creating a new article. Includes all the required fields,
+    This form is also used to allow a user to edit an existing article.
+    """
+    
+    article = forms.CharField(
+        widget=forms.Textarea,
+        required=False
+    )
+    
     class Meta:
         model = KBEntry
         fields = ['title', 'article']  # Excluding 'meta_data' here
-        widgets = {
-            'article': forms.Textarea(attrs={'required': False}),
-        }
-
+    
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop('request', None)
         super(KBEntryForm, self).__init__(*args, **kwargs)
-
+    
+    # Ensure the title contains at least 3 characters
+    def clean_title(self):
+        title = self.cleaned_data.get('title')
+        if len(title) < 3:
+            raise ValidationError('Article Title should be at least 3 characters.')
+        return title
+    
+    # Ensure the article contains at least 10 characters (after stripping tags)
+    def clean_article(self):
+        title = self.cleaned_data.get('title')
+        article = self.cleaned_data.get('article')
+        # Strip HTML tags and white spaces for validation
+        plain_text = strip_tags(article).strip()
+        if len(plain_text) < 10:
+            raise ValidationError('Article Body should contain at least 10 characters.')
+        # Always return the original article data, not the stripped version
+        return article
+    
     def save(self, commit=True):
         instance = super(KBEntryForm, self).save(commit=False)
         if not instance.pk:  # Check if the instance has a primary key (i.e., if it's been saved before)
@@ -102,19 +145,23 @@ class KBEntryForm(forms.ModelForm):
             instance.save()
             self.save_m2m()
         return instance
-
-class RequestPasswordResetForm(forms.Form):
-    email = forms.EmailField()
-    
+ 
 class PasswordResetConfirmForm(forms.Form):
+    """
+    A form for reseting a users password.
+    Consists of a repeated password field for validation.
+    """
     new_password1 = forms.CharField(widget=forms.PasswordInput, label='New Password')
     new_password2 = forms.CharField(widget=forms.PasswordInput, label='Confirm New Password')
     
+    # This validates the first password field using Django built in validate_password function
+    # Which will give an error if the password is common or too simple
     def clean_new_password1(self):
         new_password1 = self.cleaned_data.get('new_password1')
         validate_password(new_password1)  # This will raise a ValidationError if the password is not valid
         return new_password1
 
+    ## We then clean and compare the two password fields to ensure they match
     def clean(self):
         cleaned_data = super().clean()
         new_password1 = cleaned_data.get('new_password1')

@@ -2,8 +2,7 @@
 {% extends 'knowledge/base.html' %}
 
 {% block content %}
-<br>
-<h2>All Users</h2>
+<h2>List All Users</h2>
 <table class="table">
     <thead>
         <tr>
@@ -30,15 +29,15 @@
                 {% endif %}
             </td>
             <td>{{ user.date_joined }}</td>
-            <td>
+            
               {% if user.is_active %}
-                  Active 
-                  <a href="{% url 'toggle_user_active_status' user.id %}" class="btn btn-danger">Deactivate</a>
+                  <td>Active</td>
+                  <td><a href="{% url 'toggle_user_active_status' user.id %}" class="btn btn-danger">Deactivate</a></td>
               {% else %}
-                  Inactive 
-                  <a href="{% url 'toggle_user_active_status' user.id %}" class="btn btn-success">Activate</a>
+                  <td>Inactive</td>
+                  <td><a href="{% url 'toggle_user_active_status' user.id %}" class="btn btn-success">Activate</a></td>
               {% endif %}
-          </td>
+          
         </tr>
         {% empty %}
         <tr>

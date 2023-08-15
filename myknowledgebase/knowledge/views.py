@@ -10,7 +10,7 @@ from django.shortcuts import get_object_or_404, render, redirect
 from django.utils import timezone
 from django.utils.html import strip_tags
 from django.urls import reverse
-from .forms import KBEntryForm, NewUserForm, PasswordResetConfirmForm, RequestPasswordResetForm
+from .forms import CustomPasswordChangeForm, KBEntryForm, NewUserForm, PasswordResetConfirmForm, RequestPasswordResetForm
 from .models import KBEntry, Tag, Audit, calculate_rating
 import json
 

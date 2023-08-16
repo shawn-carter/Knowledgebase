@@ -30,5 +30,6 @@ urlpatterns = [
     path('delete_article/<int:article_id>/', views.delete_article, name='delete_article'),
     path('undelete_article/<int:article_id>/', views.undelete_article, name='undelete_article'),  
     path('confirm_permanent_delete/<int:article_id>/', views.confirm_permanent_delete, name='confirm_permanent_delete'),
-    path('perform_permanent_delete/<int:article_id>/', views.perform_permanent_delete, name='perform_permanent_delete'),    
+    path('perform_permanent_delete/<int:article_id>/', views.perform_permanent_delete, name='perform_permanent_delete'),
+    path('manage_tags/', views.manage_tags, name='manage_tags')
 ]

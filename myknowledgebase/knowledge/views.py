@@ -1,4 +1,5 @@
 # knowledge/views.py
+from django.db import models
 from django.contrib import messages
 from django.contrib.auth import authenticate, login as django_login, logout as django_logout,update_session_auth_hash
 from django.contrib.auth.decorators import login_required
@@ -972,3 +973,43 @@ def perform_permanent_delete(request, article_id):
         messages.error(request, 'Article not found.')
 
     return redirect('home')
+
+@login_required
+def manage_tags(request):
+    """
+    Enables the superuser to manage tags, including viewing and deleting them.
+    
+    - Accessible only to authenticated users due to the @login_required decorator.
+    - Checks if the user is a superuser:
+        - If not, an error message is displayed, and the user is redirected to the home page.
+    - If the request method is POST (which means a tag is being deleted):
+        - Retrieves the ID of the tag to be deleted from the POST data.
+        - Deletes the tag with the given ID from the database.
+        - Redirects to the same 'manage_tags' page to reflect the deletion.
+    - For all request methods (including GET):
+        - Fetches all tags from the database.
+        - Annotates each tag with the number of times it is used in articles.
+        - Orders the tags by this count in descending order.
+    
+    Parameters:
+    - request (HttpRequest): The HTTP request object, which contains information about the current user.
+
+    Returns:
+    - HttpResponse: Renders the 'manage_tags.html' template with the context data containing the tags.
+                     For non-superusers, redirects to the home page with an error message.
+    """
+    if not request.user.is_superuser:
+            messages.error(request, 'You are not allowed to manage Tags')
+            return redirect('home')
+    if request.method == 'POST':
+        tag_id_to_delete = request.POST.get('tag_id')
+        if tag_id_to_delete:
+            Tag.objects.filter(id=tag_id_to_delete).delete()
+            return redirect('manage_tags')
+    
+    # Fetch all tags, annotate them with the number of times they are used,
+    # and order them by this count in descending order
+    tags = Tag.objects.annotate(num_times_used=models.Count('kbentry')).order_by('-num_times_used')
+    
+    context = {'tags': tags}
+    return render(request, 'knowledge/manage_tags.html', context)

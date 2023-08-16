@@ -265,7 +265,8 @@ class SuperUserViewsTest(BaseTestCaseWithSuperUser):
             reverse('delete_article', args=[self.article.id]),  # replace 1 with actual article_id
             reverse('undelete_article', args=[self.article.id]),  # replace 1 with actual article_id
             reverse('confirm_permanent_delete', args=[self.article.id]),
-            reverse('perform_permanent_delete', args=[self.article.id])           
+            reverse('perform_permanent_delete', args=[self.article.id]),
+            reverse('manage_tags')
         ]
         
         # Iterate over the list of URLs and run the checks for each one

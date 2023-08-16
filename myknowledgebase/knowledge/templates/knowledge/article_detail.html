@@ -15,8 +15,10 @@
   </div>
   <p><strong>Author:</strong> <a href="{% url 'user_articles' article.created_by.id %}" title="See all articles by {{ article.created_by.username }}">{{ article.created_by.username }}</a></p>
   <p><strong>Created Date:</strong> {{ article.created_datetime|date:"H:i:s jS F, Y" }}</p>
-  <p><strong>Last Modified By:</strong> {{ article.last_modified_by }}</p>
-  <p><strong>Last Modified Date:</strong> {{ article.last_modified_date|date:"H:i:s jS F, Y" }}</p>
+  {% if article.last_modified_by %}
+    <p><strong>Last Modified By:</strong> {{ article.last_modified_by }}</p>
+    <p><strong>Last Modified Date:</strong> {{ article.modified_datetime|date:"H:i:s jS F, Y" }}</p>
+  {% endif %}
   <p><strong>Views:</strong> {{ article.views }}</p>
   <p><strong>Rating:</strong> <span id="rating">{{ article.rating }}</span></p>
   <p><strong># of MetaTags:</strong> {{ article.meta_data.count }}</p>

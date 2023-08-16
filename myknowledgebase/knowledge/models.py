@@ -27,7 +27,7 @@ class KBEntry(models.Model):
     article = models.TextField()
     created_by = models.ForeignKey(User, related_name="created_kb_entries", on_delete=models.SET_NULL, null=True)
     created_datetime = models.DateTimeField(auto_now_add=True)
-    modified_datetime = models.DateTimeField(auto_now=True)
+    modified_datetime = models.DateTimeField(null=True, blank=True)
     last_modified_by = models.ForeignKey(User, related_name="modified_kb_entries", on_delete=models.SET_NULL, null=True)
     deleted_datetime = models.DateTimeField(null=True, blank=True)
     deleted_by = models.ForeignKey(User, related_name="deleted_kb_entries", on_delete=models.SET_NULL, null=True, blank=True)
@@ -35,7 +35,7 @@ class KBEntry(models.Model):
     downvotes = models.ManyToManyField(User, related_name="downvoted_kb_entries", blank=True)
     rating = models.FloatField(default=0.0)
     views = models.PositiveIntegerField(default=0)
-    meta_data = models.ManyToManyField('Tag', blank=True) # Assuming you will have a 'Tag' model
+    meta_data = models.ManyToManyField('Tag', blank=True)
 
 class Tag(models.Model):
     """

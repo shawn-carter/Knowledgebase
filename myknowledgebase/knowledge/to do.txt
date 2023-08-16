@@ -1,9 +1,3 @@
-Create new article: The quill box has 'None' in it when we go to the page (it should be blank)
-We now have ratings and views, these are not visible in the search results, maybe we could add a coloured badge with green, yellow, orange and red for each 25% of rating and the views in the badge?
-There are only a couple of admin only features, deleting, undeleting articles, enabling/disabling users, and viewing audit tables - I think you mentioned orphaned tags.
-Maybe we could show a view with all Tags, listed by popularity - with an option to delete any orphaned tags (that have been applied and then removed from an article, or the article has been permanently deleted)
-It might be a good idea to also allow the administrator to delete any tags - someone might add an offensive tag, and it would then be in the drop down for any new/edited article.
-It's probably unfair to Rate new Articles as 0.0 - maybe we should check if they have been rated, and show 'Not Yet Rated' instead of 0.0 in the article details
 We could enhance the Search by giving the user the ability to search for author=sc3639&tags=html - or is this going too far?  We could put tick boxes or a radio button next to search to filter: Search All, Search Title & Body, Search Author, Search Tags
 My Articles is a simple view, it only shows the Title, Extract and Edit button... we could enhance it.
 I don't want the modified_datetime = models.DateTimeField(auto_now=True) to set automatically, only when an article is modified, is this just a case of removing (auto_now=True) from the model?

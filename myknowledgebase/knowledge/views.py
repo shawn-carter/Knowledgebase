@@ -1,4 +1,5 @@
 # knowledge/views.py
+
 from django.db import models
 from django.contrib import messages
 from django.contrib.auth import authenticate, login as django_login, logout as django_logout,update_session_auth_hash
@@ -387,6 +388,7 @@ def create(request):
         form = KBEntryForm(request.POST, request=request)
         if form.is_valid():
             article = form.save(commit=False)  # Temporarily save without committing to DB
+            article.last_modified_by = None
             article.save()  # Save the KBEntry instance to the database
             # Create an Audit Entry for the Newly Created Article
             Audit(user=request.user, kb_entry=article, action_details=f"Created a new article: '{article.title[:50]}'").save()
@@ -524,6 +526,8 @@ def edit_article(request, article_id):
         if form.is_valid():
             form.save()           
             article.last_modified_by = request.user
+            article.modified_datetime = timezone.now()
+            print(article.modified_datetime)
             article.save()
             # Create an Audit record : Article Editted
             Audit(user=request.user, kb_entry=article, action_details=f"Editted Article : '{article.title[:50]}'").save()

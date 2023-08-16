@@ -62,7 +62,7 @@
             {% if user.is_authenticated %}
             <!-- Show the Username, and User Level if they are Authenticated User-->
               <li class="nav-item">
-                <a class="nav-link" id="nav5">{{ user.username }}</a>
+                <strong><a class="nav-link">{{ user.username }}</a></strong>
               </li>
               {% if user.is_staff %}
               <li class="nav-item dropdown">

@@ -70,6 +70,16 @@
   #metatagDropdown div:hover {
     background-color: #f7f7f7;
   }
+
+  #quillEditorFormGroup.is-valid .ql-container, 
+  #quillEditorFormGroup.is-valid .ql-toolbar {
+      border-color: #28a745;
+  }
+  
+  #quillEditorFormGroup.is-invalid .ql-container, 
+  #quillEditorFormGroup.is-invalid .ql-toolbar {
+      border-color: #dc3545;
+  }
 </style>
 {% endblock %} {% block extra_js %}
 <script>
@@ -83,12 +93,45 @@
             },
         });
 
-        // Update the value of the hidden article textarea whenever the Quill content changes
+        // Find the quillEditor div and traverse up to its closest parent with class "form-group"
+        // We need this to add the 'is-valid' and 'is-invalid classes' as it is created dynamically
+        var quillEditorFormGroup = $('#quillEditor').closest('.form-group');
+        // Assign an ID to this form-group div
+        quillEditorFormGroup.attr('id', 'quillEditorFormGroup');
+        var formGroup = $("#quillEditorFormGroup");
+        
+        // Using jQuery to get the article and title objects
         var article = $('textarea[name=article]');
-
+        var title = $('#id_title');
+       
+        // Update the value of the hidden article textarea whenever the Quill content changes
+        // Also added some checks as user types and add valid/invalid classes
         quill.on('text-change', function() {
-            article.val(quill.root.innerHTML);
+          var text = quill.getText().trim();
+          var length = text.length;
+          if(length >= 10) {
+            formGroup.removeClass("is-invalid").addClass("is-valid");
+          } else {
+            formGroup.removeClass("is-valid").addClass("is-invalid");
+          }
+          // Set the article text to the contents of the Quill Editor
+          article.val(quill.root.innerHTML);
         });
+
+        // Focus on the Title
+        title.focus();
+
+        // Listener for Title
+        title.on("input", function() {
+          var input=$(this);
+          var title_length=input.val().length;
+          if(title_length>=3){
+              input.removeClass("is-invalid").addClass("is-valid");
+          }
+          else{
+              input.removeClass("is-valid").addClass("is-invalid");
+          }
+      });
 
         // References to important DOM elements
         const meta_data_input = $('#meta_data_input');
@@ -105,27 +148,37 @@
         form.on('submit', function(event) {
             event.preventDefault();
             // Some basic validation to ensure Title and Body are not empty
-            title=$('#id_title').val();
-            if(title.trim()==='')
+            var titleText=title.val();
+            if(titleText.trim()==='')
             {
+              title.addClass('is-invalid').focus();
               alertify.error("Article Title cannot be blank");
               return false;
             }
             // Title needs to be more than 3 characters
-            if(title.length < 3)
+            if(titleText.length < 3)
             {
+              title.focus();
               alertify.error("Article Title should be at least 3 characters");
+              return false;
+            }
+            if(titleText.length > 255)
+            {
+              title.focus();
+              alertify.error("Article Title should not exceed 255 characters");
               return false;
             }
             // Article cannot be blank
             if(article.val().trim()==='' || article.val()==='<p><br></p>')
             {
+              formGroup.removeClass("is-valid").addClass("is-invalid");
               alertify.error("Article Body cannot be blank");
-              console.log("Article content:"+article.val()); // article will contain <p><br><p> if it is empty
+              //console.log("Article content:"+article.val()); // article will contain <p><br><p> if it is empty
               return false;
             }
             if(stripTags(article.val()).trim().length < 10)
             {
+                formGroup.removeClass("is-valid").addClass("is-invalid");
                 alertify.error("Article Body should contain at least 10 characters");
                 return false;
             }

@@ -19,7 +19,7 @@
   <p><strong>Last Modified Date:</strong> {{ article.last_modified_date|date:"H:i:s jS F, Y" }}</p>
   <p><strong>Views:</strong> {{ article.views }}</p>
   <p><strong>Rating:</strong> <span id="rating">{{ article.rating }}</span></p>
-  <p><strong>Meta Data:</strong> {{ article.meta_data.count }}</p>
+  <p><strong># of MetaTags:</strong> {{ article.meta_data.count }}</p>
   <br>
   
   {% if user != article.created_by and not user.is_superuser %}

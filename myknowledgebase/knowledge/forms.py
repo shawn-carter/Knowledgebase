@@ -107,7 +107,8 @@ class KBEntryForm(forms.ModelForm):
     
     article = forms.CharField(
         widget=forms.Textarea,
-        required=False
+        required=False,
+        initial=""
     )
     
     class Meta:

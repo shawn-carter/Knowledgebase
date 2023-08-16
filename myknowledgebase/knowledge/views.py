@@ -36,6 +36,8 @@ def login_view(request):
     """
     Handles the user login process.
 
+    - If the user is already authenticated, send them to 'home'
+
     - If the request is POST, it means the form has been submitted:
         - An instance of AuthenticationForm is created using the POST data.
         - If the form is valid, it attempts to authenticate the user with the given username and password.
@@ -55,6 +57,9 @@ def login_view(request):
     Returns:
     - HttpResponse: The HTTP response object (the rendered template).
     """
+    if request.user.is_authenticated:
+        return redirect('home')
+    
     if request.method == "POST":
         form = AuthenticationForm(request, data=request.POST)
         if form.is_valid():
@@ -71,10 +76,12 @@ def login_view(request):
             messages.error(request,"Invalid username or password.")
     form = AuthenticationForm()
     return render(request = request, template_name = "knowledge/login.html", context={"login_form":form})
-
+    
 def register(request):
     """
     Handles the user registration process.
+    
+    - If the user is already authenticated, send them to 'home'
     
     - If the request is POST, it means the form has been submitted:
         - An instance of NewUserForm is created using the POST data.
@@ -93,6 +100,9 @@ def register(request):
     Returns:
     - HttpResponse: The HTTP response object (the rendered template).
     """
+    if request.user.is_authenticated:
+        return redirect('home')
+    
     if request.method == "POST":
         form = NewUserForm(request.POST)
         if form.is_valid():
@@ -108,6 +118,8 @@ def register(request):
 def password_reset_request(request):
     """
     Handles the password reset request process.
+        
+    - If the user is already authenticated, send them to 'home'
     
     - If the request is POST, it means the form has been submitted:
         - An instance of RequestPasswordResetForm is created using the POST data.
@@ -129,6 +141,9 @@ def password_reset_request(request):
     Returns:
     - HttpResponse: The HTTP response object (the rendered template).
     """
+    if request.user.is_authenticated:
+        return redirect('home')
+    
     if request.method == 'POST':
         form = RequestPasswordResetForm(request.POST)
         if form.is_valid():
@@ -150,6 +165,8 @@ def password_reset_request(request):
 def password_reset_confirm(request, user_id, token):
     """
     Handles the password reset confirmation process.
+        
+    - If the user is already authenticated, send them to 'home'
     
     - The function first attempts to retrieve a user with the provided user_id parameter.
         - If no user with that ID exists, the function redirects to a template that indicates an invalid token.
@@ -175,6 +192,9 @@ def password_reset_confirm(request, user_id, token):
     Returns:
     - HttpResponse: The HTTP response object (the rendered template).
     """
+    if request.user.is_authenticated:
+        return redirect('home')
+    
     try:
         user = User.objects.get(pk=user_id)
         if token_generator.check_token(user, token):
@@ -198,6 +218,8 @@ def password_reset_complete(request):
     """
     Renders a confirmation page after the user has successfully reset their password.
     
+    - If the user is already authenticated, send them to 'home'
+    
     This function is called after a user has successfully completed the password reset process.
     It renders a page that confirms the password has been changed successfully and informs the user
     that they can now log in with their new password.
@@ -208,6 +230,9 @@ def password_reset_complete(request):
     Returns:
     - HttpResponse: The HTTP response object (the rendered template).
     """
+    if request.user.is_authenticated:
+        return redirect('home')
+    
     return render(request, 'knowledge/password_reset_complete.html')
 # ------------ End of non authenticated Views ----------
 
@@ -231,7 +256,7 @@ def logout(request):
     """
     django_logout(request)
     messages.success(request, 'You were successfully logged out.')
-    return redirect('home')
+    return redirect('login')
 
 @login_required
 def changepassword(request):

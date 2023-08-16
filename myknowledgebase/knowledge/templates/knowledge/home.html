@@ -16,7 +16,12 @@
         </div>
     </form>
 </div>
-
+<style>
+    .badge-orange {
+        background-color: orange;
+        color: white;
+    }
+</style>
 <!-- Display search results in a table -->
 {% if entries %}
     <table class="table">
@@ -31,7 +36,23 @@
         <tbody>
         {% for entry in entries %}
             <tr>
-                <td><a href="{% url 'article_detail' entry.id %}">{{ entry.title }}</a></td>
+                <td>
+                    <a href="{% url 'article_detail' entry.id %}">{{ entry.title }}
+                    {% if entry.rating == 0.0 and entry.downvotes.count == 0 %}
+                        <span class="badge rounded-pill badge-norating">Not Yet Rated</span>
+                    {% else %}
+                        {% if entry.rating >= 75 %}
+                            <span class="badge rounded-pill badge-green">{{ entry.views }}</span>
+                        {% elif entry.rating >= 50 %}
+                            <span class="badge rounded-pill badge-yellow">{{ entry.views }}</span>
+                        {% elif entry.rating >= 25 %}
+                            <span class="badge rounded-pill badge-orange">{{ entry.views }}</span>
+                        {% else %}
+                            <span class="badge rounded-pill badge-red">{{ entry.views }}</span>
+                        {% endif %}
+                    {% endif %}
+                </a>
+                </td>
                 <td><a href="{% url 'user_articles' entry.created_by.id %}">{{ entry.created_by.username }}</a></td>
                 <td>{{ entry.article|truncatechars:50 }}</td>
                 <td>
@@ -51,13 +72,41 @@
       <div class="col-md-6">
          <h3>Newest Articles</h3>
          {% for article in newest_articles %}
-            <a href="{% url 'article_detail' article.id %}">{{ article.title }}</a><br>
+            <a href="{% url 'article_detail' article.id %}">{{ article.title }}</a>
+            {% if article.rating == 0.0 and article.downvotes.count == 0 %}
+                        <span class="badge rounded-pill badge-norating">Not Yet Rated</span>
+                    {% else %}
+                        {% if article.rating >= 75 %}
+                            <span class="badge rounded-pill badge-green">{{ article.views }}</span>
+                        {% elif article.rating >= 50 %}
+                            <span class="badge rounded-pill badge-yellow">{{ article.views }}</span>
+                        {% elif article.rating >= 25 %}
+                            <span class="badge rounded-pill badge-orange">{{ article.views }}</span>
+                        {% else %}
+                            <span class="badge rounded-pill badge-red">{{ article.views }}</span>
+                        {% endif %}
+            {% endif %}
+            <br>
          {% endfor %}
       </div>
       <div class="col-md-6">
          <h3>Top Rated Articles</h3>
          {% for article in top_rated_articles %}
-            <a href="{% url 'article_detail' article.id %}">{{ article.title }}</a><br>
+            <a href="{% url 'article_detail' article.id %}">{{ article.title }}</a>
+            {% if article.rating == 0.0 and article.downvotes.count == 0 %}
+                        <span class="badge rounded-pill badge-norating">Not Yet Rated</span>
+                    {% else %}
+                        {% if article.rating >= 75 %}
+                            <span class="badge rounded-pill badge-green">{{ article.views }}</span>
+                        {% elif article.rating >= 50 %}
+                            <span class="badge rounded-pill badge-yellow">{{ article.views }}</span>
+                        {% elif article.rating >= 25 %}
+                            <span class="badge rounded-pill badge-orange">{{ article.views }}</span>
+                        {% else %}
+                            <span class="badge rounded-pill badge-red">{{ article.views }}</span>
+                        {% endif %}
+            {% endif %}
+            <br>
          {% endfor %}
       </div>
    </div>

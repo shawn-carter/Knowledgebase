@@ -46,41 +46,7 @@
   </ul>
 </div>
 {% endif %}
-<style>
-  #metatagDropdown {
-    border: 1px solid #ccc;
-    max-height: 100px;
-    overflow-y: auto;
-    position: absolute;
-    z-index: 1000; /* to ensure it appears on top */
-    background-color: white;
-  }
 
-  #metatagDropdown div {
-    padding: 5px 10px;
-    cursor: pointer;
-    border-bottom: 1px solid #eee;
-    transition: background-color 0.2s;
-  }
-
-  #metatagDropdown div:last-child {
-    border-bottom: none;
-  }
-
-  #metatagDropdown div:hover {
-    background-color: #f7f7f7;
-  }
-
-  #quillEditorFormGroup.is-valid .ql-container, 
-  #quillEditorFormGroup.is-valid .ql-toolbar {
-      border-color: #28a745;
-  }
-  
-  #quillEditorFormGroup.is-invalid .ql-container, 
-  #quillEditorFormGroup.is-invalid .ql-toolbar {
-      border-color: #dc3545;
-  }
-</style>
 {% endblock %} {% block extra_js %}
 <script>
   $(document).ready(function() {

@@ -530,9 +530,10 @@ def edit_article(request, article_id):
             # Process tags
             tag_names = request.POST.get('meta_data', '').split(',')
             for tag_name in tag_names:
-                tag_name = tag_name.strip()
-                tag, created = Tag.objects.get_or_create(name=tag_name)
-                article.meta_data.add(tag)
+                if tag_name:
+                    tag_name = tag_name.strip()
+                    tag, created = Tag.objects.get_or_create(name=tag_name)
+                    article.meta_data.add(tag)
 
             # Redirect to the updated article or some success page
             return redirect(f'/article/{article_id}')

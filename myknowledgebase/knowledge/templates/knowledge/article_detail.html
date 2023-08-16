@@ -22,7 +22,7 @@
   <p><strong>Views:</strong> {{ article.views }}</p>
   <p><strong>Rating:</strong>
   {% if article.rating != 0.0 or article.downvotes.count > 0 %}
-  <span id="rating">{{ article.rating }}</span></p>
+  <span id="rating">{{ article.rating }}%</span></p>
   {% else %}
   <span id="rating">Not Yet Rated</span></p>
   {% endif %}

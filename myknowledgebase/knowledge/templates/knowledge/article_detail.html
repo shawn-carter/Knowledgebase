@@ -20,7 +20,12 @@
     <p><strong>Last Modified Date:</strong> {{ article.modified_datetime|date:"H:i:s jS F, Y" }}</p>
   {% endif %}
   <p><strong>Views:</strong> {{ article.views }}</p>
-  <p><strong>Rating:</strong> <span id="rating">{{ article.rating }}</span></p>
+  <p><strong>Rating:</strong>
+  {% if article.rating != 0.0 or article.downvotes.count > 0 %}
+  <span id="rating">{{ article.rating }}</span></p>
+  {% else %}
+  <span id="rating">Not Yet Rated</span></p>
+  {% endif %}
   <p><strong># of MetaTags:</strong> {{ article.meta_data.count }}</p>
   <br>
   

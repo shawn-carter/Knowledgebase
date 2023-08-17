@@ -37,7 +37,7 @@
             {% endif %}
         </td>
           <td>{{ article.rating }}</td>
-          <td>{{ article.upvotes.count }} / {{ article.downvote.count }}</td>
+          <td>{{ article.upvotes.count }} / {{ article.downvotes.count }}</td>
           <td>{{ article.article|striptags|truncatechars:50 }}</td>
           <td>
             <a href="{% url 'user_articles' article.created_by.id %}">{{ article.created_by.username }}</a>

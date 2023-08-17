@@ -204,7 +204,29 @@ class LoginViewTestCase(TestCase):
             },
         )
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Invalid username or password.")
+        self.assertContains(response, "Invalid username or password")
+
+    def test_login_with_blank_username(self):
+        response = self.client.post(
+            reverse("login"),
+            data={
+                "username": "",
+                "password": "wrong_password",
+            },
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Username cannot be blank")
+
+    def test_login_with_blank_password(self):
+        response = self.client.post(
+            reverse("login"),
+            data={
+                "username": self.username,
+                "password": "",
+            },
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Password cannot be blank")   
 
     def test_authenticated_user_redirect(self):
         self.client.login(username=self.username, password=self.password)

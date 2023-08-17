@@ -410,7 +410,9 @@ def create(request):
             messages.error(request, 'Please correct the error above.')
     else:
         form = KBEntryForm(request=request)
-    
+    print(all_tags)
+    jsontags=json.dumps(list(all_tags))
+    print(jsontags)
     context = {
         'form': form,
         'all_tags_json': json.dumps(list(all_tags))  # Serialize all_tags to JSON for the template

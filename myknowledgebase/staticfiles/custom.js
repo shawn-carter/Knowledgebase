@@ -1,4 +1,4 @@
-console.log("Loaded Custom JS File");
+console.log("Loaded Custom JS File - From StaticFiles");
 
 // Toolbar Options for Quill.js
 const ToolbarOptions = [

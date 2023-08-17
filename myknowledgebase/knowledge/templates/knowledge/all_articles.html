@@ -41,7 +41,7 @@
           <td>
             <a href="{% url 'user_articles' article.created_by.id %}">{{ article.created_by.username }}</a>
           </td>
-          <td>{{ article.created_datetime }}</td>
+          <td>{{ article.created_datetime|date:"d/m/Y"}}</td>
           <td>
             {% for tag in article.meta_data.all %}
                 <a href="{% url 'home' %}?search={{ tag.name }}" class="btn btn-secondary m-1">{{ tag.name }}</a>

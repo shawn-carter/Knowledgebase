@@ -72,10 +72,16 @@ def login_view(request):
                 django_login(request, user)
                 messages.success(request, f"You are now logged in as {username}.")
                 return redirect('home')
-            else:
-                messages.error(request,"Invalid username or password.")
         else:
-            messages.error(request,"Invalid username or password.")
+            username = form.cleaned_data.get('username')
+            password = form.cleaned_data.get('password')
+            if not username or not password:
+                if not username:
+                    messages.error(request,"Username cannot be blank")
+                if not password:
+                    messages.error(request,"Password cannot be blank")
+            else:
+                messages.error(request,"Invalid username or password")
     form = AuthenticationForm()
     return render(request = request, template_name = "knowledge/login.html", context={"login_form":form})
     

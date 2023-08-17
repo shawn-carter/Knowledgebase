@@ -4,7 +4,7 @@
 <h2>All Articles by {{ author.username }}</h2>
 
 {% if entries %}
-    <table class="table">
+    <table class="table" id="table">
         <thead>
             <tr>
                 <th>Title</th>
@@ -34,8 +34,8 @@
                 {% endif %}
                 </td>
                 <td>{{ entry.article|striptags|truncatechars:50 }}</td>
-                <td>{{ entry.created_datetime|date:"H:i:s jS F, Y" }}</td>
-                <td>{{ entry.modified_datetime|date:"H:i:s jS F, Y" }}</td>
+                <td>{{ entry.created_datetime|date:"d/m/Y H:i:s" }}</td>
+                <td>{{ entry.modified_datetime|date:"d/m/Y H:i:s" }}</td>
                 <td>{{ entry.last_modified_by.username }}</td>
                 <td>
                     {% for tag in entry.meta_data.all %}
@@ -50,3 +50,12 @@
     <p>{{ author.username }} has not written any articles yet.</p>
 {% endif %}
 {% endblock %}
+
+{% block extra_js %}
+   <script>
+    // Wait until the document content is fully loaded before running the script
+        $(document).ready(function () {
+            setUpdataTable({colReorder: true});
+        });
+    </script>
+{% endblock%}

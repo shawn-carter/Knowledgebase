@@ -63,10 +63,10 @@
 {% endif %}
 {% if not entries or entries|length < 5 %}
    <div class="row">
-      <div class="col-md-6">
+      <div class="col-md-6 text-center">
          <h3>Newest Articles</h3>
          {% for article in newest_articles %}
-            <a href="{% url 'article_detail' article.id %}">{{ article.title }}</a>
+            <a href="{% url 'article_detail' article.id %}">{{ article.title|truncatechars:50 }}</a>
             {% if article.rating == 0.0 and article.downvotes.count == 0 %}
                         <span class="badge rounded-pill badge-norating">Not Yet Rated</span>
                     {% else %}
@@ -83,10 +83,10 @@
             <br>
          {% endfor %}
       </div>
-      <div class="col-md-6">
+      <div class="col-md-6 text-center">
          <h3>Top Rated Articles</h3>
          {% for article in top_rated_articles %}
-            <a href="{% url 'article_detail' article.id %}">{{ article.title }}</a>
+            <a href="{% url 'article_detail' article.id %}">{{ article.title|truncatechars:50 }}</a>
             {% if article.rating == 0.0 and article.downvotes.count == 0 %}
                         <span class="badge rounded-pill badge-norating">Not Yet Rated</span>
                     {% else %}

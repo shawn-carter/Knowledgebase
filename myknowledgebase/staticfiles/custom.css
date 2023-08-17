@@ -51,3 +51,10 @@
   #quillEditorFormGroup.is-invalid .ql-toolbar {
       border-color: #dc3545;
   }
+
+  h1 {
+    width:500px;
+    margin: 0 auto;
+    background: gray;
+    text-align: center;
+}

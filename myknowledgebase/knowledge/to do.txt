@@ -1,4 +1,3 @@
 We could enhance the Search by giving the user the ability to search for author=sc3639&tags=html - or is this going too far?  We could put tick boxes or a radio button next to search to filter: Search All, Search Title & Body, Search Author, Search Tags
 My Articles is a simple view, it only shows the Title, Extract and Edit button... we could enhance it.
-I don't want the modified_datetime = models.DateTimeField(auto_now=True) to set automatically, only when an article is modified, is this just a case of removing (auto_now=True) from the model?
 We mentioned about superusers being able to edit articles that are softdeleted, but the view currently redirect them and shows a warning that the article cannot be editted.

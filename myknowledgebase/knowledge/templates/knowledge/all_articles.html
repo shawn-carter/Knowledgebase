@@ -6,6 +6,7 @@
     <thead class="thead-dark">
       <tr>
         <th scope="col">Title</th>
+        <th scope="col">Rating (Up/Down)</th>
         <th scope="col">Article Summary</th>
         <th scope="col">Created By</th>
         <th scope="col">Date Created</th>
@@ -35,6 +36,7 @@
             {% endif %}
         
         </td>
+          <td>{{ article.rating }}<br>({{article.upvotes.count}} / {{article.downvotes.count}})</td>
           <td>{{ article.article|striptags|truncatechars:50 }}</td>
           <td>
             <a href="{% url 'user_articles' article.created_by.id %}">{{ article.created_by.username }}</a>

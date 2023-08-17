@@ -38,7 +38,7 @@ Install Dependencies
 
     pip install -r requirements.txt
 
-SetUp the Database
+SetUp the Database (Optional - you can use the included sqlite3 Database - details below)
   Update the settings.py file in the myknowledgebase directory with your database settings.
 
 .. code:: python
@@ -88,3 +88,8 @@ holding the details of the Article along with things like upvotes, rating, autho
 The ``Tags`` model is used to hold all the Metadata Tags
 
 The ``Audit`` model is used to store and track events such as Article creation, editting and deletions.
+
+Using the included sqlite3 DB
+=============================
+User: sc3639
+Password: To Add Later when development finished

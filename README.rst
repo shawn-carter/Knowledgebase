@@ -38,7 +38,7 @@ Install Dependencies
 
     pip install -r requirements.txt
 
-SetUp the Database (Optional - you can use the included sqlite3 Database - details below)
+SetUp the Database (Optional) -- You can use the included sqlite3 Database - and create a new SuperUser
   Update the settings.py file in the myknowledgebase directory with your database settings.
 
 .. code:: python
@@ -61,7 +61,7 @@ Run Migrations
     python manage.py makemigrations
     python manage.py migrate
 
-Create a Superuser (Optional)
+Create a Superuser
 
 .. code:: python
 

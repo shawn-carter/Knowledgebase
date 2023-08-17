@@ -1,9 +1,9 @@
 {% extends 'knowledge/base.html' %}
 
 {% block content %}
-<h2>My Articles</h2>
+<h2>My Knowledgebase Articles</h2>
 {% if articles %}
-    <table class="table">
+    <table class="table" id="table">
         <thead>
             <tr>
                 <th>Title</th>
@@ -41,3 +41,12 @@
     <p>You haven't written any articles yet.</p>
 {% endif %}
 {% endblock %}
+
+{% block extra_js %}
+   <script>
+    // Wait until the document content is fully loaded before running the script
+        $(document).ready(function () {
+            setUpdataTable({colReorder: true});
+        });
+    </script>
+{% endblock%}

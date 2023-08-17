@@ -2,10 +2,11 @@
 
 {% block content %}
   <h2>All Knowledge Base Articles</h2>
-  <table class="table">
+  <table class="table" id="table">
     <thead class="thead-dark">
       <tr>
         <th scope="col">Title</th>
+        <th scope="col">Rating %</th>
         <th scope="col">Rating (Up/Down)</th>
         <th scope="col">Article Summary</th>
         <th scope="col">Created By</th>
@@ -34,9 +35,9 @@
                     <span class="badge rounded-pill badge-red">{{ article.views }}</span>
                 {% endif %}
             {% endif %}
-        
         </td>
-          <td>{{ article.rating }}<br>({{article.upvotes.count}} / {{article.downvotes.count}})</td>
+          <td>{{ article.rating }}</td>
+          <td>{{ article.upvotes.count }} / {{ article.downvote.count }}</td>
           <td>{{ article.article|striptags|truncatechars:50 }}</td>
           <td>
             <a href="{% url 'user_articles' article.created_by.id %}">{{ article.created_by.username }}</a>
@@ -67,3 +68,14 @@
     </tbody>
   </table>
 {% endblock %}
+
+{% block extra_js %}
+   <script>
+    // Wait until the document content is fully loaded before running the script
+        $(document).ready(function () {
+            setUpdataTable({
+              colReorder: true
+           });
+        });
+    </script>
+{% endblock%}

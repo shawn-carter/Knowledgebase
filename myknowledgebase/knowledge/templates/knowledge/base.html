@@ -27,6 +27,12 @@
     <!-- Quill CSS -->
     <link href="//cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet" />
 
+    <!-- DataTables.js-->
+    <link href="https://cdn.datatables.net/v/bs5/dt-1.13.6/cr-1.7.0/fh-3.4.0/r-2.5.0/sb-1.5.0/datatables.min.css" rel="stylesheet">
+ 
+
+    
+
     <title>{% block title %}Knowledge Base{% endblock %}</title>
 
     <!-- Custom JS which is a static file-->
@@ -129,7 +135,7 @@
     </nav>
 
     <!-- Page Content -->
-    <div class="container"><br>{% block content %} {% endblock %}</div>
+    <div class="container">{% block content %} {% endblock %}</div>
 
     <!-- jQuery and Bootstrap Bundle (includes Popper) -->
     <script src="https://code.jquery.com/jquery-3.6.1.min.js"></script>
@@ -140,6 +146,9 @@
 
     <!-- Alertify JS -->
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/alertify.min.js"></script>
+
+    <!-- DataTables.JS -->
+    <script src="https://cdn.datatables.net/v/bs5/dt-1.13.6/cr-1.7.0/fh-3.4.0/r-2.5.0/sb-1.5.0/datatables.min.js"></script>
 
     <!-- Block for JavaScript -->
     {% block scripts %} {% endblock %}

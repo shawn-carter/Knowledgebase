@@ -12,6 +12,10 @@ const ToolbarOptions = [
   ["clean"], // Remove formatting option
 ];
 
+function setUpdataTable(options)
+{
+  let table = new DataTable('#table', options)
+}
 
 // This function is to setup the form for the create.html and edit_article.html templates
 function initialiseArticleEditor(type) {

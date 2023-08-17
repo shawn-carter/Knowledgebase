@@ -18,7 +18,7 @@
 </div>
 <!-- Display search results in a table -->
 {% if entries %}
-    <table class="table">
+    <table class="table" id="table">
         <thead>
             <tr>
                 <th>Title</th>
@@ -107,3 +107,12 @@
 {% endif %}
 
 {% endblock %}
+
+{% block extra_js %}
+   <script>
+    // Wait until the document content is fully loaded before running the script
+        $(document).ready(function () {
+            setUpdataTable({colReorder: true});
+        });
+    </script>
+{% endblock%}

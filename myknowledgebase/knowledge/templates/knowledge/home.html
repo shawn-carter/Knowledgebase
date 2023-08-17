@@ -1,7 +1,5 @@
 {% extends "knowledge/base.html" %}
-
-{% block title %}Home{% endblock %}
-
+{% block title %}{{ block.super }} - Search {% endblock %}
 {% block content %}
 <h2>Search the Knowledgebase</h2>
 <!-- Add search bar and button with Bootstrap styling -->
@@ -18,101 +16,101 @@
 </div>
 <!-- Display search results in a table -->
 {% if entries %}
-    <table class="table" id="table">
-        <thead>
-            <tr>
-                <th>Title</th>
-                <th>Author</th> <!-- New Column for Author -->
-                <th>Article Extract</th>
-                <th>Metadata Tags</th>
-            </tr>
-        </thead>
-        <tbody>
+<table class="table" id="table" style="display:none">
+    <thead>
+        <tr>
+            <th>Title</th>
+            <th>Author</th> <!-- New Column for Author -->
+            <th>Article Extract</th>
+            <th>Metadata Tags</th>
+        </tr>
+    </thead>
+    <tbody>
         {% for entry in entries %}
-            <tr>
-                <td>
-                    <a href="{% url 'article_detail' entry.id %}">{{ entry.title }}
+        <tr>
+            <td>
+                <a href="{% url 'article_detail' entry.id %}">{{ entry.title }}
                     {% if entry.rating == 0.0 and entry.downvotes.count == 0 %}
-                        <span class="badge rounded-pill badge-norating">Not Yet Rated</span>
+                    <span class="badge rounded-pill badge-norating">Not Yet Rated</span>
                     {% else %}
-                        {% if entry.rating >= 75 %}
-                            <span class="badge rounded-pill badge-green">{{ entry.views }}</span>
-                        {% elif entry.rating >= 50 %}
-                            <span class="badge rounded-pill badge-yellow">{{ entry.views }}</span>
-                        {% elif entry.rating >= 25 %}
-                            <span class="badge rounded-pill badge-orange">{{ entry.views }}</span>
-                        {% else %}
-                            <span class="badge rounded-pill badge-red">{{ entry.views }}</span>
-                        {% endif %}
+                    {% if entry.rating >= 75 %}
+                    <span class="badge rounded-pill badge-green">{{ entry.views }}</span>
+                    {% elif entry.rating >= 50 %}
+                    <span class="badge rounded-pill badge-yellow">{{ entry.views }}</span>
+                    {% elif entry.rating >= 25 %}
+                    <span class="badge rounded-pill badge-orange">{{ entry.views }}</span>
+                    {% else %}
+                    <span class="badge rounded-pill badge-red">{{ entry.views }}</span>
+                    {% endif %}
                     {% endif %}
                 </a>
-                </td>
-                <td><a href="{% url 'user_articles' entry.created_by.id %}">{{ entry.created_by.username }}</a></td>
-                <td>{{ entry.article|truncatechars:50 }}</td>
-                <td>
-                    {% for tag in entry.meta_data.all %}
-                        <a href="/?search={{ tag.name }}" class="btn btn-secondary btn-sm m-1">{{ tag.name }}</a>
-                    {% endfor %}
-                </td>
-            </tr>
+            </td>
+            <td><a href="{% url 'user_articles' entry.created_by.id %}">{{ entry.created_by.username }}</a></td>
+            <td>{{ entry.article|truncatechars:50 }}</td>
+            <td>
+                {% for tag in entry.meta_data.all %}
+                <a href="/?search={{ tag.name }}" class="btn btn-secondary btn-sm m-1">{{ tag.name }}</a>
+                {% endfor %}
+            </td>
+        </tr>
         {% endfor %}
-        </tbody>
-    </table>
+    </tbody>
+</table>
 {% elif search_term %}
-    <p>No Articles found that match the search term: "{{ search_term }}"</p>
+<p>No Articles found that match the search term: "{{ search_term }}"</p>
 {% endif %}
-{% if not entries or entries|length < 5 %}
-   <div class="row">
-      <div class="col-md-6 text-center">
-         <h3>Newest Articles</h3>
-         {% for article in newest_articles %}
-            <a href="{% url 'article_detail' article.id %}">{{ article.title|truncatechars:50 }}</a>
-            {% if article.rating == 0.0 and article.downvotes.count == 0 %}
-                        <span class="badge rounded-pill badge-norating">Not Yet Rated</span>
-                    {% else %}
-                        {% if article.rating >= 75 %}
-                            <span class="badge rounded-pill badge-green">{{ article.views }}</span>
-                        {% elif article.rating >= 50 %}
-                            <span class="badge rounded-pill badge-yellow">{{ article.views }}</span>
-                        {% elif article.rating >= 25 %}
-                            <span class="badge rounded-pill badge-orange">{{ article.views }}</span>
-                        {% else %}
-                            <span class="badge rounded-pill badge-red">{{ article.views }}</span>
-                        {% endif %}
-            {% endif %}
-            <br>
-         {% endfor %}
-      </div>
-      <div class="col-md-6 text-center">
-         <h3>Top Rated Articles</h3>
-         {% for article in top_rated_articles %}
-            <a href="{% url 'article_detail' article.id %}">{{ article.title|truncatechars:50 }}</a>
-            {% if article.rating == 0.0 and article.downvotes.count == 0 %}
-                        <span class="badge rounded-pill badge-norating">Not Yet Rated</span>
-                    {% else %}
-                        {% if article.rating >= 75 %}
-                            <span class="badge rounded-pill badge-green">{{ article.views }}</span>
-                        {% elif article.rating >= 50 %}
-                            <span class="badge rounded-pill badge-yellow">{{ article.views }}</span>
-                        {% elif article.rating >= 25 %}
-                            <span class="badge rounded-pill badge-orange">{{ article.views }}</span>
-                        {% else %}
-                            <span class="badge rounded-pill badge-red">{{ article.views }}</span>
-                        {% endif %}
-            {% endif %}
-            <br>
-         {% endfor %}
-      </div>
-   </div>
-{% endif %}
+{% if not entries or entries|length < 5 %} <div class="row">
+    <div class="col-md-6 text-center">
+        <h3>Newest Articles</h3>
+        {% for article in newest_articles %}
+        <a href="{% url 'article_detail' article.id %}">{{ article.title|truncatechars:50 }}</a>
+        {% if article.rating == 0.0 and article.downvotes.count == 0 %}
+        <span class="badge rounded-pill badge-norating">Not Yet Rated</span>
+        {% else %}
+        {% if article.rating >= 75 %}
+        <span class="badge rounded-pill badge-green">{{ article.views }}</span>
+        {% elif article.rating >= 50 %}
+        <span class="badge rounded-pill badge-yellow">{{ article.views }}</span>
+        {% elif article.rating >= 25 %}
+        <span class="badge rounded-pill badge-orange">{{ article.views }}</span>
+        {% else %}
+        <span class="badge rounded-pill badge-red">{{ article.views }}</span>
+        {% endif %}
+        {% endif %}
+        <br>
+        {% endfor %}
+    </div>
+    <div class="col-md-6 text-center">
+        <h3>Top Rated Articles</h3>
+        {% for article in top_rated_articles %}
+        <a href="{% url 'article_detail' article.id %}">{{ article.title|truncatechars:50 }}</a>
+        {% if article.rating == 0.0 and article.downvotes.count == 0 %}
+        <span class="badge rounded-pill badge-norating">Not Yet Rated</span>
+        {% else %}
+        {% if article.rating >= 75 %}
+        <span class="badge rounded-pill badge-green">{{ article.views }}</span>
+        {% elif article.rating >= 50 %}
+        <span class="badge rounded-pill badge-yellow">{{ article.views }}</span>
+        {% elif article.rating >= 25 %}
+        <span class="badge rounded-pill badge-orange">{{ article.views }}</span>
+        {% else %}
+        <span class="badge rounded-pill badge-red">{{ article.views }}</span>
+        {% endif %}
+        {% endif %}
+        <br>
+        {% endfor %}
+    </div>
+    </div>
+    {% endif %}
 
-{% endblock %}
+    {% endblock %}
 
-{% block extra_js %}
-   <script>
-    // Wait until the document content is fully loaded before running the script
+    {% block extra_js %}
+    <script>
+        // Wait until the document content is fully loaded before running the script
         $(document).ready(function () {
-            setUpdataTable({colReorder: true});
+            setUpdataTable({ colReorder: true });
+            $("#table").fadeIn(100);
         });
     </script>
-{% endblock%}
+    {% endblock%}

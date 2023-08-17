@@ -1,61 +1,64 @@
 {% extends 'knowledge/base.html' %}
-
+{% block title %}{{ block.super }} - User Articles: {{ author.username }} {% endblock %}
 {% block content %}
 <h2>All Articles by {{ author.username }}</h2>
 
 {% if entries %}
-    <table class="table" id="table">
-        <thead>
-            <tr>
-                <th>Title</th>
-                <th>Article Extract</th>
-                <th>Created Date</th>
-                <th>Last Modified</th>
-                <th>Modified By</th>
-                <th>Metadata Tags</th>
-            </tr>
-        </thead>
-        <tbody>
+<table class="table" id="table" style="display:none">
+    <thead>
+        <tr>
+            <th>Title</th>
+            <th>Article Extract</th>
+            <th>Created Date</th>
+            <th>Last Modified</th>
+            <th>Modified By</th>
+            <th>Metadata Tags</th>
+        </tr>
+    </thead>
+    <tbody>
         {% for entry in entries %}
-            <tr>
-                <td><a href="{% url 'article_detail' entry.id %}">{{ entry.title }}</a>
-                    {% if entry.rating == 0.0 and entry.downvotes.count == 0 %}
-                    <span class="badge rounded-pill badge-norating">Not Yet Rated</span>
+        <tr>
+            <td><a href="{% url 'article_detail' entry.id %}">{{ entry.title }}</a>
+                {% if entry.rating == 0.0 and entry.downvotes.count == 0 %}
+                <span class="badge rounded-pill badge-norating">Not Yet Rated</span>
                 {% else %}
-                    {% if entry.rating >= 75 %}
-                        <span class="badge rounded-pill badge-green">{{ entry.views }}</span>
-                    {% elif entry.rating >= 50 %}
-                        <span class="badge rounded-pill badge-yellow">{{ entry.views }}</span>
-                    {% elif entry.rating >= 25 %}
-                        <span class="badge rounded-pill badge-orange">{{ entry.views }}</span>
-                    {% else %}
-                        <span class="badge rounded-pill badge-red">{{ entry.views }}</span>
-                    {% endif %}
+                {% if entry.rating >= 75 %}
+                <span class="badge rounded-pill badge-green">{{ entry.views }}</span>
+                {% elif entry.rating >= 50 %}
+                <span class="badge rounded-pill badge-yellow">{{ entry.views }}</span>
+                {% elif entry.rating >= 25 %}
+                <span class="badge rounded-pill badge-orange">{{ entry.views }}</span>
+                {% else %}
+                <span class="badge rounded-pill badge-red">{{ entry.views }}</span>
                 {% endif %}
-                </td>
-                <td>{{ entry.article|striptags|truncatechars:50 }}</td>
-                <td>{{ entry.created_datetime|date:"d/m/Y H:i:s" }}</td>
-                <td>{{ entry.modified_datetime|date:"d/m/Y H:i:s" }}</td>
-                <td>{{ entry.last_modified_by.username }}</td>
-                <td>
-                    {% for tag in entry.meta_data.all %}
-                        <a href="/?search={{ tag.name }}" class="btn btn-secondary btn-sm m-1">{{ tag.name }}</a>
-                    {% endfor %}
-                </td>
-            </tr>
+                {% endif %}
+            </td>
+            <td>{{ entry.article|striptags|truncatechars:50 }}</td>
+            <td>{{ entry.created_datetime|date:"d/m/Y H:i:s" }}</td>
+            <td>{{ entry.modified_datetime|date:"d/m/Y H:i:s" }}</td>
+            <td>{{ entry.last_modified_by.username }}</td>
+            <td>
+                {% for tag in entry.meta_data.all %}
+                <a href="/?search={{ tag.name }}" class="btn btn-secondary btn-sm m-1">{{ tag.name }}</a>
+                {% endfor %}
+            </td>
+        </tr>
         {% endfor %}
-        </tbody>
-    </table>
+    </tbody>
+</table>
 {% else %}
-    <p>{{ author.username }} has not written any articles yet.</p>
+<p>{{ author.username }} has not written any articles yet.</p>
 {% endif %}
 {% endblock %}
 
 {% block extra_js %}
-   <script>
+<script>
     // Wait until the document content is fully loaded before running the script
-        $(document).ready(function () {
-            setUpdataTable({colReorder: true});
+    $(document).ready(function () {
+        setUpdataTable({
+            colReorder: true
         });
-    </script>
+        $("#table").fadeIn(250);
+    });
+</script>
 {% endblock%}

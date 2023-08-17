@@ -1,9 +1,9 @@
 <!-- templates/knowledge/user_list.html -->
 {% extends 'knowledge/base.html' %}
-
+{% block title %}{{ block.super }} - User List {% endblock %}
 {% block content %}
 <h2>List All Users</h2>
-<table class="table">
+<table class="table" id="table" style="display:none">
     <thead>
         <tr>
             <th>User ID</th>
@@ -23,21 +23,21 @@
             <td>{{ user.email }}</td>
             <td>
                 {% if user.is_superuser %}
-                    Superuser
+                Superuser
                 {% else %}
-                    User
+                User
                 {% endif %}
             </td>
             <td>{{ user.date_joined }}</td>
-            
-              {% if user.is_active %}
-                  <td>Active</td>
-                  <td><a href="{% url 'toggle_user_active_status' user.id %}" class="btn btn-danger">Deactivate</a></td>
-              {% else %}
-                  <td>Inactive</td>
-                  <td><a href="{% url 'toggle_user_active_status' user.id %}" class="btn btn-success">Activate</a></td>
-              {% endif %}
-          
+
+            {% if user.is_active %}
+            <td>Active</td>
+            <td><a href="{% url 'toggle_user_active_status' user.id %}" class="btn btn-danger">Deactivate</a></td>
+            {% else %}
+            <td>Inactive</td>
+            <td><a href="{% url 'toggle_user_active_status' user.id %}" class="btn btn-success">Activate</a></td>
+            {% endif %}
+
         </tr>
         {% empty %}
         <tr>
@@ -47,3 +47,15 @@
     </tbody>
 </table>
 {% endblock %}
+
+{% block extra_js %}
+<script>
+    // Wait until the document content is fully loaded before running the script
+    $(document).ready(function () {
+        setUpdataTable({
+            colReorder: true
+        });
+    });
+    $("#table").fadeIn(250);
+</script>
+{% endblock%}

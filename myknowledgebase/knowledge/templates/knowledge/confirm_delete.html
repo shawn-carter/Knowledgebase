@@ -1,4 +1,5 @@
 {% extends 'knowledge/base.html' %}
+{% block title %}{{ block.super }} - Confirm Delete: {{ article.title }}{% endblock %}
 {% block content %}
 <h2>Confirm Deletion</h2>
 <p>Are you sure you want to delete the article titled "{{ article.title }}"?</p>

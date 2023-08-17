@@ -1,10 +1,11 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+
 class KBEntry(models.Model):
     """
     Represents an entry in the knowledge base.
-    
+
     Attributes:
     - title (CharField): The title of the knowledge base entry. Maximum length of 255 characters.
     - article (TextField): The main content of the knowledge base entry.
@@ -23,52 +24,73 @@ class KBEntry(models.Model):
     - views (PositiveIntegerField): The number of views this entry has received. Default is 0.
     - meta_data (ManyToManyField): The associated tags for this entry. Links to instances of the 'Tag' model.
     """
+
     title = models.CharField(max_length=255)
     article = models.TextField()
-    created_by = models.ForeignKey(User, related_name="created_kb_entries", on_delete=models.SET_NULL, null=True)
+    created_by = models.ForeignKey(
+        User, related_name="created_kb_entries", on_delete=models.SET_NULL, null=True
+    )
     created_datetime = models.DateTimeField(auto_now_add=True)
     modified_datetime = models.DateTimeField(null=True, blank=True)
-    last_modified_by = models.ForeignKey(User, related_name="modified_kb_entries", on_delete=models.SET_NULL, null=True)
+    last_modified_by = models.ForeignKey(
+        User, related_name="modified_kb_entries", on_delete=models.SET_NULL, null=True
+    )
     deleted_datetime = models.DateTimeField(null=True, blank=True)
-    deleted_by = models.ForeignKey(User, related_name="deleted_kb_entries", on_delete=models.SET_NULL, null=True, blank=True)
-    upvotes = models.ManyToManyField(User, related_name="upvoted_kb_entries", blank=True)
-    downvotes = models.ManyToManyField(User, related_name="downvoted_kb_entries", blank=True)
+    deleted_by = models.ForeignKey(
+        User,
+        related_name="deleted_kb_entries",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+    )
+    upvotes = models.ManyToManyField(
+        User, related_name="upvoted_kb_entries", blank=True
+    )
+    downvotes = models.ManyToManyField(
+        User, related_name="downvoted_kb_entries", blank=True
+    )
     rating = models.FloatField(default=0.0)
     views = models.PositiveIntegerField(default=0)
-    meta_data = models.ManyToManyField('Tag', blank=True)
+    meta_data = models.ManyToManyField("Tag", blank=True)
+
 
 class Tag(models.Model):
     """
     Represents a tag that can be associated with a knowledge base entry.
-    
+
     Attributes:
     - name (CharField): The name of the tag. Maximum length of 100 characters.
-    
+
     Methods:
     - __str__(self): Returns a string representation of the Tag model, which is the name of the tag.
     """
+
     name = models.CharField(max_length=100)
+
     def __str__(self):
         return self.name  # Assuming 'name' is the field storing the tag's name
+
 
 class Audit(models.Model):
     """
     Represents an audit log entry to track user actions on knowledge base entries.
-    
+
     Attributes:
     - user (ForeignKey): Reference to the user who performed the action.
     - action_datetime (DateTimeField): The date and time when the action was performed. Automatically set to the current date and time when a new log entry is created.
     - kb_entry (ForeignKey): Reference to the knowledge base entry that the action was performed on. Can be null if the action is not related to a specific entry.
     - action_details (CharField): A brief description of the action performed. Maximum length of 255 characters.
-    
+
     The Audit model is designed to keep a log of various actions that users perform within the application,
     thereby allowing for accountability and potential analysis of user activity.
     """
+
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     action_datetime = models.DateTimeField(auto_now_add=True)
     kb_entry = models.ForeignKey(KBEntry, on_delete=models.SET_NULL, null=True)
     action_details = models.CharField(max_length=255)
-    
+
+
 def calculate_rating(article):
     """
     Calculate the rating of a given article based on upvotes and downvotes.

@@ -1,12 +1,13 @@
 {% extends "knowledge/base.html" %}
+{% block title %}{{ block.super }} - Manage Tags {% endblock %}
 {% block content %}
 
 <h2>Manage Tags</h2>
-<table class="table">
+<table class="table" id="table" style="display:none">
     <thead>
         <tr>
             <th scope="col">Tag</th>
-            <th scope="col">Number of Uses</th>
+            <th scope="col">Number of Articles Using Tag</th>
             <th scope="col">Actions</th>
         </tr>
     </thead>
@@ -30,3 +31,13 @@
 </table>
 
 {% endblock %}
+
+{% block extra_js %}
+   <script>
+    // Wait until the document content is fully loaded before running the script
+        $(document).ready(function () {
+            setUpdataTable({colReorder: true, order: false});
+            $("#table").fadeIn(100);
+        });
+    </script>
+{% endblock%}

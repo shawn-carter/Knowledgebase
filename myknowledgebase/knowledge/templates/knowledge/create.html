@@ -1,39 +1,37 @@
 <!-- knowledge/templates/knowledge/create.html -->
-{% extends 'knowledge/base.html' %} {% load widget_tweaks %} {% block content %}
-<h2>Create a New Knowledge Base Article</h2>
+{% extends 'knowledge/base.html' %}
+{% block title %}{{ block.super }} - Create New Article {% endblock %}
+{% load widget_tweaks %}
+{% block content %}
+<h2>Create New Article</h2>
 <form method="POST" id="kbEntryForm" novalidate>
-  {% csrf_token %}
-  {% for field in form %}
+    {% csrf_token %}
+    {% for field in form %}
     {% if not field.name == "meta_data"%}
     <div class="form-group">
-      {% if field.name == "article" %}
+        {% if field.name == "article" %}
         <label for="quillEditor">{{ field.label }}</label>
         <div id="quillEditor" style="height: 200px">{{ field.value }}</div>
         {{ field|attr:"style:display:none;" }} {% else %}
         <label for="{{ field.id_for_label }}">{{ field.label }}</label>
         {{ field|add_class:"form-control" }}
-      {% endif %}
-    {% endif %}
+        {% endif %}
+        {% endif %}
     </div>
-  {% endfor %}
+    {% endfor %}
 
-  <div class="form-group">
-    <label for="metatagLookup">Lookup/Add Metatag:</label>
-    <input
-      type="text"
-      id="metatagLookup"
-      class="form-control"
-      placeholder="Type to search or add a new tag..."
-    />
-  </div>
+    <div class="form-group">
+        <label for="metatagLookup">Lookup/Add Metatag:</label>
+        <input type="text" id="metatagLookup" class="form-control" placeholder="Type to search or add a new tag..." />
+    </div>
 
-  <div class="form-group">
-    <label>Selected Meta Data:</label>
-    <div id="selectedMetatags"></div>
-    <input type="hidden" name="meta_data" id="meta_data_input" />
-  </div>
+    <div class="form-group">
+        <label>Selected Meta Data:</label>
+        <div id="selectedMetatags"></div>
+        <input type="hidden" name="meta_data" id="meta_data_input" />
+    </div>
 
-  <button type="submit" class="btn btn-primary">Submit</button>
+    <button type="submit" class="btn btn-primary">Submit</button>
 </form>
 
 <!-- We are using the data attributes of this div to pass the metatagLookup to JavaScript -->
@@ -41,16 +39,16 @@
 
 {% if form.errors %}
 <div class="alert alert-danger">
-  <ul>
-    {% for field, errors in form.errors.items %} {% for error in errors %}
-    <li><strong>{{ field }}:</strong> {{ error|escape }}</li>
-    {% endfor %} {% endfor %}
-  </ul>
+    <ul>
+        {% for field, errors in form.errors.items %} {% for error in errors %}
+        <li><strong>{{ field }}:</strong> {{ error|escape }}</li>
+        {% endfor %} {% endfor %}
+    </ul>
 </div>
 {% endif %} {% endblock %} {% block extra_js %}
 <script>
-  $(document).ready(function () {
-    initialiseArticleEditor("new");
-  });
+    $(document).ready(function () {
+        initialiseArticleEditor("new");
+    });
 </script>
 {% endblock %}

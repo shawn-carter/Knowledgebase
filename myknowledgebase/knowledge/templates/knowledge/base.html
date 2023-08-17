@@ -1,137 +1,107 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+
+<head>
     {% load static %}
     <meta charset="UTF-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1, shrink-to-fit=yes"
-    />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=yes" />
 
     <!-- Bootstrap CSS -->
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-    />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" />
 
     <!-- Alertify CSS -->
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/css/alertify.min.css"
-    />
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/css/themes/default.min.css"
-    />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/css/alertify.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/css/themes/default.min.css" />
 
     <!-- Quill CSS -->
     <link href="//cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet" />
 
     <!-- DataTables.js-->
-    <link href="https://cdn.datatables.net/v/bs5/dt-1.13.6/cr-1.7.0/fh-3.4.0/r-2.5.0/sb-1.5.0/datatables.min.css" rel="stylesheet">
- 
-
-    
+    <link href="https://cdn.datatables.net/v/bs5/dt-1.13.6/cr-1.7.0/fh-3.4.0/r-2.5.0/sb-1.5.0/datatables.min.css"
+        rel="stylesheet" />
 
     <title>{% block title %}Knowledge Base{% endblock %}</title>
 
     <!-- Custom JS which is a static file-->
     <script src="{% static 'custom.js' %}"></script>
-    <link rel="stylesheet" href="{% static 'custom.css' %}"/>
-  </head>
-  <body>
+    <link rel="stylesheet" href="{% static 'custom.css' %}" />
+</head>
+
+<body>
     <!-- Navbar -->
-    <nav
-      class="navbar navbar-light navbar-expand-md"
-      style="background-color: #eeeeee"
-    >
-      <div class="container">
-        <!-- Navbar brand -->
-        <a class="navbar-brand" href="/">KnowledgeBase</a>
+    <nav class="navbar navbar-light navbar-expand-md" style="background-color: #eeeeee">
+        <div class="container">
+            <!-- Navbar brand -->
+            <a class="navbar-brand" href="/">KnowledgeBase</a>
 
-        <!-- Navbar toggler button -->
-        <button
-          class="navbar-toggler"
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#navbarResponsive"
-          aria-controls="navbarResponsive"
-          aria-expanded="false"
-          aria-label="Toggle navigation"
-        >
-          <span class="navbar-toggler-icon"></span>
-        </button>
+            <!-- Navbar toggler button -->
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarResponsive"
+                aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
 
-        <!-- Navbar links -->
-        <div class="collapse navbar-collapse" id="navbarResponsive">
-          <ul class="navbar-nav ms-auto">          
-            {% if user.is_authenticated %}
-            <!-- Show the Username, and User Level if they are Authenticated User-->
-              <li class="nav-item">
-                <strong><a class="nav-link">{{ user.username }}</a></strong>
-              </li>
-              {% if user.is_staff %}
-              <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                  Admin Tasks
-                </a>
-                <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-                  <li><a class="dropdown-item" href="{% url 'audit_logs' %}"">Audit Logs</a></li>
-                  <li><a class="dropdown-item" href="{% url 'manage_tags' %}">Manage MetaTags</a></li>
-                  <li><a class="dropdown-item" href="{% url 'user-list' %}">List All Users</a></li>
+            <!-- Navbar links -->
+            <div class="collapse navbar-collapse" id="navbarResponsive">
+                <ul class="navbar-nav ms-auto">
+                    {% if user.is_authenticated %}
+                    <!-- Show the Username, and User Level if they are Authenticated User-->
+                    <li class="nav-item">
+                        <strong><a class="nav-link">{{ user.username }}</a></strong>
+                    </li>
+                    {% if user.is_staff %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink" role="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">Admin Tasks</a>
+                        <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                            <li>
+                                <a class="dropdown-item" href="{% url 'audit_logs' %}">Audit Logs</a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="{% url 'manage_tags' %}">Manage MetaTags</a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="{% url 'user-list' %}">List All Users</a>
+                            </li>
+                        </ul>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" id="logout">(Normal User)</a>
+                    </li>
+                    {% endif %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'home' %}">Search</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'create' %}">Create New Article</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'allarticles' %}">All Articles</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'my_articles' %}">My Articles</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'change_password' %}">Change Password</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="logout" href="{% url 'logout' %}">Logout</a>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" id="login" href="{% url 'login' %}">Login</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="register" href="{% url 'register' %}">Register</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="passwordreset" href="{% url 'password_reset_request' %}">Reset
+                            Password</a>
+                    </li>
+                    {% endif %}
                 </ul>
-              </li>
-              {% else %}
-              <li class="nav-item">
-                <a class="nav-link" id="logout">(Normal User)</a>
-              </li>
-              {% endif %} 
-            <li class="nav-item">
-              <a class="nav-link" href="{% url 'home' %}"
-                >Search</a
-              >
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="{% url 'create' %}"
-                >Create New Article</a
-              >
-            <li class="nav-item">
-                <a class="nav-link" href="{% url 'allarticles' %}"
-                  >All Articles</a
-              >
-            <li class="nav-item">
-              <a class="nav-link" href="{% url 'my_articles' %}"
-                >My Articles</a
-            >
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="{% url 'change_password' %}"
-                >Change Password</a
-              >
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" id="logout" href="{% url 'logout' %}"
-                >Logout</a
-              >
-            </li>
-            {% else %}
-            <li class="nav-item">
-              <a class="nav-link" id="login" href="{% url 'login' %}">Login</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" id="register" href="{% url 'register' %}"
-                >Register</a
-              >
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" id="passwordreset" href="{% url 'password_reset_request' %}"
-                >Reset Password</a
-              >
-            </li>
-            {% endif %}
-          </ul>
+            </div>
         </div>
-      </div>
     </nav>
 
     <!-- Page Content -->
@@ -148,31 +118,32 @@
     <script src="https://cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/alertify.min.js"></script>
 
     <!-- DataTables.JS -->
-    <script src="https://cdn.datatables.net/v/bs5/dt-1.13.6/cr-1.7.0/fh-3.4.0/r-2.5.0/sb-1.5.0/datatables.min.js"></script>
+    <script
+        src="https://cdn.datatables.net/v/bs5/dt-1.13.6/cr-1.7.0/fh-3.4.0/r-2.5.0/sb-1.5.0/datatables.min.js"></script>
 
     <!-- Block for JavaScript -->
     {% block scripts %} {% endblock %}
 
     <!-- Script to display the Alertify Messages on Page Load-->
     <script>
-      window.onload = function() {
-          {% for message in messages %}
-              if ("{{ message.level_tag }}" === "success") {
-                  alertify.success("{{ message }}");
-                  console.log("{{ message }}")
-              } else if ("{{ message.level_tag }}" === "error") {
-                  alertify.error("{{ message }}");
-                  console.log("{{ message }}")
-              } else {
-                  alertify.message("{{ message }}");
-                  console.log("{{ message }}")
-              }
-          {% endfor %}
-      }
+        window.onload = function () {
+            {% for message in messages %}
+            if ("{{ message.level_tag }}" === "success") {
+                alertify.success("{{ message }}");
+                console.log("{{ message }}")
+            } else if ("{{ message.level_tag }}" === "error") {
+                alertify.error("{{ message }}");
+                console.log("{{ message }}")
+            } else {
+                alertify.message("{{ message }}");
+                console.log("{{ message }}")
+            }
+            {% endfor %}
+        }
     </script>
 
     <!-- Any Extra JavaScript Block-->
     {% block extra_js %} {% endblock %}
+</body>
 
-  </body>
 </html>

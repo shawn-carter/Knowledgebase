@@ -1,11 +1,13 @@
 {% extends 'knowledge/base.html' %}
-
+{% block title %}{{ block.super }} - Confirm Permanent Delete: {{ article.title }}{% endblock %}
 {% block content %}
 <h2>Confirm Permanent Deletion</h2>
 <p>
-    You are about to permanently delete the article titled: <strong>{{ article.title }}</strong>. This action cannot be undone and will also remove all associated audit logs.
+    You are about to permanently delete the article titled: <strong>{{ article.title }}</strong>. This action cannot be
+    undone and will also remove all associated audit logs.
 </p>
-<p>I have added the permanent delete functionality to demonstrate that it can be done, but ideally articles should only be soft deleted</p>
+<p>I have added the permanent delete functionality to demonstrate that it can be done, but ideally articles should only
+    be soft deleted</p>
 <a href="{% url 'perform_permanent_delete' article.id %}" class="btn btn-danger">Confirm Permanent Deletion</a>
 <a href="{% url 'article_detail' article.id %}" class="btn btn-secondary">Cancel</a>
 {% endblock %}

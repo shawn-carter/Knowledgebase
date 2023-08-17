@@ -8,7 +8,7 @@ Source code
 Installation and Setup
 ======================
 
-First, setup your download the repo:
+First, setup the repo:
 
 .. code:: bash
 

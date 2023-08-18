@@ -2,14 +2,20 @@ from django.test import TestCase, Client
 from django.contrib.auth.models import User
 from django.urls import reverse
 from knowledge.models import KBEntry
-
+from django.utils import timezone
 
 # Class to be used with functions that need a user to be logged in
 class BaseTestCaseWithUser(TestCase):
     def setUp(self):
         self.client = Client()
-        self.user = User.objects.create_user(username="testuser", password="testpass")
+        self.email = "test@testdomain.test"  # Store email in a class attribute
+        self.user = User.objects.create_user(
+            username="testuser", password="testpass", email=self.email
+        )
         self.client.login(username="testuser", password="testpass")
+        self.article = KBEntry.objects.create(
+            title="Test Article", article="Test Content", created_by=self.user
+        )
 
 
 class BaseTestCaseWithSuperUser(BaseTestCaseWithUser):
@@ -34,7 +40,7 @@ class BaseTestCaseWithSuperUser(BaseTestCaseWithUser):
             reverse("perform_permanent_delete", args=[1]),
             reverse("confirm_permanent_delete", args=[1]),
             reverse("toggle_user_active_status", args=[1]),
-            reverse("undelete_article", args=[1]),
+            reverse("undelete_article", args=[1])
         ]
 
         self.client.login(username="testadmin", password="adminpass")
@@ -46,7 +52,7 @@ class BaseTestCaseWithSuperUser(BaseTestCaseWithUser):
                     response.status_code, 302
                 )  # Expecting a redirect after performing an action
             except AssertionError:
-                print(f"AssertionError for URL: {url}")
+                print(f"AssertionError for URL: {url} for superuser")
                 raise
         else:
             try:
@@ -54,7 +60,7 @@ class BaseTestCaseWithSuperUser(BaseTestCaseWithUser):
                     response.status_code, 200
                 )  # Expecting a successful response, since this is a rendered page
             except AssertionError:
-                print(f"AssertionError for URL: {url}")
+                print(f"AssertionError for URL: {url} for superuser")
                 raise
 
         # Check for normal authenticated users
@@ -65,7 +71,7 @@ class BaseTestCaseWithSuperUser(BaseTestCaseWithUser):
                 response.status_code, 302
             )  # Expecting a redirect to 'home'
         except AssertionError:
-            print(f"AssertionError for URL: {url}")
+            print(f"AssertionError for URL: {url} for authenticated user")
             raise
 
         # Check for unauthenticated users
@@ -76,5 +82,5 @@ class BaseTestCaseWithSuperUser(BaseTestCaseWithUser):
                 response, f'{reverse("login")}?next={url}'
             )  # Expecting a redirect to 'login'
         except AssertionError:
-            print(f"AssertionError for URL: {url}")
+            print(f"AssertionError for URL: {url} for non authenticated user")
             raise

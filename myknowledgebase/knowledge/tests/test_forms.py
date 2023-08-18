@@ -17,13 +17,17 @@ class NewUserFormTestCase(TestCase):
         # Create a user to simulate a scenario where the username is already in use.
         User.objects.create(username="testuser")
         form = NewUserForm(data={"username": "testuser"})
+        # The form should be valid
         self.assertFalse(form.is_valid())
+        # However the username is already in use
         self.assertIn("Username is already taken.", form.errors["username"])
 
     # Test where the user tries to enter all numbers for the username
     def test_username_all_numbers(self):
         form = NewUserForm(data={"username": "123456"})
+        # The form is valid
         self.assertFalse(form.is_valid())
+        # But the form validation checks the contents and gives form error
         self.assertIn("Username cannot be all numbers.", form.errors["username"])
 
     # Test where the username contains a @ symbol
@@ -196,6 +200,7 @@ class KBEntryFormTestCase(TestCase):
         self.request = mock.Mock()
         self.request.user = self.user
 
+    # Test for acceptance of valid article submit
     def test_valid_form(self):
         form_data = {
             "title": "Sample Article",
@@ -204,6 +209,7 @@ class KBEntryFormTestCase(TestCase):
         form = KBEntryForm(data=form_data, request=self.user)
         self.assertTrue(form.is_valid())
 
+    # Test for article without valid title
     def test_missing_title(self):
         form_data = {
             "title": "",
@@ -213,6 +219,7 @@ class KBEntryFormTestCase(TestCase):
         self.assertFalse(form.is_valid())
         self.assertIn("title", form.errors)
 
+    # Test for article with short title (less than 3 characters)
     def test_short_title(self):
         form_data = {
             "title": "Ab",
@@ -222,6 +229,7 @@ class KBEntryFormTestCase(TestCase):
         self.assertFalse(form.is_valid())
         self.assertIn("title", form.errors)
 
+    # Test for article without article body
     def test_missing_article(self):
         form_data = {
             "title": "Article without body",
@@ -231,6 +239,7 @@ class KBEntryFormTestCase(TestCase):
         self.assertFalse(form.is_valid())
         self.assertIn("article", form.errors)
 
+    # Test for article with short article body (less than 10 characters)
     def test_short_article(self):
         form_data = {
             "title": "Article with short body",
@@ -240,6 +249,7 @@ class KBEntryFormTestCase(TestCase):
         self.assertFalse(form.is_valid())
         self.assertIn("article", form.errors)
 
+    # Test for ability to edit an existing valid article
     def test_edit_article(self):
         # Create an article
         form_data = {
@@ -264,7 +274,77 @@ class KBEntryFormTestCase(TestCase):
         self.assertEqual(article_edited.title, "Edited Article")
         self.assertEqual(article_edited.last_modified_by, self.user)
 
+    def test_edit_article_with_short_title(self):
+        # Create an article
+        form_data = {
+            "title": "Initial Article",
+            "article": "<p>This is the initial version of the article.</p>",
+        }
+        form = KBEntryForm(data=form_data, request=self.request)
+        self.assertTrue(form.is_valid())
+        article = form.save()
 
+        # Edit the article with short title
+        form_data_edit = {
+            "title": "Sh",
+            "article": "<p>This is the edited version of the article.</p>",
+        }
+        form_edit = KBEntryForm(
+            data=form_data_edit, instance=article, request=self.request
+        )
+        
+        # Assert that the form is invalid due to the short title
+        self.assertFalse(form_edit.is_valid())
+        
+        # Assert that attempting to save an invalid form raises a ValueError
+        with self.assertRaises(ValueError):
+            article_edited = form_edit.save()
+
+        # Reload the article from the database to ensure we are working with the most recent data
+        article.refresh_from_db()
+
+        # Assert that the article title in the database remains unchanged
+        self.assertEqual(article.title, "Initial Article")
+
+        # Assert that the last_modified_by field in the database remains unchanged
+        self.assertEqual(article.last_modified_by, self.user)
+
+    def test_edit_article_with_short_body(self):
+        # Create an article
+        form_data = {
+            "title": "Initial Article",
+            "article": "<p>This is the initial version of the article.</p>",
+        }
+        form = KBEntryForm(data=form_data, request=self.request)
+        self.assertTrue(form.is_valid())
+        article = form.save()
+
+        # Edit the article with short body
+        form_data_edit = {
+            "title": "Article with Short Body",
+            "article": "<p>Hi</p>",  # This body is too short and should be invalid
+        }
+        form_edit = KBEntryForm(
+            data=form_data_edit, instance=article, request=self.request
+        )
+        
+        # Assert that the form is invalid due to the short body
+        self.assertFalse(form_edit.is_valid())
+        
+        # Assert that attempting to save an invalid form raises a ValueError
+        with self.assertRaises(ValueError):
+            article_edited = form_edit.save()
+
+        # Reload the article from the database to ensure we are working with the most recent data
+        article.refresh_from_db()
+
+        # Assert that the article body in the database remains unchanged
+        self.assertEqual(article.article, "<p>This is the initial version of the article.</p>")
+
+        # Assert that the last_modified_by field in the database remains unchanged
+        self.assertEqual(article.last_modified_by, self.user)
+
+    
 class RequestPasswordResetFormTestCase(TestCase):
     def test_valid_email(self):
         form = RequestPasswordResetForm(data={"email": "john@example.com"})

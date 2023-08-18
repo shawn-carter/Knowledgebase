@@ -476,9 +476,7 @@ def create(request):
             messages.error(request, "Please correct the error above.")
     else:
         form = KBEntryForm(request=request)
-    print(all_tags)
     jsontags = json.dumps(list(all_tags))
-    print(jsontags)
     context = {
         "form": form,
         "all_tags_json": json.dumps(
@@ -597,7 +595,7 @@ def edit_article(request, article_id):
     if not (request.user.is_superuser or article.created_by == request.user):
         messages.error(request, "You are not authorized to edit this article.")
         return redirect(
-            f"/article/{article_id}"
+            f"/article/{article_id}/"
         )  # Redirect to article detail or some other appropriate page
 
     if request.method == "POST":
@@ -606,7 +604,6 @@ def edit_article(request, article_id):
             form.save()
             article.last_modified_by = request.user
             article.modified_datetime = timezone.now()
-            print(article.modified_datetime)
             article.save()
             # Create an Audit record : Article Editted
             Audit(
@@ -624,7 +621,7 @@ def edit_article(request, article_id):
                     article.meta_data.add(tag)
 
             # Redirect to the updated article or some success page
-            return redirect(f"/article/{article_id}")
+            return redirect(f"/article/{article_id}/")
 
     else:
         form = KBEntryForm(instance=article, request=request)

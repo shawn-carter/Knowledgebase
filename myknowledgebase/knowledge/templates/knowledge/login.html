@@ -10,13 +10,9 @@
                 <label for="{{ field.id_for_label }}">{{ field.label }}</label>
                 <input type="{{ field.field.widget.input_type }}"
                     class="form-control {% if field.errors %}is-invalid{% elif form.data %}is-valid{% endif %}"
-                    id="{{ field.id_for_label }}" name="{{ field.html_name }}" {%
-                    if
-                    field.value
-                    !="None"
-                    %}value="{{ field.value }}" {%
-                    endif
-                    %} />
+                    id="{{ field.id_for_label }}" name="{{ field.html_name }}"
+                    value="{{ field.value|default:'' }}"
+                />
                 {% for error in field.errors %}
                 <div class="invalid-feedback">{{ error }}</div>
                 {% endfor %}

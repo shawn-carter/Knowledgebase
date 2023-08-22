@@ -99,7 +99,6 @@ class CustomPasswordChangeForm(PasswordChangeForm):
     Includes existing password
     plus a repeated password field for validation.
     """
-
     def clean_new_password1(self):
         password1 = self.cleaned_data.get("new_password1")
 

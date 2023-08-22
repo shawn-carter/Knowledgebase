@@ -57,7 +57,8 @@ class KBEntryUpvoteTestCase(BaseTestCaseWithUser):
 
         initial_rating = article.rating
         article.upvotes.add(self.user)
-        article.rating = calculate_rating(article)
+        rating_info = calculate_rating(article)  # a function to calculate the rating
+        article.rating = rating_info['rating']
         article.save()
 
         self.assertEqual(article.rating, 100)
@@ -70,7 +71,8 @@ class KBEntryDownvoteTestCase(BaseTestCaseWithUser):
         )
 
         article.downvotes.add(self.user)
-        article.rating = calculate_rating(article)
+        rating_info = calculate_rating(article)  # a function to calculate the rating
+        article.rating = rating_info['rating']
         article.save()
 
         # Assuming the initial rating was 0, and after one downvote it becomes 0 again

@@ -5,6 +5,11 @@
 
 {% block content %}
 <h2>Edit an Existing KB Article</h2>
+{% if is_deleted %}
+<div class="alert alert-danger" role="alert">
+    This Article has been Deleted and is not visible to Normal Users!
+</div>
+{% endif %}
 <form method="POST" id="kbEntryForm">
     {% csrf_token %}
     {% for field in form %}

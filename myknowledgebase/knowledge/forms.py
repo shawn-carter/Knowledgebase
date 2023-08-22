@@ -13,12 +13,23 @@ class NewUserForm(forms.ModelForm):
     A form for creating new users. Includes all the required fields,
     plus a repeated password field for validation.
     """
-
     password1 = forms.CharField(label="Password", widget=forms.PasswordInput)
     password2 = forms.CharField(label="Confirm Password", widget=forms.PasswordInput)
     email = forms.EmailField(required=True)  # Ensure email is required
 
-    class Meta:
+    # Define new init to ensure that fields are returned if one field is invalid
+    def __init__(self, *args, **kwargs):
+        # Get the raw POST data from the kwargs
+        post_data = kwargs.get('data', None)
+        
+        # If there's POST data, update the kwargs with a copy of the POST data
+        if post_data:
+            kwargs['data'] = post_data.copy()
+        
+        # Call the parent class's __init__ method
+        super().__init__(*args, **kwargs)
+
+    class Meta:      
         model = User
         fields = ("username", "email")
 

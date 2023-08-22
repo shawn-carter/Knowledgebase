@@ -609,13 +609,18 @@ def edit_article(request, article_id):
         messages.error(request, "No article exists with this ID")
         return redirect("home")
 
-    # Check if user is authorized to edit
+    # Check if user is authorized to edit (superuser or article author)
     if not (request.user.is_superuser or article.created_by == request.user):
         messages.error(request, "You are not authorized to edit this article.")
         return redirect(
             f"/article/{article_id}/"
         )  # Redirect to article detail
 
+    # If article is deleted and user is not superuser
+    if article.deleted_datetime and article.created_by == request.user:
+        messages.error(request, "You can't edit this article - it has been deleted.")
+        return redirect("home")  # Redirect to article detail
+    
     if request.method == "POST":
         form = KBEntryForm(request.POST, instance=article, request=request)
         if form.is_valid():
@@ -648,6 +653,7 @@ def edit_article(request, article_id):
         "form": form,
         "article": article,
         "associated_metatags": [tag.name for tag in associated_metatags],
+        "is_deleted": article.deleted_datetime,
         "all_tags_json": json.dumps(list(all_tags)),  # Serialize all_tags to JSON here
     }
     return render(request, "knowledge/edit_article.html", context)

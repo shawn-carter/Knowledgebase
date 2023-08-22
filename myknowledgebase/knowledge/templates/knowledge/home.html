@@ -15,7 +15,7 @@
     </form>
 </div>
 <!-- Display search results in a table -->
-{% if entries %}
+{% if articles %}
 <table class="table" id="table" style="display:none">
     <thead>
         <tr>
@@ -26,29 +26,36 @@
         </tr>
     </thead>
     <tbody>
-        {% for entry in entries %}
+        {% for article in articles %}
         <tr>
             <td>
-                <a href="{% url 'article_detail' entry.id %}">{{ entry.title }}
-                    {% if entry.rating == 0.0 and entry.downvotes.count == 0 %}
-                    <span class="badge rounded-pill badge-norating">Not Yet Rated</span>
+                <a href="{% url 'article_detail' article.id %}">{{ article.title }}</a>
+                {% if article.rating == 0.0 and article.downvotes.count == 0 %}
+                <span class="badge rounded-pill badge-norating" aria-label="Not Yet Rated">Not Yet Rated</span>
+                {% else %}
+                    {% if article.rating >= 75 %}
+                    <span class="badge rounded-pill badge-green" aria-label="{{ article.views }} views (Good rating)">
+                        {{ article.views }}
+                    </span>
+                    {% elif article.rating >= 50 %}
+                    <span class="badge rounded-pill badge-yellow" aria-label="{{ article.views }} views (Average rating)">
+                        {{ article.views }}
+                    </span>
+                    {% elif article.rating >= 25 %}
+                    <span class="badge rounded-pill badge-orange" aria-label="{{ article.views }} views (Below average rating)">
+                        {{ article.views }}
+                    </span>
                     {% else %}
-                    {% if entry.rating >= 75 %}
-                    <span class="badge rounded-pill badge-green">{{ entry.views }}</span>
-                    {% elif entry.rating >= 50 %}
-                    <span class="badge rounded-pill badge-yellow">{{ entry.views }}</span>
-                    {% elif entry.rating >= 25 %}
-                    <span class="badge rounded-pill badge-orange">{{ entry.views }}</span>
-                    {% else %}
-                    <span class="badge rounded-pill badge-red">{{ entry.views }}</span>
+                    <span class="badge rounded-pill badge-red" aria-label="{{ article.views }} views (Poor rating)">
+                        {{ article.views }}
+                    </span>
                     {% endif %}
-                    {% endif %}
-                </a>
+                {% endif %}
             </td>
-            <td><a href="{% url 'user_articles' entry.created_by.id %}">{{ entry.created_by.username }}</a></td>
+            <td><a href="{% url 'user_articles' article.created_by.id %}">{{ article.created_by.username }}</a></td>
             <td>{{ entry.article|truncatechars:50 }}</td>
             <td>
-                {% for tag in entry.meta_data.all %}
+                {% for tag in article.meta_data.all %}
                 <a href="/?search={{ tag.name }}" class="btn btn-secondary btn-sm m-1">{{ tag.name }}</a>
                 {% endfor %}
             </td>
@@ -65,16 +72,16 @@
         {% for article in newest_articles %}
         <a href="{% url 'article_detail' article.id %}">{{ article.title|truncatechars:50 }}</a>
         {% if article.rating == 0.0 and article.downvotes.count == 0 %}
-        <span class="badge rounded-pill badge-norating">Not Yet Rated</span>
+        <span class="badge rounded-pill badge-norating" aria-label="Not Yet Rated">Not Yet Rated</span>
         {% else %}
         {% if article.rating >= 75 %}
-        <span class="badge rounded-pill badge-green">{{ article.views }}</span>
+        <span class="badge rounded-pill badge-green" aria-label="{{ article.views }} views (Good rating)">{{ article.views }}</span>
         {% elif article.rating >= 50 %}
-        <span class="badge rounded-pill badge-yellow">{{ article.views }}</span>
+        <span class="badge rounded-pill badge-yellow" aria-label="{{ article.views }} views (Average rating)">{{ article.views }}</span>
         {% elif article.rating >= 25 %}
-        <span class="badge rounded-pill badge-orange">{{ article.views }}</span>
+        <span class="badge rounded-pill badge-orange" aria-label="{{ article.views }} views (Below average rating)">{{ article.views }}</span>
         {% else %}
-        <span class="badge rounded-pill badge-red">{{ article.views }}</span>
+        <span class="badge rounded-pill badge-red" aria-label="{{ article.views }} views (Poor rating)">{{ article.views }}</span>
         {% endif %}
         {% endif %}
         <br>
@@ -85,16 +92,16 @@
         {% for article in top_rated_articles %}
         <a href="{% url 'article_detail' article.id %}">{{ article.title|truncatechars:50 }}</a>
         {% if article.rating == 0.0 and article.downvotes.count == 0 %}
-        <span class="badge rounded-pill badge-norating">Not Yet Rated</span>
+        <span class="badge rounded-pill badge-norating" aria-label="Not Yet Rated">Not Yet Rated</span>
         {% else %}
         {% if article.rating >= 75 %}
-        <span class="badge rounded-pill badge-green">{{ article.views }}</span>
+        <span class="badge rounded-pill badge-green" aria-label="{{ article.views }} views (Good rating)">{{ article.views }}</span>
         {% elif article.rating >= 50 %}
-        <span class="badge rounded-pill badge-yellow">{{ article.views }}</span>
+        <span class="badge rounded-pill badge-yellow" aria-label="{{ article.views }} views (Average rating)">{{ article.views }}</span>
         {% elif article.rating >= 25 %}
-        <span class="badge rounded-pill badge-orange">{{ article.views }}</span>
+        <span class="badge rounded-pill badge-orange" aria-label="{{ article.views }} views (Below average rating)">{{ article.views }}</span>
         {% else %}
-        <span class="badge rounded-pill badge-red">{{ article.views }}</span>
+        <span class="badge rounded-pill badge-red" aria-label="{{ article.views }} views (Poor rating)">{{ article.views }}</span>
         {% endif %}
         {% endif %}
         <br>

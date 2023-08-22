@@ -425,7 +425,7 @@ def home(request):
         top_rated_articles = []
 
     context = {
-        "entries": articles,
+        "articles": articles,
         "newest_articles": newest_articles,
         "top_rated_articles": top_rated_articles,
         "search_term": search_term,

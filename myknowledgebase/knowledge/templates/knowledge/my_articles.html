@@ -14,19 +14,28 @@
     <tbody>
         {% for article in articles %}
         <tr>
-            <td><a href="{% url 'article_detail' article.id %}">{{ article.title }}</a>
+            <td>
+                <a href="{% url 'article_detail' article.id %}">{{ article.title }}</a>
                 {% if article.rating == 0.0 and article.downvotes.count == 0 %}
-                <span class="badge rounded-pill badge-norating">Not Yet Rated</span>
+                <span class="badge rounded-pill badge-norating" aria-label="Not Yet Rated">Not Yet Rated</span>
                 {% else %}
-                {% if article.rating >= 75 %}
-                <span class="badge rounded-pill badge-green"> {{ article.views }} </span>
-                {% elif article.rating >= 50 %}
-                <span class="badge rounded-pill badge-yellow">{{ article.views }}</span>
-                {% elif article.rating >= 25 %}
-                <span class="badge rounded-pill badge-orange">{{ article.views }}</span>
-                {% else %}
-                <span class="badge rounded-pill badge-red">{{ article.views }}</span>
-                {% endif %}
+                    {% if article.rating >= 75 %}
+                    <span class="badge rounded-pill badge-green" aria-label="{{ article.views }} views (Good rating)">
+                        {{ article.views }}
+                    </span>
+                    {% elif article.rating >= 50 %}
+                    <span class="badge rounded-pill badge-yellow" aria-label="{{ article.views }} views (Average rating)">
+                        {{ article.views }}
+                    </span>
+                    {% elif article.rating >= 25 %}
+                    <span class="badge rounded-pill badge-orange" aria-label="{{ article.views }} views (Below average rating)">
+                        {{ article.views }}
+                    </span>
+                    {% else %}
+                    <span class="badge rounded-pill badge-red" aria-label="{{ article.views }} views (Poor rating)">
+                        {{ article.views }}
+                    </span>
+                    {% endif %}
                 {% endif %}
             </td>
             <td>{{ article.article|striptags|truncatechars:50 }}</td>

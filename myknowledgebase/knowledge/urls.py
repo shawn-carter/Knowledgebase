@@ -36,6 +36,7 @@ urlpatterns = [
         views.downvote_article,
         name="downvote_article",
     ),
+    path('confirm_logout/', views.confirm_logout, name='confirm_logout'),
     path("logout/", views.logout, name="logout"),
     # ---------- These URLS are ONLY for Super Users ----------
     path("auditlogs/", views.audit_logs, name="audit_logs"),

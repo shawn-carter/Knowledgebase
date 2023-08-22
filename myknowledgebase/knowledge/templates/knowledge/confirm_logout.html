@@ -1,0 +1,11 @@
+{% extends 'knowledge/base.html' %}
+{% block title %}{{ block.super }} - Confirm Logout{% endblock %}
+{% block content %}
+<h2>Confirm Logout</h2>
+<p>Are you sure you want to logout?</p>
+<form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">Yes</button>
+    <a href="{% url 'home' %}" class="btn btn-secondary">No</a>
+</form>
+{% endblock %}

@@ -86,7 +86,9 @@ def login_view(request):
             if user is not None:
                 django_login(request, user)
                 messages.success(request, f"You are now logged in as {username}.")
-                return redirect("home")
+                # Check if 'next' parameter is present in GET data
+                next_url = request.GET.get('next') or 'home'
+                return redirect(next_url)
         else:
             username = form.cleaned_data.get("username")
             password = form.cleaned_data.get("password")
@@ -283,6 +285,27 @@ def password_reset_complete(request):
 
 
 # ------------ The Views below are for Authenticated (logged in) Users ----------
+@login_required
+def confirm_logout(request):
+    """ 
+    Brings up a confirmation request asking user if they are sure they want to log out
+        - If the user clicks Yes then they are redirected to the actual logout view.
+        - Otherwise they are redirected to the home view
+        
+        *This was added after seeing that confirmation was required when leaving the application.
+        
+        The user must be authenticated to access this view (as indicated by @login_required).
+
+    Parameters:
+    - request (HttpRequest): The HTTP request object.
+
+    Returns:
+    - HttpResponseRedirect: A redirect response object that redirects the user to logout
+    """
+    if request.method == 'POST':
+        return redirect('logout')
+    return render(request, 'knowledge/confirm_logout.html')
+
 @login_required
 def logout(request):
     """

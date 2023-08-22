@@ -9,6 +9,8 @@ from knowledge.models import KBEntry
 from .base_tests import BaseTestCaseWithUser, BaseTestCaseWithSuperUser
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.test import TestCase, tag
+from django.utils import timezone
+from django.core.exceptions import ObjectDoesNotExist
 
 token_generator = PasswordResetTokenGenerator()
 
@@ -484,31 +486,34 @@ class PasswordResetRequestViewExistingUser(BaseTestCaseWithUser):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'knowledge/password_reset_link.html')        
 
+
 class PasswordResetIntegrationTest(TestCase):
     """ 
     This test goes further than the previous test
-    It tests the password reset process for a new user
+    It tests the full password reset process for a user
     """
     def setUp(self):
+        # We create a new user called testuser with email test@example.com
         self.user = User.objects.create_user(username='testuser', email='test@example.com', password='old_password')
         self.email = 'test@example.com'
     
     @tag('integration') #tagged during debug to allow quicker testing   
     def test_password_reset_flow(self):
-        # Check that the user cannot log in with a new password
-        self.assertFalse(self.client.login(username=self.user.username, password='new_password_123'))
+        # Check that the user cannot log in with an incorrect password 
+        self.assertFalse(self.client.login(username=self.user.username, password='incorrect_password_123'))
         
-        # Request password reset
+        # Request password reset - POST the email address to the password_reset_request view
         response = self.client.post(reverse('password_reset_request'), data={'email': self.email})
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'knowledge/password_reset_link.html')
         
-        # Generate password reset link
+        # Generate password reset link uses similar process to the password reset view
+        # But we need the link as a variable to perform the password reset
         user = User.objects.get(email=self.email)
         token = token_generator.make_token(user)
         reset_url = reverse("password_reset_confirm", args=[user.pk, token])
         
-        # Reset password
+        # Reset password - by POSTING to reset_url with the new password
         new_password = 'new_password_123'
         response = self.client.post(reset_url, data={
             'new_password1': new_password, 
@@ -521,11 +526,15 @@ class PasswordResetIntegrationTest(TestCase):
         # Confirm that the password reset was successful by checking the user can login
         self.assertTrue(self.client.login(username=self.user.username, password=new_password))
 
+
 class DeleteViewTestCase(BaseTestCaseWithUser):
-          
+    """
+    Normal user attempts to soft delete
+    - Normal users do not have permission to soft delete articles
+    """
     def test_delete_non_existent_article(self):
         # Attempt to delete an article with an ID that doesn't exist in the database
-        non_existent_article_id = 99999  # Assuming this ID doesn't exist
+        non_existent_article_id = 99999  # This ID doesn't exist
         response = self.client.get(reverse("delete_article", args=[non_existent_article_id]))
         
         # Assert that the user is redirected to the 'home' page
@@ -536,13 +545,28 @@ class DeleteViewTestCase(BaseTestCaseWithUser):
         self.assertEqual(len(messages), 1)
         self.assertEqual(str(messages[0]), "You don't have permission to view this page.")
 
+    def test_delete_article(self):
+        # Attempt to delete an article with an ID that doesn't exist in the database
+        existing_article_id = 1  # This ID should exist
+        response = self.client.get(reverse("delete_article", args=[existing_article_id]))
+        
+        # Assert that the user is redirected to the 'home' page
+        self.assertRedirects(response, reverse('home'))
+        
+        # Check for the error message
+        messages = list(get_messages(response.wsgi_request))
+        self.assertEqual(len(messages), 1)
+        self.assertEqual(str(messages[0]), "You don't have permission to view this page.")
 
-class ConfirmDeleteViewTestCase(BaseTestCaseWithUser):
-           
-    def test_permanent_delete_non_existent_article(self):
-        # Attempt to permanently delete an article with an ID that doesn't exist in the database
-        non_existent_article_id = 61  # Assuming this ID doesn't exist
-        response = self.client.get(reverse("confirm_permanent_delete", args=[non_existent_article_id]))
+
+class DeleteViewTestCaseSuperUser(BaseTestCaseWithSuperUser):
+    """
+    Superuser attempts to soft delete
+    """
+    def test_delete_non_existent_article(self):
+        # Attempt to delete an article with an ID that doesn't exist in the database
+        non_existent_article_id = 99999  # This ID doesn't exist
+        response = self.client.get(reverse("delete_article", args=[non_existent_article_id]))
         
         # Assert that the user is redirected to the 'home' page
         self.assertRedirects(response, reverse('home'))
@@ -552,4 +576,79 @@ class ConfirmDeleteViewTestCase(BaseTestCaseWithUser):
         self.assertEqual(len(messages), 1)
         self.assertEqual(str(messages[0]), "Article not found.")
 
+    def test_delete_article(self):
+        # Attempt to delete an article with an ID that doesn't exist in the database
+        existing_article_id = 1  # This ID should exist
+        response = self.client.get(reverse("delete_article", args=[existing_article_id]))
+        
+        # Assert that the response is 200
+        self.assertEqual(response.status_code, 200)
+
+
+class ConfirmDeleteViewTestCase(BaseTestCaseWithUser):
+    """
+    Normal user attempt to permanently delete an article bypassing the confirmation
+    """
+    def test_permanent_delete_non_existent_article(self):
+        # Attempt to permanently delete an article with an ID that doesn't exist in the database
+        non_existent_article_id = 61  # Assuming this ID doesn't exist
+        response = self.client.get(reverse("perform_permanent_delete", args=[non_existent_article_id]))
+        
+        # Assert that the user is redirected to the 'home' page
+        self.assertRedirects(response, reverse('home'))
+        
+        # Check for the error message
+        messages = list(get_messages(response.wsgi_request))
+        self.assertEqual(len(messages), 1)
+        self.assertEqual(str(messages[0]), "Article not found.")
+
+    def test_permanent_delete_article(self):
+        # Attempt to permanently delete an article with an ID that doesn't exist in the database
+        existing_article_id = 1  # Assuming this ID does exist
+        response = self.client.get(reverse("perform_permanent_delete", args=[existing_article_id]))
+        
+        # Assert that the user is redirected to the 'home' page
+        self.assertRedirects(response, reverse('home'))
+        
+        # Check for the error message
+        messages = list(get_messages(response.wsgi_request))
+        self.assertEqual(len(messages), 1)
+        self.assertEqual(str(messages[0]), "You are not allowed to permanently delete any articles")        
+
+
+class PerformDeleteViewTestCaseSuperUser(BaseTestCaseWithSuperUser):
+    """
+    Superuser attempt to perform permanently delete an article
+    """
+    def test_permanent_delete_non_existent_article(self):
+        # Attempt to permanently delete an article with an ID that doesn't exist in the database
+        non_existent_article_id = 61  # Assuming this ID doesn't exist
+        response = self.client.get(reverse("perform_permanent_delete", args=[non_existent_article_id]))
+        
+        # Assert that the user is redirected to the 'home' page
+        self.assertRedirects(response, reverse('home'))
+        
+        # Check for the error message
+        messages = list(get_messages(response.wsgi_request))
+        self.assertEqual(len(messages), 1)
+        self.assertEqual(str(messages[0]), "Article not found.")
+
+    def test_permanent_delete_existing_article(self):
+        # Test for an existing article
+        existing_article_id = self.article.id  # Using the article created in the setUp method
+        
+        # Soft-delete the article
+        self.article.deleted_datetime = timezone.now()
+        self.article.save()
+        
+        # Attempt to permanently delete the article
+        response = self.client.get(reverse("perform_permanent_delete", args=[existing_article_id]))
+        self.assertRedirects(response, reverse('home'))
+        
+        # Check if the article exists in the database
+        try:
+            self.article.refresh_from_db()
+            self.fail("Article still exists in the database. Expected it to be deleted.")
+        except ObjectDoesNotExist:
+            pass  # This is what we expect if the article has been deleted
         

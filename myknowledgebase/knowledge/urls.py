@@ -48,6 +48,7 @@ urlpatterns = [
     path(
         "delete_article/<int:article_id>/", views.delete_article, name="delete_article"
     ),
+    path('quick_delete_toggle/<int:article_id>/', views.quick_delete_toggle, name='quick_delete_toggle'),
     path(
         "undelete_article/<int:article_id>/",
         views.undelete_article,

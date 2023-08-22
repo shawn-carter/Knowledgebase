@@ -110,7 +110,16 @@ def calculate_rating(article):
     This gives us a rating between 0, where no one has yet voted or found it helpful to 100 where everyone who voted - voted it up
     """
     total_votes = article.upvotes.count() + article.downvotes.count()
+    upvotes = article.upvotes.count()
+    downvotes = article.downvotes.count()
+
     if total_votes == 0:
-        return 0  # To handle the case where there are no votes yet
-    rating_percentage = (article.upvotes.count() / total_votes) * 100
-    return round(rating_percentage, 1)  # Rounding off to one decimal place
+        rating_percentage = 0
+    else:
+        rating_percentage = (upvotes / total_votes) * 100
+
+    return {
+        'rating': round(rating_percentage, 1),
+        'upvotes': upvotes,
+        'downvotes': downvotes,
+    }

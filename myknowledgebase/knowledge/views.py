@@ -576,16 +576,11 @@ def edit_article(request, article_id):
 
     all_tags = Tag.objects.all().values_list(
         "name", flat=True
-    )  # Move this line outside the try block
+    ) 
 
     # Fetch the article instance using the article_id
     try:
         article = KBEntry.objects.get(pk=article_id)
-        if article.deleted_datetime:  # Check if the article has been soft-deleted
-            messages.error(
-                request, "This article has been deleted and cannot be edited."
-            )
-            return redirect("home")
         associated_metatags = article.meta_data.all()
     except KBEntry.DoesNotExist:
         messages.error(request, "No article exists with this ID")
@@ -596,7 +591,7 @@ def edit_article(request, article_id):
         messages.error(request, "You are not authorized to edit this article.")
         return redirect(
             f"/article/{article_id}/"
-        )  # Redirect to article detail or some other appropriate page
+        )  # Redirect to article detail
 
     if request.method == "POST":
         form = KBEntryForm(request.POST, instance=article, request=request)
@@ -755,11 +750,14 @@ def upvote_article(request, article_id):
             request.user
         )  # remove downvote if user previously downvoted
 
-        rating = calculate_rating(article)  # a function to calculate the rating
-        article.rating = rating  # Saving the calculated rating to the article
+        rating_info = calculate_rating(article)  # a function to calculate the rating
+        article.rating = rating_info['rating']  # Saving the calculated rating to the article
         article.save()  # Committing the change to the database
 
-        return JsonResponse({"status": "success", "rating": rating})
+        return JsonResponse({
+            'success': True,
+            **rating_info
+        })
     except KBEntry.DoesNotExist:
         return JsonResponse({"status": "error", "message": "Article not found"})
 
@@ -793,11 +791,11 @@ def downvote_article(request, article_id):
             request.user
         )  # remove downvote if user previously downvoted
 
-        rating = calculate_rating(article)  # a function to calculate the rating
-        article.rating = rating  # Saving the calculated rating to the article
+        rating_info = calculate_rating(article)  # a function to calculate the rating
+        article.rating = rating_info['rating']  # Saving the calculated rating to the article
         article.save()  # Committing the change to the database
 
-        return JsonResponse({"status": "success", "rating": rating})
+        return JsonResponse({"status": "success", **rating_info})
     except KBEntry.DoesNotExist:
         return JsonResponse({"status": "error", "message": "Article not found"})
 
@@ -953,7 +951,7 @@ def delete_article(request, article_id):
         article = KBEntry.objects.get(pk=article_id)
     except KBEntry.DoesNotExist:
         messages.error(request, "Article not found.")
-        return redirect("home")  # or wherever you want to redirect to
+        return redirect("home")  
 
     if request.method == "POST":
         softDeleteArticle(article, request.user)
@@ -967,6 +965,63 @@ def delete_article(request, article_id):
         return redirect("article_detail", article_id=article.id)
 
     return render(request, "knowledge/confirm_delete.html", {"article": article})
+
+
+@login_required
+def quick_delete_toggle(request, article_id):
+    """ 
+    Handles the soft deletion and undeletion (toggle) of an article from the All Article View
+
+    - Accessible only to authenticated users due to the @login_required decorator.
+    - Checks if the user is a superuser:
+        - If not, the user is redirected to the home page with an error message.
+    - If the user is a superuser:
+        - Attempts to fetch the KBEntry object that corresponds to the provided article_id parameter.
+        - If the KBEntry object is not found, an error message is displayed, and the user is redirected to the home page.
+        - If the KBEntry object is found:
+        - If the article is delete
+            - Uses the undeleteArticle function
+        - Else
+            - Uses the softDeslete function
+        - Creates an Audit entry to log the deletion action.
+        - Displays a success message and redirects the user to the article detail page.
+
+    Parameters:
+    - request (HttpRequest): The HTTP request object, which contains information about the current user.
+    - article_id (int): The ID of the article to be deleted.
+
+    Returns:
+    - HttpResponse: Keeps user on the All Articles Page
+    """
+    if not request.user.is_superuser:
+        messages.error(request, "You don't have permission to perform this action.")
+        return JsonResponse({'success': False, 'message': "Unauthorized"})
+
+    try:
+        article = KBEntry.objects.get(pk=article_id)
+    except KBEntry.DoesNotExist:
+        messages.error(request, "Article not found.")
+        return JsonResponse({'success': False, 'message': "Article not found"})
+
+    if article.deleted_datetime:
+        # If article is already deleted, undelete it
+        undeleteArticle(article)
+        action_details = f"Undeleted article: '{article.title[:50]}'"
+        action = "undeleted"
+    else:
+        # Soft delete the article
+        softDeleteArticle(article, request.user)
+        action_details = f"Soft deleted article: '{article.title[:50]}'"
+        action = "deleted"
+
+    Audit(
+        user=request.user,
+        kb_entry=article,
+        action_details=action_details,
+    ).save()
+
+    #messages.success(request, "Article successfully " + action + ".")
+    return JsonResponse({'success': True, 'action': action})
 
 
 @login_required

@@ -1,5 +1,10 @@
 console.log("Loaded Custom JS File from Static");
-
+// If the user navigates to the page using page history or back it will be refreshed
+// This prevents cache to show previous states for buttons etc.
+// And the rating colour / number of views on all_incidents
+if (window.performance.getEntriesByType("navigation")[0].type === "back_forward") {
+  location.reload();
+}
 // Toolbar Options for Quill.js
 const ToolbarOptions = [
   ["bold", "italic", "underline", "strike"], // Text formatting options
@@ -12,6 +17,7 @@ const ToolbarOptions = [
   ["clean"], // Remove formatting option
 ];
 
+// Generic function to set up DataTable on any table - they all use the same id 'table'
 function setUpdataTable(options)
 {
   let table = new DataTable('#table', options)

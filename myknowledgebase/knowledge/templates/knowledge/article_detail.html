@@ -74,7 +74,7 @@
                 },
                 success: function (response) {
                     // Assuming the response contains the updated rating
-                    $('#rating').text(response.rating);
+                    $('#rating').text(response.rating +" % ("+response.upvotes+" Up / "+response.downvotes+" Down)" );
                     $('#upvote').prop('disabled', true);
                     $('#downvote').prop('disabled', false);
                 }
@@ -90,7 +90,7 @@
                 },
                 success: function (response) {
                     // Assuming the response contains the updated rating
-                    $('#rating').text(response.rating);
+                    $('#rating').text(response.rating +" % ("+response.upvotes+" Up / "+response.downvotes+" Down)" );
                     $('#downvote').prop('disabled', true);
                     $('#upvote').prop('disabled', false);
                 }

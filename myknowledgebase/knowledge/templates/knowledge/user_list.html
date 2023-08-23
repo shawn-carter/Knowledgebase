@@ -1,61 +1,56 @@
-<!-- templates/knowledge/user_list.html -->
 {% extends 'knowledge/base.html' %}
 {% block title %}{{ block.super }} - User List {% endblock %}
 {% block content %}
-<h2>List All Users</h2>
-<table class="table" id="table" style="display:none">
-    <thead>
-        <tr>
-            <th>User ID</th>
-            <th>Username</th>
-            <th>Email</th>
-            <th>User Level</th>
-            <th>Date Joined</th>
-            <th>Active</th>
-            <th>Action</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for user in users %}
-        <tr>
-            <td>{{ user.id }}</td>
-            <td>{{ user.username }}</td>
-            <td>{{ user.email }}</td>
-            <td>
-                {% if user.is_superuser %}
-                Superuser
+    <h2>List All Users</h2>
+    <table class="table" id="table" style="display:none">
+        <thead>
+            <tr>
+                <th>User ID</th>
+                <th>Username</th>
+                <th>Email</th>
+                <th>User Level</th>
+                <th>Date Joined</th>
+                <th>Active</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+            <tr>
+                <td>{{ user.id }}</td>
+                <td>{{ user.username }}</td>
+                <td>{{ user.email }}</td>
+                <td>
+                    {% if user.is_superuser %}
+                        Superuser
+                    {% else %}
+                        User
+                    {% endif %}
+                </td>
+                <td>{{ user.date_joined }}</td>
+                <!-- If user is Active -->
+                {% if user.is_active %}
+                    <td>Active</td>
+                    <td><a href="{% url 'toggle_user_active_status' user.id %}" class="btn btn-danger">Deactivate</a></td>
                 {% else %}
-                User
+                    <td>Inactive</td>
+                    <td><a href="{% url 'toggle_user_active_status' user.id %}" class="btn btn-success">Activate</a></td>
                 {% endif %}
-            </td>
-            <td>{{ user.date_joined }}</td>
-
-            {% if user.is_active %}
-            <td>Active</td>
-            <td><a href="{% url 'toggle_user_active_status' user.id %}" class="btn btn-danger">Deactivate</a></td>
-            {% else %}
-            <td>Inactive</td>
-            <td><a href="{% url 'toggle_user_active_status' user.id %}" class="btn btn-success">Activate</a></td>
-            {% endif %}
-
-        </tr>
-        {% empty %}
-        <tr>
-            <td colspan="6">No users have been created yet.</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+            </tr>
+            {% endfor %}
+            <!-- No need to check for %empty% as a user has to exist to see this page -->
+        </tbody>
+    </table>
 {% endblock %}
 
 {% block extra_js %}
-<script>
-    // Wait until the document content is fully loaded before running the script
-    $(document).ready(function () {
-        setUpdataTable({
-            colReorder: true
+    <script>
+        // Wait until the document content is fully loaded before running the script
+        $(document).ready(function () {
+            setUpdataTable({
+                colReorder: true
+            });
         });
-    });
-    $("#table").fadeIn(250);
-</script>
+        $("#table").fadeIn(250);
+    </script>
 {% endblock%}

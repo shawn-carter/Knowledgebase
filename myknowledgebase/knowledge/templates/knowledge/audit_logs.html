@@ -33,6 +33,7 @@
     // Wait until the document content is fully loaded before running the script
     $(document).ready(function () {
         setUpdataTable({ colReorder: true, order: false });
+        // Fade in table to prevent it drawing twice
         $("#table").fadeIn(100);
     });
 </script>

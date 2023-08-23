@@ -1,65 +1,68 @@
 {% extends 'knowledge/base.html' %}
 {% block title %}{{ block.super }} - My Articles{% endblock %}
 {% block content %}
-<h2>My Knowledgebase Articles</h2>
-{% if articles %}
-<table class="table" id="table" style="display:none">
-    <thead>
-        <tr>
-            <th>Title</th>
-            <th>Article Extract</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for article in articles %}
-        <tr>
-            <td>
-                <a href="{% url 'article_detail' article.id %}">{{ article.title }}</a>
-                {% if article.rating == 0.0 and article.downvotes.count == 0 %}
-                <span class="badge rounded-pill badge-norating" aria-label="Not Yet Rated">Not Yet Rated</span>
-                {% else %}
-                    {% if article.rating >= 75 %}
-                    <span class="badge rounded-pill badge-green" aria-label="{{ article.views }} views (Good rating)">
-                        {{ article.views }}
-                    </span>
-                    {% elif article.rating >= 50 %}
-                    <span class="badge rounded-pill badge-yellow" aria-label="{{ article.views }} views (Average rating)">
-                        {{ article.views }}
-                    </span>
-                    {% elif article.rating >= 25 %}
-                    <span class="badge rounded-pill badge-orange" aria-label="{{ article.views }} views (Below average rating)">
-                        {{ article.views }}
-                    </span>
+    <h2>My Knowledgebase Articles</h2>
+    
+    {% if articles %}
+    <!-- If there are any articles-->
+    <table class="table" id="table" style="display:none">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Article Extract</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for article in articles %}
+            <tr>
+                <td>
+                    <a href="{% url 'article_detail' article.id %}">{{ article.title }}</a>
+                    {% if article.rating == 0.0 and article.downvotes.count == 0 %}
+                    <span class="badge rounded-pill badge-norating" aria-label="Not Yet Rated">Not Yet Rated</span>
                     {% else %}
-                    <span class="badge rounded-pill badge-red" aria-label="{{ article.views }} views (Poor rating)">
-                        {{ article.views }}
-                    </span>
+                        {% if article.rating >= 75 %}
+                        <span class="badge rounded-pill badge-green" aria-label="{{ article.views }} views (Good rating)">
+                            {{ article.views }}
+                        </span>
+                        {% elif article.rating >= 50 %}
+                        <span class="badge rounded-pill badge-yellow" aria-label="{{ article.views }} views (Average rating)">
+                            {{ article.views }}
+                        </span>
+                        {% elif article.rating >= 25 %}
+                        <span class="badge rounded-pill badge-orange" aria-label="{{ article.views }} views (Below average rating)">
+                            {{ article.views }}
+                        </span>
+                        {% else %}
+                        <span class="badge rounded-pill badge-red" aria-label="{{ article.views }} views (Poor rating)">
+                            {{ article.views }}
+                        </span>
+                        {% endif %}
                     {% endif %}
-                {% endif %}
-            </td>
-            <td>{{ article.article|striptags|truncatechars:50 }}</td>
-            <td>
-                <a href="{% url 'edit_article' article.id %}" class="btn btn-primary">Edit</a>
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
-{% else %}
-<p>You haven't written any articles yet.</p>
-{% endif %}
-<br>
+                </td>
+                <td>{{ article.article|striptags|truncatechars:50 }}</td>
+                <td>
+                    <a href="{% url 'edit_article' article.id %}" class="btn btn-primary">Edit</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <!-- Otherwise -->
+        <p>You haven't written any articles yet.</p>
+    {% endif %}
+    <br>
 {% endblock %}
 
 {% block extra_js %}
-<script>
-    // Wait until the document content is fully loaded before running the script
-    $(document).ready(function () {
-        setUpdataTable({
-            colReorder: true
+    <script>
+        // Wait until the document content is fully loaded before running the script
+        $(document).ready(function () {
+            setUpdataTable({
+                colReorder: true
+            });
         });
-    });
-    $("#table").fadeIn(100);
-</script>
+        $("#table").fadeIn(100);
+    </script>
 {% endblock%}

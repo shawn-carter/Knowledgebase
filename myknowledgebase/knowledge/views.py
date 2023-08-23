@@ -2,12 +2,7 @@
 
 from django.db import models
 from django.contrib import messages
-from django.contrib.auth import (
-    authenticate,
-    login as django_login,
-    logout as django_logout,
-    update_session_auth_hash,
-)
+from django.contrib.auth import (authenticate, login as django_login, logout as django_logout, update_session_auth_hash,)
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.models import User
@@ -27,8 +22,7 @@ from .forms import (
 from .models import KBEntry, Tag, Audit, calculate_rating
 import json
 
-# Functions to be used inside Views
-
+################################# Functions to be used inside Views
 
 # -- This is to soft delete an article
 def softDeleteArticle(article, user):
@@ -47,8 +41,10 @@ def undeleteArticle(article):
 # -- This token_generator is required to generate Tokens for password reset requests
 token_generator = PasswordResetTokenGenerator()
 
+################################ End of Functions
 
-# ---------- All these views are for users who have not been authenticated ----------
+################################# ---------- All these views are for users who have not been authenticated ----------
+
 def login_view(request):
     """
     Handles the user login process.
@@ -282,10 +278,11 @@ def password_reset_complete(request):
     return render(request, "knowledge/password_reset_complete.html")
 
 
-# ------------ End of non authenticated Views ----------
+################################# ------------ End of non authenticated Views ----------
 
 
-# ------------ The Views below are for Authenticated (logged in) Users ----------
+################################# ------------ The Views below are for Authenticated (logged in) Users ----------
+
 @login_required
 def confirm_logout(request):
     """ 
@@ -736,7 +733,7 @@ def user_articles(request, user_id):
         user_obj = User.objects.get(pk=user_id)
 
         # Fetch all articles created by this user and not deleted
-        user_entries = KBEntry.objects.filter(
+        user_articles = KBEntry.objects.filter(
             created_by=user_obj, deleted_datetime__isnull=True
         )
 
@@ -744,7 +741,7 @@ def user_articles(request, user_id):
         return render(
             request,
             "knowledge/user_articles.html",
-            {"entries": user_entries, "author": user_obj},
+            {"articles": user_articles, "author": user_obj},
         )
     except User.DoesNotExist:
         messages.error(request, "User not found.")
@@ -829,11 +826,11 @@ def downvote_article(request, article_id):
     except KBEntry.DoesNotExist:
         return JsonResponse({"status": "error", "message": "Article not found"})
 
+######################################### ----------- This is the end of normal Authenticated User Views ----------
 
-# ----------- This is the end of normal Authenticated User Views ----------
 
+######################################### ----------- The Views Below are restricted to 'superusers' ----------
 
-# ----------- The Views Below are restricted to 'superusers' ----------
 @login_required
 def audit_logs(request):
     """
@@ -1232,3 +1229,5 @@ def manage_tags(request):
 
     context = {"tags": tags}
     return render(request, "knowledge/manage_tags.html", context)
+
+###################################### --------------- End of SuperUser Views ------------------

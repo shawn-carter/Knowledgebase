@@ -52,8 +52,15 @@
       border-color: #dc3545;
   }
 
-  h2, h3 {
+  h1, h2, h3 {
     text-align: center;
     margin-top:5px !important;
   }
 
+  .ql-syntax {
+    padding: 2px !important;
+    background-color: black !important; 
+    color: white !important;
+    margin: 2px !important;
+    font-size: medium !important;
+  }

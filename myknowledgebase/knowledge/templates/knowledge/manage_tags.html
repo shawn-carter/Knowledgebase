@@ -1,35 +1,33 @@
 {% extends "knowledge/base.html" %}
 {% block title %}{{ block.super }} - Manage Tags {% endblock %}
 {% block content %}
-
-<h2>Manage Tags</h2>
-<table class="table" id="table" style="display:none">
-    <thead>
-        <tr>
-            <th scope="col">Tag</th>
-            <th scope="col">Number of Articles Using Tag</th>
-            <th scope="col">Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for tag in tags %}
-        <tr>
-            <td>{{ tag.name }}</td>
-            <td>
-                {{ tag.num_times_used }}
-            </td>
-            <td>
-                <form method="post" action="{% url 'manage_tags' %}">
-                    {% csrf_token %}
-                    <input type="hidden" name="tag_id" value="{{ tag.id }}" />
-                    <button type="submit" class="btn btn-danger">Delete</button>
-                </form>
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
-
+    <h2>Manage Tags</h2>
+    <table class="table" id="table" style="display:none">
+        <thead>
+            <tr>
+                <th scope="col">Tag</th>
+                <th scope="col">Number of Articles Using Tag</th>
+                <th scope="col">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for tag in tags %}
+            <tr>
+                <td>{{ tag.name }}</td>
+                <td>
+                    {{ tag.num_times_used }}
+                </td>
+                <td>
+                    <form method="post" action="{% url 'manage_tags' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="tag_id" value="{{ tag.id }}" />
+                        <button type="submit" class="btn btn-danger">Delete</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 {% endblock %}
 
 {% block extra_js %}

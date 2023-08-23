@@ -5,9 +5,11 @@ from .base_tests import BaseTestCaseWithUser
 from knowledge.models import KBEntry, Audit, Tag
 from knowledge.models import calculate_rating
 
+# These tests are for the Knowledgebase Models
 
 class KBEntryModelTestCase(BaseTestCaseWithUser):
     def test_article_creation(self):
+        # Attempting to create a new Article
         # Since we're logged in as testuser, use this user for the created_by field
         article = KBEntry.objects.create(
             title="Test Article",
@@ -22,6 +24,7 @@ class KBEntryModelTestCase(BaseTestCaseWithUser):
 
 class AuditModelTestCase(BaseTestCaseWithUser):
     def test_audit_creation(self):
+        # Testing the audit functionality
         article = KBEntry.objects.create(
             title="Test Article", article="This is a test article", created_by=self.user
         )
@@ -36,6 +39,7 @@ class AuditModelTestCase(BaseTestCaseWithUser):
 
 class TagModelTestCase(BaseTestCaseWithUser):
     def test_tag_creation(self):
+        # Testing creation of a Tag
         tag = Tag.objects.create(name="TestTag")
         self.assertEqual(tag.name, "TestTag")
 
@@ -51,6 +55,7 @@ class TagModelTestCase(BaseTestCaseWithUser):
 
 class KBEntryUpvoteTestCase(BaseTestCaseWithUser):
     def test_upvote_functionality(self):
+        # Testing upvoting an article
         article = KBEntry.objects.create(
             title="Test Article", article="This is a test article", created_by=self.user
         )
@@ -60,12 +65,13 @@ class KBEntryUpvoteTestCase(BaseTestCaseWithUser):
         rating_info = calculate_rating(article)  # a function to calculate the rating
         article.rating = rating_info['rating']
         article.save()
-
+        # We check that the article rating is 100
         self.assertEqual(article.rating, 100)
 
 
 class KBEntryDownvoteTestCase(BaseTestCaseWithUser):
     def test_downvote_functionality(self):
+        # Testing downvoting an article
         article = KBEntry.objects.create(
             title="Test Article", article="This is a test article", created_by=self.user
         )
@@ -75,5 +81,5 @@ class KBEntryDownvoteTestCase(BaseTestCaseWithUser):
         article.rating = rating_info['rating']
         article.save()
 
-        # Assuming the initial rating was 0, and after one downvote it becomes 0 again
+        # Assuming the initial rating was 0.0, and after one downvote it becomes 0
         self.assertEqual(article.rating, 0)

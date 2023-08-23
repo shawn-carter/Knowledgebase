@@ -10,8 +10,12 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from unittest import mock
 
+# These tests are for the Knowledgebase forms
 
 class NewUserFormTestCase(TestCase):
+    """ 
+    Tests for the new user Form
+    """
     # Test to make sure user cannot create an account with the same username
     def test_username_taken(self):
         # Create a user to simulate a scenario where the username is already in use.
@@ -195,6 +199,11 @@ class NewUserFormTestCase(TestCase):
 
 
 class KBEntryFormTestCase(TestCase):
+    """
+    Tests for Knowledgebase Entry (Article)    
+    """
+    # We create a new user - we don't use BaseTestCaseWithUser because we want to try creating invalid articles
+    # and want to test that we can submit a new article successfully
     def setUp(self):
         self.user = User.objects.create_user(username="testuser", password="testpass")
         self.request = mock.Mock()
@@ -249,7 +258,7 @@ class KBEntryFormTestCase(TestCase):
         self.assertFalse(form.is_valid())
         self.assertIn("article", form.errors)
 
-    # Test for ability to edit an existing valid article
+    # Test for ability to edit an existing valid article (This is a short integration test)
     def test_edit_article(self):
         # Create an article
         form_data = {
@@ -270,12 +279,13 @@ class KBEntryFormTestCase(TestCase):
         )
         self.assertTrue(form_edit.is_valid())
         article_edited = form_edit.save()
-
+        
+        # Check that our changes have been made to the article title and last modified
         self.assertEqual(article_edited.title, "Edited Article")
         self.assertEqual(article_edited.last_modified_by, self.user)
 
     def test_edit_article_with_short_title(self):
-        # Create an article
+        # Create a new article
         form_data = {
             "title": "Initial Article",
             "article": "<p>This is the initial version of the article.</p>",
@@ -284,7 +294,7 @@ class KBEntryFormTestCase(TestCase):
         self.assertTrue(form.is_valid())
         article = form.save()
 
-        # Edit the article with short title
+        # Edit the article with short title (we did a similar test with create article but this is just to be sure!)
         form_data_edit = {
             "title": "Sh",
             "article": "<p>This is the edited version of the article.</p>",
@@ -319,7 +329,7 @@ class KBEntryFormTestCase(TestCase):
         self.assertTrue(form.is_valid())
         article = form.save()
 
-        # Edit the article with short body
+        # Edit the article with short body - we try to save an invalid article
         form_data_edit = {
             "title": "Article with Short Body",
             "article": "<p>Hi</p>",  # This body is too short and should be invalid
@@ -346,6 +356,10 @@ class KBEntryFormTestCase(TestCase):
 
     
 class RequestPasswordResetFormTestCase(TestCase):
+    """ 
+    Testing the request password reset form, it's a simple form - with only an email address
+    So the tests are just to ensure it will only accept a valid email, and give us a invalid form otherwise
+    """
     def test_valid_email(self):
         form = RequestPasswordResetForm(data={"email": "john@example.com"})
         self.assertTrue(form.is_valid())
@@ -362,6 +376,10 @@ class RequestPasswordResetFormTestCase(TestCase):
 
 
 class PasswordResetConfirmFormTestCase(TestCase):
+    """ 
+    These tests are for the password reset confirmation
+    Ensuring that a valid password passes the test, and other invalid combinations fail
+    """
     def test_valid_passwords(self):
         form = PasswordResetConfirmForm(
             data={
@@ -408,8 +426,14 @@ class PasswordResetConfirmFormTestCase(TestCase):
 
 
 class CustomPasswordChangeFormTestCase(TestCase):
+    """ 
+    These tests are for the authenticated user password Change form
+    It takes the existing password and 2 fields for the new password
+    """
     def test_valid_password_change(self):
+        # We create a new user
         user = User.objects.create_user(username="john", password="old_password")
+        # Then check that the form is valid for good credentials
         form = CustomPasswordChangeForm(
             user,
             data={
@@ -422,6 +446,7 @@ class CustomPasswordChangeFormTestCase(TestCase):
 
     def test_incorrect_old_password(self):
         user = User.objects.create_user(username="john", password="old_password")
+        # Testing for wrong existing password
         form = CustomPasswordChangeForm(
             user,
             data={
@@ -435,6 +460,7 @@ class CustomPasswordChangeFormTestCase(TestCase):
 
     def test_new_passwords_dont_match(self):
         user = User.objects.create_user(username="john", password="old_password")
+        # Testing for not matching new passwords
         form = CustomPasswordChangeForm(
             user,
             data={
@@ -448,6 +474,7 @@ class CustomPasswordChangeFormTestCase(TestCase):
 
     def test_short_new_password(self):
         user = User.objects.create_user(username="john", password="old_password")
+        # Testing for new password that is too short
         form = CustomPasswordChangeForm(
             user,
             data={
@@ -461,6 +488,7 @@ class CustomPasswordChangeFormTestCase(TestCase):
 
     def test_common_new_password(self):
         user = User.objects.create_user(username="john", password="old_password")
+        # Testing for common password (uses Django built in validation)
         form = CustomPasswordChangeForm(
             user,
             data={

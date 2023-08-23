@@ -14,10 +14,13 @@ from django.core.exceptions import ObjectDoesNotExist
 
 token_generator = PasswordResetTokenGenerator()
 
+# These are standard tests to ensure users can access URLS that they should be able to
+
 class NonAuthenticatedUserAccessTest(TestCase):
     """
     Tests ensuring that non authenticated users can access the following
     urls: login, register, reset_password, password_reset_request, password_reset_confirm, password_reset_complete
+    We expect the response to be 200 (OK)
     """
     def test_login_view(self):
         response = self.client.get(reverse('login'))
@@ -198,7 +201,7 @@ class AuthenticatedUsersAccessTest(BaseTestCaseWithUser):
         
     def test_logout_view(self):
         response = self.client.get(reverse('logout'))
-        self.assertEqual(response.status_code, 302)  # Expect a redirect
+        self.assertEqual(response.status_code, 302)  # Expect a redirect after logging out to /login/
         self.assertRedirects(response, '/login/')
 
 
@@ -310,6 +313,8 @@ class LoginViewTestCase(TestCase):
     """
     This uses a regular TestCase, as we want to check the correct template is returned for a non authorised user
     We also check for attempts to login with incorrect credentials, and while leaving the username or password blank
+    Although some similar tests have been performed using forms or models, these specifically check the view
+    and we are checking for the response, not valid form data.
     """
     def setUp(self):
         self.username = 'shawncarter'
@@ -369,7 +374,7 @@ class ArticleViewTestCase(BaseTestCaseWithUser):
     """
     This Test creates a Test Article, and makes sure it can be returned
     It also checks what happens if a user attempts to access article_details for a
-    non existing article
+    non existing article - we are checking for Ok or redirect responses and error messages returned
     """
     def setUp(self):
         super().setUp()  #Create test user
@@ -397,6 +402,9 @@ class ArticleViewTestCase(BaseTestCaseWithUser):
 
 
 class EditViewTestCaseUser(BaseTestCaseWithUser):
+    """ 
+    Testing editing from the view - expecting Ok or error messages
+    """
     def test_edit_article_view(self):
         # Testing correct template is returned
         response = self.client.get(reverse('edit_article', args=[self.article.id]))
@@ -489,8 +497,9 @@ class PasswordResetRequestViewExistingUser(BaseTestCaseWithUser):
 
 class PasswordResetIntegrationTest(TestCase):
     """ 
-    This test goes further than the previous test
-    It tests the full password reset process for a user
+    This is an integration test for the User Password Process for an authenticated user
+    It tests the full password reset process for a user from logging in to changing password
+    Checking that the password is successfully changed
     """
     def setUp(self):
         # We create a new user called testuser with email test@example.com
@@ -571,7 +580,7 @@ class DeleteViewTestCaseSuperUser(BaseTestCaseWithSuperUser):
         # Assert that the user is redirected to the 'home' page
         self.assertRedirects(response, reverse('home'))
         
-        # Check for the error message
+        # Check for the error message that is returned
         messages = list(get_messages(response.wsgi_request))
         self.assertEqual(len(messages), 1)
         self.assertEqual(str(messages[0]), "Article not found.")
@@ -618,7 +627,7 @@ class ConfirmDeleteViewTestCase(BaseTestCaseWithUser):
 
 class PerformDeleteViewTestCaseSuperUser(BaseTestCaseWithSuperUser):
     """
-    Superuser attempt to perform permanently delete an article
+    Test Superuser attempt to perform permanently delete an article
     """
     def test_permanent_delete_non_existent_article(self):
         # Attempt to permanently delete an article with an ID that doesn't exist in the database

@@ -13,17 +13,18 @@
 <form method="POST" id="kbEntryForm">
     {% csrf_token %}
     {% for field in form %}
-    {% if not field.name == "meta_data"%}
-    <div class="form-group">
-        {% if field.name == "article" %}
-        <label for="quillEditor">{{ field.label }}</label>
-        <div id="quillEditor" style="height: 200px">{{ field.value|safe }}</div>
-        {{ field|attr:"style:display:none;" }} {% else %}
-        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-        {{ field|add_class:"form-control" }}
+        {% if not field.name == "meta_data"%}
+        <div class="form-group">
+            {% if field.name == "article" %}
+                <label for="quillEditor">{{ field.label }}</label>
+                <div id="quillEditor" style="height: 200px">{{ field.value|safe }}</div>
+                {{ field|attr:"style:display:none;" }} 
+            {% else %}
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field|add_class:"form-control" }}
+            {% endif %}
         {% endif %}
-        {% endif %}
-    </div>
+        </div>
     {% endfor %}
     <div class="form-group">
         <label for="metatagLookup">Lookup/Add Metatag:</label>
@@ -36,7 +37,7 @@
         <input type="hidden" name="meta_data" id="meta_data_input" />
     </div>
     <br />
-    {{ article.modified_date|date }}
+
     <button type="submit" class="btn btn-danger">Save Changes</button>
     <button type="button" class="btn btn-primary" onclick="window.history.back();">
         Go Back (Do Not Save)

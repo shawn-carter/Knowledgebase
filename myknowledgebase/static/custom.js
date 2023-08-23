@@ -7,9 +7,11 @@ if (window.performance.getEntriesByType("navigation")[0].type === "back_forward"
 }
 // Toolbar Options for Quill.js
 const ToolbarOptions = [
-  ["bold", "italic", "underline", "strike"], // Text formatting options
+  ["bold", "italic", "underline", "strike","blockquote","code-block"], // Text formatting options
   [{ list: "ordered" }, { list: "bullet" }], // List options
   [{ size: [false, "large"] }], // Font size
+  [{ header: [1,2,3]}], // H1, H2, H3 headings
+  [{ color: [] }, { background: [] }], //Colour and Background
   [{ indent: "-1" }, { indent: "+1" }], // Indentation options
   [{ font: [] }], // Font family
   [{ align: [] }], // Text alignment
@@ -58,13 +60,15 @@ function initialiseArticleEditor(type) {
     article.val(quill.root.innerHTML);
   });
 
-  // Focus on the Title
+  // Focus on the Title when we open the editor page we want to focus the title
+  // As this is the first user input
   title.focus();
 
-  // Listener for Title
+  // Listener for Title (Quick validation on title) on change
   title.on("input", function () {
     var input = $(this);
     var title_length = input.val().length;
+    // Must be at least 3 characters or 'is-invalid'
     if (title_length >= 3) {
       input.removeClass("is-invalid").addClass("is-valid");
     } else {
@@ -72,19 +76,20 @@ function initialiseArticleEditor(type) {
     }
   });
 
-  // References to important DOM elements
+  // References to meta_data_input
   const meta_data_input = $("#meta_data_input");
 
   // Select the hidden element
   var metatagData = $("#metatagData").attr("data-metatags");
-  console.log("Metatag Data:", metatagData);
+  //console.log("Metatag Data:", metatagData);
   // Read and parse the data attribute
 
   //const metatags = {{ all_tags_json|safe }}; - the line below replaces this
 
   const metatags = JSON.parse(metatagData);
-  console.log(metatags);
+  //console.log(metatags);
 
+  // references to the selected items
   const selectedMetatags = $("#selectedMetatags");
   const metatagLookup = $("#metatagLookup");
 
@@ -157,7 +162,7 @@ function initialiseArticleEditor(type) {
 
   // Handle metatag lookup: show dropdown on keyup, prevent form submission on Enter
   metatagLookup.keydown(function (event) {
-    console.log("Key pressed:", event.key);
+    //console.log("Key pressed:", event.key);
     if (event.key === "Enter") {
       event.preventDefault(); // Stop the Enter key from submitting the form
 
@@ -223,7 +228,7 @@ function initialiseArticleEditor(type) {
 
 // Function to add a metatag to the list of selected tags
 function addMetatagToSelected(tag, selectedMetatags, meta_data_input) {
-  console.log("Adding tag:", tag);
+  //console.log("Adding tag:", tag);
   if (!tag || !tag.trim()) return; // Check if tag is empty or just spaces
 
   // Get existing tags using jQuery
@@ -235,7 +240,7 @@ function addMetatagToSelected(tag, selectedMetatags, meta_data_input) {
     .get();
 
   if (existingTags.includes(tag)) {
-    console.log(`Tag "${tag}" is already added.`);
+    //console.log(`Tag "${tag}" is already added.`);
     return;
   }
 
@@ -244,10 +249,8 @@ function addMetatagToSelected(tag, selectedMetatags, meta_data_input) {
     .attr("type", "button")
     .addClass("btn btn-secondary m-1")
     .click(function () {
-      console.log(
-        "Attempting to remove tag:",
-        $(this).children(".tag-text").text()
-      ); // Only get the text of the tag-text span
+      //console.log("Attempting to remove tag:",$(this).children(".tag-text").text()); 
+      // Only get the text of the tag-text span
       $(this).remove();
       updateMetaDataInput(selectedMetatags, meta_data_input);
     });
@@ -258,9 +261,10 @@ function addMetatagToSelected(tag, selectedMetatags, meta_data_input) {
     $("<span>").html("&nbsp;&times;").attr("aria-hidden", "true")
   );
 
+  // Append to the selectedMetatags
   selectedMetatags.append(tagButton);
 
-  console.log("Updated number of tags:", selectedMetatags.children().length);
+  //console.log("Updated number of tags:", selectedMetatags.children().length);
   updateMetaDataInput(selectedMetatags, meta_data_input); // Update the hidden input after adding a tag
 }
 
@@ -273,9 +277,9 @@ function updateMetaDataInput(selectedMetatags, meta_data_input) {
       return $(this).children(".tag-text").text(); // Only get the text of the tag-text span
     })
     .get();
-  console.log("Selected tags array:", selectedTags);
+  //console.log("Selected tags array:", selectedTags);
   meta_data_input.val(selectedTags.join(",")); // Set value using jQuery
-  console.log("Setting hidden input with tags:", meta_data_input.val());
+  //console.log("Setting hidden input with tags:", meta_data_input.val());
 }
 
 // Function to strip HTML tags from a string

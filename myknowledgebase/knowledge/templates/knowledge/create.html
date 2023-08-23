@@ -7,15 +7,16 @@
 <form method="POST" id="kbEntryForm" novalidate>
     {% csrf_token %}
     {% for field in form %}
-    {% if not field.name == "meta_data"%}
-    <div class="form-group">
-        {% if field.name == "article" %}
-        <label for="quillEditor">{{ field.label }}</label>
-        <div id="quillEditor" style="height: 200px">{{ field.value }}</div>
-        {{ field|attr:"style:display:none;" }} {% else %}
-        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-        {{ field|add_class:"form-control" }}
-        {% endif %}
+        {% if not field.name == "meta_data"%}
+        <div class="form-group">
+            {% if field.name == "article" %}
+                <label for="quillEditor">{{ field.label }}</label>
+                <div id="quillEditor" style="height: 200px">{{ field.value }}</div>
+                {{ field|attr:"style:display:none;" }} 
+            {% else %}
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field|add_class:"form-control" }}
+            {% endif %}
         {% endif %}
     </div>
     {% endfor %}
@@ -34,20 +35,23 @@
     <button type="submit" class="btn btn-primary">Submit</button>
 </form>
 
-<!-- We are using the data attributes of this div to pass the metatagLookup to JavaScript -->
+<!-- We are using the data attributes of this div to pass the list of Metatags to JavaScript -->
 <div id="metatagData" data-metatags="{{ all_tags_json }}"></div>
 
 {% if form.errors %}
 <div class="alert alert-danger">
     <ul>
-        {% for field, errors in form.errors.items %} {% for error in errors %}
-        <li><strong>{{ field }}:</strong> {{ error|escape }}</li>
-        {% endfor %} {% endfor %}
+        {% for field, errors in form.errors.items %} 
+            {% for error in errors %}
+            <li><strong>{{ field }}:</strong> {{ error|escape }}</li>
+            {% endfor %}
+        {% endfor %}
     </ul>
 </div>
 {% endif %} {% endblock %} {% block extra_js %}
 <script>
     $(document).ready(function () {
+        // Wait till the page is loaded then initialise the Quill Editor
         initialiseArticleEditor("new");
     });
 </script>

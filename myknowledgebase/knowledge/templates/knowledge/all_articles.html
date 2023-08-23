@@ -1,118 +1,119 @@
 {% extends 'knowledge/base.html' %}
 {% block title %}{{ block.super }} - All Articles {% endblock %}
 {% block content %}
-<h2>All Knowledge Base Articles</h2>
-<table class="table" id="table" style="display: none">
-    <thead class="thead-dark">
-        <tr>
-            <th scope="col">Title</th>
-            <th scope="col">Rating %</th>
-            <th scope="col">Rating (Up/Down)</th>
-            <th scope="col">Article Summary</th>
-            <th scope="col">Created By</th>
-            <th scope="col">Date Created</th>
-            <th scope="col">Tags</th>
-            {% if user.is_superuser %}
-            <th scope="col">Actions</th>
-            <!-- This column is only for superusers -->
-            {% endif %}
-        </tr>
-    </thead>
-    <tbody>
-        {% for article in articles %}
-        <tr>
-            <td>
-                <a href="{% url 'article_detail' article.id %}">{{ article.title }}</a>
-                {% if article.rating == 0.0 and article.downvotes.count == 0 %}
-                <span class="badge rounded-pill badge-norating" aria-label="Not Yet Rated">Not Yet Rated</span>
-                {% else %}
-                    {% if article.rating >= 75 %}
-                    <span class="badge rounded-pill badge-green" aria-label="{{ article.views }} views (Good rating)">
-                        {{ article.views }}
-                    </span>
-                    {% elif article.rating >= 50 %}
-                    <span class="badge rounded-pill badge-yellow" aria-label="{{ article.views }} views (Average rating)">
-                        {{ article.views }}
-                    </span>
-                    {% elif article.rating >= 25 %}
-                    <span class="badge rounded-pill badge-orange" aria-label="{{ article.views }} views (Below average rating)">
-                        {{ article.views }}
-                    </span>
-                    {% else %}
-                    <span class="badge rounded-pill badge-red" aria-label="{{ article.views }} views (Poor rating)">
-                        {{ article.views }}
-                    </span>
-                    {% endif %}
+    <h2>All Knowledge Base Articles</h2>
+    <table class="table" id="table" style="display: none">
+        <thead class="thead-dark">
+            <tr>
+                <th scope="col">Title</th>
+                <th scope="col">Rating %</th>
+                <th scope="col">Rating (Up/Down)</th>
+                <th scope="col">Article Summary</th>
+                <th scope="col">Created By</th>
+                <th scope="col">Date Created</th>
+                <th scope="col">Tags</th>
+                {% if user.is_superuser %}
+                    <th scope="col">Actions</th>
+                    <!-- This column is only for superusers -->
                 {% endif %}
-            </td>
-            <td>{{ article.rating }}</td>
-            <td>{{ article.upvotes.count }} / {{ article.downvotes.count }}</td>
-            <td>{{ article.article|striptags|truncatechars:50 }}</td>
-            <td>
-                <a href="{% url 'user_articles' article.created_by.id %}">{{ article.created_by.username }}</a>
-            </td>
-            <td>{{ article.created_datetime|date:"d/m/Y"}}</td>
-            <td>
-                {% for tag in article.meta_data.all %}
-                <a href="{% url 'home' %}?search={{ tag.name }}" class="btn btn-secondary m-1">{{ tag.name }}</a>
-                {% empty %} No tags {% endfor %}
-            </td>
-            {% if user.is_superuser %}
-            <td>
-                <a href="{% url 'quick_delete_toggle' article.id %}" class="btn btn-danger quick-action-btn delete-btn" data-article-id="{{ article.id }}"
+            </tr>
+        </thead>
+        <tbody>
+            {% for article in articles %}
+            <tr>
+                <td>
+                    <a href="{% url 'article_detail' article.id %}">{{ article.title }}</a>
+                    {% if article.rating == 0.0 and article.downvotes.count == 0 %}
+                    <span class="badge rounded-pill badge-norating" aria-label="Not Yet Rated">Not Yet Rated</span>
+                    {% else %}
+                        {% if article.rating >= 75 %}
+                        <span class="badge rounded-pill badge-green" aria-label="{{ article.views }} views (Good rating)">
+                            {{ article.views }}
+                        </span>
+                        {% elif article.rating >= 50 %}
+                        <span class="badge rounded-pill badge-yellow" aria-label="{{ article.views }} views (Average rating)">
+                            {{ article.views }}
+                        </span>
+                        {% elif article.rating >= 25 %}
+                        <span class="badge rounded-pill badge-orange" aria-label="{{ article.views }} views (Below average rating)">
+                            {{ article.views }}
+                        </span>
+                        {% else %}
+                        <span class="badge rounded-pill badge-red" aria-label="{{ article.views }} views (Poor rating)">
+                            {{ article.views }}
+                        </span>
+                        {% endif %}
+                    {% endif %}
+                </td>
+                <td>{{ article.rating }}</td>
+                <td>{{ article.upvotes.count }} / {{ article.downvotes.count }}</td>
+                <td>{{ article.article|striptags|truncatechars:50 }}</td>
+                <td>
+                    <a href="{% url 'user_articles' article.created_by.id %}">{{ article.created_by.username }}</a>
+                </td>
+                <td>{{ article.created_datetime|date:"d/m/Y"}}</td>
+                <td>
+                    {% for tag in article.meta_data.all %}
+                    <a href="{% url 'home' %}?search={{ tag.name }}" class="btn btn-secondary m-1">{{ tag.name }}</a>
+                    {% empty %} No tags {% endfor %}
+                </td>
+                {% if user.is_superuser %}
+                <!-- Add the Delete/Undelete and Edit Buttons for SuperUsers -->
+                <td>
+                    <a href="{% url 'quick_delete_toggle' article.id %}" class="btn btn-danger quick-action-btn delete-btn" data-article-id="{{ article.id }}"
                     {% if article.deleted_datetime %}style="display: none" {% endif %}>Delete</a>
-                <a href="{% url 'quick_delete_toggle' article.id %}" class="btn btn-warning quick-action-btn undelete-btn" data-article-id="{{ article.id }}"
+                    <a href="{% url 'quick_delete_toggle' article.id %}" class="btn btn-warning quick-action-btn undelete-btn" data-article-id="{{ article.id }}"
                     {% if not article.deleted_datetime %}style="display: none" {% endif %}>Undelete</a>
                     <a href="{% url 'edit_article' article.id %}" class="btn btn-primary">Edit</a>
-            </td>
-            {% endif %}
-        </tr>
-        {% empty %}
-        <tr>
-            <td colspan="{% if user.is_superuser %}6{% else %}5{% endif %}">
-                No entries found.
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
-<br />
+                </td>
+                {% endif %}
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="{% if user.is_superuser %}6{% else %}5{% endif %}">
+                    No Articles found.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <br />
 {% endblock %} {% block extra_js %}
-<script>
-    // Wait until the document content is fully loaded before running the script
-    $(document).ready(function () {        
-        // Set up the DataTable for the all articles view
-        setUpdataTable({
-            colReorder: true,
-        });
-        // Fade in, to prevent table being shown before it has been formatted
-        $("#table").fadeIn(250);
+    <script>
+        // Wait until the document content is fully loaded before running the script
+        $(document).ready(function () {        
+            // Set up the DataTable for the all articles view
+            setUpdataTable({
+                colReorder: true,
+            });
+            // Fade in, to prevent table being shown before it has been formatted
+            $("#table").fadeIn(250);
 
-        // Listener for Quick Delete
-        // Attach the click listener to the table, and use a selector to filter the events to .quick-action-btn
-        $('#table').on('click', '.quick-action-btn', function(event) {
-            console.log('quick-delete');
-            event.preventDefault(); // Prevent the default action
-            const articleId = $(this).data('article-id');
-            const parentTd = $(this).parent(); // Reference to the parent <td>
-            $.ajax({
-                url: `/quick_delete_toggle/${articleId}/`,
-                type: 'GET',
-                success: function(response) {
-                    if (response.success) {
-                        if (response.action === 'deleted') {
-                            parentTd.find('.delete-btn').hide();
-                            parentTd.find('.undelete-btn').show();
-                            alertify.success("Successfully Soft Deleted Article: " + articleId);
-                        } else {
-                            parentTd.find('.undelete-btn').hide();
-                            parentTd.find('.delete-btn').show();
-                            alertify.success("Successfully UnDeleted Article: " + articleId);
+            // Listener for Quick Delete
+            // Attach the click listener to the table, and use a selector to filter the events to .quick-action-btn
+            $('#table').on('click', '.quick-action-btn', function(event) {
+                console.log('quick-delete');
+                event.preventDefault(); // Prevent the default action
+                const articleId = $(this).data('article-id');
+                const parentTd = $(this).parent(); // Reference to the parent <td>
+                $.ajax({
+                    url: `/quick_delete_toggle/${articleId}/`,
+                    type: 'GET',
+                    success: function(response) {
+                        if (response.success) {
+                            if (response.action === 'deleted') {
+                                parentTd.find('.delete-btn').hide();
+                                parentTd.find('.undelete-btn').show();
+                                alertify.success("Successfully Soft Deleted Article: " + articleId);
+                            } else {
+                                parentTd.find('.undelete-btn').hide();
+                                parentTd.find('.delete-btn').show();
+                                alertify.success("Successfully UnDeleted Article: " + articleId);
+                            }
                         }
                     }
-                }
+                });
             });
         });
-    });
-</script>
+    </script>
 {% endblock%}

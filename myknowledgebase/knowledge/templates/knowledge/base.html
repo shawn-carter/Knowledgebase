@@ -48,68 +48,77 @@
             <div class="collapse navbar-collapse" id="navbarResponsive">
                 <ul class="navbar-nav ms-auto">
                     {% if user.is_authenticated %}
-                    <!-- Show the Username, and User Level if they are Authenticated User-->
-                    <li class="nav-item">
-                        <strong><a class="nav-link">{{ user.username }}</a></strong>
-                    </li>
-                    {% if user.is_staff %}
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink" role="button"
-                            data-bs-toggle="dropdown" aria-expanded="false">Admin Tasks</a>
-                        <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-                            <li>
-                                <a class="dropdown-item" href="{% url 'audit_logs' %}">Audit Logs</a>
+                        <!-- Show the Username if they are Authenticated User-->
+                        <li class="nav-item">
+                            <strong><a class="nav-link">{{ user.username }}</a></strong>
+                        </li>
+                        {% if user.is_staff %}
+                            <!-- Give Superusers the additional Admin Tasks dropdown -->
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink" role="button"
+                                    data-bs-toggle="dropdown" aria-expanded="false">Admin Tasks</a>
+                                <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                                    <li>
+                                        <a class="dropdown-item" href="{% url 'audit_logs' %}">Audit Logs</a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="{% url 'manage_tags' %}">Manage MetaTags</a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="{% url 'user-list' %}">List All Users</a>
+                                    </li>
+                                </ul>
                             </li>
-                            <li>
-                                <a class="dropdown-item" href="{% url 'manage_tags' %}">Manage MetaTags</a>
+                        {% else %}
+                            <!-- Show 'Normal User' to differentiate between these and Admin -->
+                            <li class="nav-item">
+                                <a class="nav-link" id="logout">(Normal User)</a>
                             </li>
-                            <li>
-                                <a class="dropdown-item" href="{% url 'user-list' %}">List All Users</a>
-                            </li>
-                        </ul>
-                    </li>
+                        {% endif %}
+                        <!-- Normal User Navigation Items-->
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'home' %}">Search</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'create' %}">Create New Article</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'allarticles' %}">All Articles</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'my_articles' %}">My Articles</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'change_password' %}">Change Password</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="logout" href="{% url 'confirm_logout' %}">Logout</a>
+                        </li>
                     {% else %}
-                    <li class="nav-item">
-                        <a class="nav-link" id="logout">(Normal User)</a>
-                    </li>
-                    {% endif %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'home' %}">Search</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'create' %}">Create New Article</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'allarticles' %}">All Articles</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'my_articles' %}">My Articles</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'change_password' %}">Change Password</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" id="logout" href="{% url 'confirm_logout' %}">Logout</a>
-                    </li>
-                    {% else %}
-                    <li class="nav-item">
-                        <a class="nav-link" id="login" href="{% url 'login' %}">Login</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" id="register" href="{% url 'register' %}">Register</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" id="passwordreset" href="{% url 'password_reset_request' %}">Reset
-                            Password</a>
-                    </li>
+                    <!-- Not Authenticated -->
+                        <li class="nav-item">
+                            <a class="nav-link" id="login" href="{% url 'login' %}">Login</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="register" href="{% url 'register' %}">Register</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="passwordreset" href="{% url 'password_reset_request' %}">Reset
+                                Password</a>
+                        </li>
                     {% endif %}
                 </ul>
             </div>
         </div>
     </nav>
 
-    <!-- Page Content -->
-    <div class="container">{% block content %} {% endblock %}</div>
+    <!-- Page Content is inside a bootstrap container-->
+    <div class="container">
+        {% block content %}
+        {% endblock %}
+    </div>
+
+    <!-- All JavaScript Includes are here -->
 
     <!-- jQuery and Bootstrap Bundle (includes Popper) -->
     <script src="https://code.jquery.com/jquery-3.6.1.min.js"></script>
@@ -126,7 +135,8 @@
         src="https://cdn.datatables.net/v/bs5/dt-1.13.6/cr-1.7.0/fh-3.4.0/r-2.5.0/sb-1.5.0/datatables.min.js"></script>
 
     <!-- Block for JavaScript -->
-    {% block scripts %} {% endblock %}
+    {% block scripts %}
+    {% endblock %}
 
     <!-- Script to display the Alertify Messages on Page Load-->
     <script>
@@ -147,7 +157,8 @@
     </script>
 
     <!-- Any Extra JavaScript Block-->
-    {% block extra_js %} {% endblock %}
+    {% block extra_js %}
+    {% endblock %}
 </body>
 
 </html>

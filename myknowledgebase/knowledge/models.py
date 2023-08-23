@@ -99,7 +99,7 @@ def calculate_rating(article):
     - article (KBEntry instance): The knowledge base entry (article) for which the rating is to be calculated.
 
     Returns:
-    - float: The calculated rating percentage of the article, rounded to one decimal place.
+    - list including the rating, number of upvotes, number of downvotes
 
     This function calculates the percentage of upvotes from the total votes (upvotes and downvotes)
     and returns it as the article's rating. If there are no votes on the article, it returns a rating of 0.0.

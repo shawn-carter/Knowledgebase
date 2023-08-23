@@ -95,8 +95,8 @@ class NewUserForm(forms.ModelForm):
 
 class CustomPasswordChangeForm(PasswordChangeForm):
     """
-    A form that allows a user to change their existing password
-    Includes existing password
+    A form that allows a user to change their existing password (logged in authenticated user)
+    Includes existing password field
     plus a repeated password field for validation.
     """
     def clean_new_password1(self):
@@ -167,7 +167,7 @@ class KBEntryForm(forms.ModelForm):
 
 class PasswordResetConfirmForm(forms.Form):
     """
-    A form for reseting a users password.
+    A form for reseting a users password (not authenticated user)
     Consists of a repeated password field for validation.
     """
 

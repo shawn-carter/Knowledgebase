@@ -6,6 +6,10 @@ from django.utils import timezone
 
 # Class to be used with functions that need a user to be logged in
 class BaseTestCaseWithUser(TestCase):
+    """ 
+    This class can be used for Test cases that use a regular user
+    It creates a user and then creates an article for that user
+    """
     def setUp(self):
         self.client = Client()
         self.email = "test@testdomain.test"  # Store email in a class attribute
@@ -19,6 +23,10 @@ class BaseTestCaseWithUser(TestCase):
 
 
 class BaseTestCaseWithSuperUser(BaseTestCaseWithUser):
+    """ 
+    This class can be used for Test cases that require a superuser
+    It creates a superuser and an article for that user
+    """
     def setUp(self):
         super().setUp()
         self.superuser = User.objects.create_superuser(
@@ -32,6 +40,12 @@ class BaseTestCaseWithSuperUser(BaseTestCaseWithUser):
         )
 
     def check_url_for_different_user_types(self, url):
+        """ 
+        This function logs the superuser in and checks access to the url that is passed into the function
+        It then logs the normal user in and checks if they can access it
+        Finally logging the user out to see if unauthenticated users can access the url
+        """
+        
         # Check for superuser
 
         # We expect the following pages to redirect (even for superuser) because they do some action and return the user
@@ -64,23 +78,23 @@ class BaseTestCaseWithSuperUser(BaseTestCaseWithUser):
                 raise
 
         # Check for normal authenticated users
+        # If a normal user attempts to access a superuser url we expect them to be redirected to home (/)
         self.client.login(username="testuser", password="testpass")
         response = self.client.get(url)
         try:
-            self.assertEqual(
-                response.status_code, 302
-            )  # Expecting a redirect to 'home'
+            self.assertEqual(response.status_code, 302)  # Expecting a redirect to 'home'
         except AssertionError:
+            # If authenticated user is able to access the url - we raise Assertion Error with the url
             print(f"AssertionError for URL: {url} for authenticated user")
             raise
 
         # Check for unauthenticated users
+        # If a non authenticated user attempts to access a superuser url we expect them to be redirected to /login/
         self.client.logout()
         response = self.client.get(url)
         try:
-            self.assertRedirects(
-                response, f'{reverse("login")}?next={url}'
-            )  # Expecting a redirect to 'login'
+            self.assertRedirects(response, f'{reverse("login")}?next={url}')  # Expecting a redirect to 'login'
         except AssertionError:
+            # If non authenticated user is able to access the url - we raise Assertion Error with the url
             print(f"AssertionError for URL: {url} for non authenticated user")
             raise

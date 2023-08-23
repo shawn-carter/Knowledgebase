@@ -884,6 +884,7 @@ def user_list(request):
     if not request.user.is_superuser:
         messages.error(request, "You don't have permission to view this page.")
         return redirect("home")
+    
     users = User.objects.all()  # get all users
     return render(request, "knowledge/user_list.html", {"users": users})
 
@@ -974,6 +975,7 @@ def delete_article(request, article_id):
     if not request.user.is_superuser:
         messages.error(request, "You don't have permission to view this page.")
         return redirect("home")
+    
     try:
         article = KBEntry.objects.get(pk=article_id)
     except KBEntry.DoesNotExist:
@@ -1215,6 +1217,7 @@ def manage_tags(request):
     if not request.user.is_superuser:
         messages.error(request, "You are not allowed to manage Tags")
         return redirect("home")
+    
     if request.method == "POST":
         tag_id_to_delete = request.POST.get("tag_id")
         if tag_id_to_delete:

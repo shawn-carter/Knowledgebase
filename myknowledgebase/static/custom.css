@@ -64,3 +64,10 @@
     margin: 2px !important;
     font-size: medium !important;
   }
+
+  blockquote {
+    border-left: 8px solid #ccc;
+    margin-bottom: 5px !important;
+    margin-top: 5px !important;
+    padding-left: 20px !important;
+  }

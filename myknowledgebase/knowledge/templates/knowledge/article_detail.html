@@ -8,15 +8,14 @@
             This Article has been Deleted and is not visible to Normal Users!
         </div>
     {% endif %}
-
+    <article>
+        <div class="ql-editor ql-snow">      
+            {{ article.article|safe }}
+        </div>
+    </article>
     {% if user.is_superuser or article.created_by == user %}
-        <a href="{% url 'edit_article' article.id %}" class="btn btn-warning">Edit Article</a>
+        <a href="{% url 'edit_article' article.id %}" class="btn btn-warning mb-2">Edit Article</a>
     {% endif %}
-
-    <div class="ql-editor ql-snow">
-        {{ article.article|safe }}
-    </div>
-
     <p><strong>Author:</strong> <a href="{% url 'user_articles' article.created_by.id %}"
             title="See all articles by {{ article.created_by.username }}">{{ article.created_by.username }}</a></p>
     <p><strong>Created Date:</strong> {{ article.created_datetime|date:"d/m/Y H:i:s" }}</p>
@@ -35,32 +34,28 @@
     {% endif %}
     </p>
     <p><strong># of MetaTags:</strong> {{ article.meta_data.count }} </p>
-    <br>
 
     {% if user != article.created_by and not user.is_superuser %}
-        <button class="btn btn-success mb-5" id="upvote" {% if user_has_upvoted %} disabled {% endif %}>Upvote</button>
-        <button class="btn btn-danger mb-5" id="downvote" {% if user_has_downvoted %} disabled {% endif %}>Downvote</button>
+        <button class="btn btn-success m-2" id="upvote" {% if user_has_upvoted %} disabled {% endif %}>Upvote</button>
+        <button class="btn btn-danger m-2" id="downvote" {% if user_has_downvoted %} disabled {% endif %}>Downvote</button>
     {% endif %}
 
     <h3>Metadata Tags</h3>
     <div class="mt-3 text-center">
     {% for tag in article.meta_data.all %}
-        <a href="{% url 'home' %}?search={{ tag.name }}" class="btn btn-secondary m-1">{{ tag.name }}</a>
+        <a href="{% url 'home' %}?search={{ tag.name }}" class="btn btn-secondary mb-1">{{ tag.name }}</a>
     {% endfor %}
     </div>
-    <br>
 
     <!-- Show Delete or Undelete and Permanently Delete for SuperUser-->
     {% if user.is_superuser %}
         {% if is_deleted %}
-            <a href="{% url 'undelete_article' article.id %}" class="btn btn-success">Undelete Article</a>
-            <a href="{% url 'confirm_permanent_delete' article.id %}" class="btn btn-danger">Permanently Delete</a>
+            <a href="{% url 'undelete_article' article.id %}" class="btn btn-success m-1">Undelete Article</a>
+            <a href="{% url 'confirm_permanent_delete' article.id %}" class="btn btn-danger m-1">Permanently Delete</a>
         {% else %}
-            <a href="{% url 'delete_article' article.id %}" class="btn btn-danger">Delete Article</a>
+            <a href="{% url 'delete_article' article.id %}" class="btn btn-danger m-1">Delete Article</a>
         {% endif %}
-        <br>
     {% endif %}
-    <br>
 {% endblock %}
 
 {% block extra_js %}

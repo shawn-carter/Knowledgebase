@@ -71,3 +71,15 @@
     margin-top: 5px !important;
     padding-left: 20px !important;
   }
+
+  .ql-editor {
+    white-space: normal;
+  }
+
+  p {
+    margin-bottom: 0.1rem;
+  }
+
+  .ql-container {
+    height: 444px !important; /* Set the height as required */
+}

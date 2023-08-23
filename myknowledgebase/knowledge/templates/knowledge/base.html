@@ -22,8 +22,6 @@
 
     <title>{% block title %}Knowledge Base{% endblock %}</title>
 
-    <!-- Custom JS which is a static file-->
-    <script src="{% static 'custom.js' %}"></script>
     <link rel="stylesheet" href="{% static 'custom.css' %}" />
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
     <meta http-equiv="Pragma" content="no-cache" />
@@ -33,11 +31,10 @@
 
 <body>
     <!-- Navbar -->
-    <nav class="navbar navbar-light navbar-expand-md" style="background-color: #eeeeee">
+    <nav class="navbar navbar-light bg-light navbar-expand-md">
         <div class="container">
             <!-- Navbar brand -->
             <a class="navbar-brand" href="/">KnowledgeBase</a>
-
             <!-- Navbar toggler button -->
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarResponsive"
                 aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
@@ -117,7 +114,11 @@
         {% block content %}
         {% endblock %}
     </div>
-
+    <br>
+    <div class="footer text-center" id="footer">
+        Shawn Carter 2023
+    </div>
+    <br>
     <!-- All JavaScript Includes are here -->
 
     <!-- jQuery and Bootstrap Bundle (includes Popper) -->
@@ -134,6 +135,11 @@
     <script
         src="https://cdn.datatables.net/v/bs5/dt-1.13.6/cr-1.7.0/fh-3.4.0/r-2.5.0/sb-1.5.0/datatables.min.js"></script>
 
+
+        <!-- Custom JS which is a static file-->
+        <script src="{% static 'custom.js' %}"></script>
+        
+    
     <!-- Block for JavaScript -->
     {% block scripts %}
     {% endblock %}

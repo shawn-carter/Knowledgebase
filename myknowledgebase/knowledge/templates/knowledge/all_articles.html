@@ -1,7 +1,11 @@
 {% extends 'knowledge/base.html' %}
-{% block title %}{{ block.super }} - All Articles {% endblock %}
+{% block title %}{{ block.super }} - All Articles{% endblock %}
+
+{% block page_title%}All Knowledge Base Articles{% endblock %}
+
 {% block content %}
-    <h2>All Knowledge Base Articles</h2>
+
+    <!-- Display a Table Showing All Articles -->
     <table class="table" id="table" style="display: none">
         <thead class="thead-dark">
             <tr>
@@ -19,9 +23,11 @@
             </tr>
         </thead>
         <tbody>
+            <!-- For each article create a new Table Row -->
             {% for article in articles %}
             <tr>
                 <td>
+                    <!-- Article Name with a Badge that show a colour for the rating and number of views -->
                     <a href="{% url 'article_detail' article.id %}">{{ article.title }}</a>
                     {% if article.rating == 0.0 and article.downvotes.count == 0 %}
                     <span class="badge rounded-pill badge-norating" aria-label="Not Yet Rated">Not Yet Rated</span>
@@ -60,11 +66,11 @@
                 {% if user.is_superuser %}
                 <!-- Add the Delete/Undelete and Edit Buttons for SuperUsers -->
                 <td>
-                    <a href="{% url 'quick_delete_toggle' article.id %}" class="btn btn-danger quick-action-btn delete-btn" data-article-id="{{ article.id }}"
+                    <a href="{% url 'quick_delete_toggle' article.id %}" class="btn btn-danger quick-action-btn delete-btn mb-1" data-article-id="{{ article.id }}"
                     {% if article.deleted_datetime %}style="display: none" {% endif %}>Delete</a>
-                    <a href="{% url 'quick_delete_toggle' article.id %}" class="btn btn-warning quick-action-btn undelete-btn" data-article-id="{{ article.id }}"
+                    <a href="{% url 'quick_delete_toggle' article.id %}" class="btn btn-warning quick-action-btn undelete-btn mb-1" data-article-id="{{ article.id }}"
                     {% if not article.deleted_datetime %}style="display: none" {% endif %}>Undelete</a>
-                    <a href="{% url 'edit_article' article.id %}" class="btn btn-primary">Edit</a>
+                    <a href="{% url 'edit_article' article.id %}" class="btn btn-primary mb-1">Edit</a>
                 </td>
                 {% endif %}
             </tr>
@@ -78,10 +84,16 @@
         </tbody>
     </table>
     <br />
-{% endblock %} {% block extra_js %}
+
+{% endblock %}
+
+{% block javascript %}
+
     <script>
+        
         // Wait until the document content is fully loaded before running the script
         $(document).ready(function () {        
+
             // Set up the DataTable for the all articles view
             setUpdataTable({
                 colReorder: true,
@@ -114,6 +126,8 @@
                     }
                 });
             });
+
         });
     </script>
+
 {% endblock%}

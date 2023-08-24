@@ -192,8 +192,10 @@ def password_reset_request(request):
                     {"reset_url": reset_url},
                 )
             except User.DoesNotExist:
-                form.add_error(None, "No account with this email address exists.")
                 messages.error(request, "No account with this email address exists.")
+                form.add_error(None, "No account with this email address exists.")
+        else:
+             messages.error(request, "Please enter a valid email address")  
     else:
         form = RequestPasswordResetForm()
     return render(request, "knowledge/password_reset_request.html", {"form": form})
@@ -372,8 +374,8 @@ def home(request):
     Renders the home page of the knowledge base application.
 
     This view is responsible for handling the search functionality on the home page.
-    It searches the knowledge base entries based on the user's search term and
-    displays the results. If no search term is provided or if the results are minimal,
+    It searches the knowledge base articles based on the user's search term and
+    displays the results. If no search term is provided or if the number of articles is less than 5,
     it displays the newest and top-rated articles.
 
     The user must be authenticated to access this view (as indicated by @login_required).
@@ -385,7 +387,7 @@ def home(request):
     - HttpResponse: The HTTP response object (the rendered template).
 
     Context Variables:
-    - entries: The set of KBEntry objects that match the search term (if any).
+    - articles: The set of KBEntry objects that match the search term - if any match
     - newest_articles: A list of the 5 most recently created KBEntry objects.
     - top_rated_articles: A list of the 5 highest-rated KBEntry objects.
     - search_term: The search term entered by the user, if any.
@@ -394,26 +396,30 @@ def home(request):
     articles = KBEntry.objects.none()  # Default to no entries
 
     if search_term:
-        from django.db.models import Q
+        # Get all articles
+        all_articles = KBEntry.objects.filter(
+            deleted_datetime__isnull=True
+        )
 
-        articles = KBEntry.objects.filter(
-            Q(title__icontains=search_term)
-            | Q(article__icontains=search_term)
-            | Q(meta_data__name__icontains=search_term)
-            | Q(
-                created_by__username__icontains=search_term
-            ),  # New condition for author's username
-            deleted_datetime__isnull=True,
-        ).distinct()
+        # Filter articles based on the search term, but exclude HTML tags
+        # As search was bringing back articles with a search like qwe - this might have been included in an image
+        articles = [
+            article for article in all_articles
+            if search_term.lower() in strip_tags(article.article).lower() # match if in article after stripping tags
+            or search_term.lower() in article.title.lower() # match if in article title
+            or any(search_term.lower() in tag.name.lower() for tag in article.meta_data.all()) # match if in any tags
+            or search_term.lower() in article.created_by.username.lower() #match on username
+        ]
+        
         for article in articles:
-            article.article = strip_tags(article.article.replace("<p>", " "))
+            article.article = strip_tags(article.article.replace("<p>", " ")) # strip tags, as we want to display without in a table
 
-    # If search results are minimal or no query:
+    # If search results return less than 5 articles or no search termy:
     if len(articles) < 5 or not search_term:
         newest_articles = KBEntry.objects.filter(
             deleted_datetime__isnull=True
         ).order_by("-created_datetime")[:5]
-        # Assuming you have a rating field which can be ordered
+        # Ordered by rating
         top_rated_articles = KBEntry.objects.filter(
             deleted_datetime__isnull=True
         ).order_by("-rating")[:5]
@@ -421,11 +427,12 @@ def home(request):
         newest_articles = []
         top_rated_articles = []
 
+    # This is what we return to the template
     context = {
-        "articles": articles,
-        "newest_articles": newest_articles,
-        "top_rated_articles": top_rated_articles,
-        "search_term": search_term,
+        "articles": articles, # The articles with tags stripped from article.article
+        "newest_articles": newest_articles, # top 5 newest articles
+        "top_rated_articles": top_rated_articles, # top 5 rated articles
+        "search_term": search_term, # the original search term
     }
 
     return render(request, "knowledge/home.html", context)

@@ -52,7 +52,7 @@
       border-color: #dc3545;
   }
 
-  h1, h2, h3 {
+  .title {
     text-align: center;
     margin-top:5px !important;
   }

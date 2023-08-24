@@ -1,13 +1,15 @@
 {% extends 'knowledge/base.html' %}
 {% block title %}{{ block.super }} - Confirm Delete: {{ article.title }}{% endblock %}
+
+{% block page_title%}Confirm Deletion{% endblock %}
+
 {% block content %}
-    <div class='col-md-6 offset-md-3 text-center'>
-        <h2>Confirm Deletion</h2>
-        <p>Are you sure you want to delete the article titled "{{ article.title }}"?</p>
-        <form method="post">
+    <div class='col-md-4 offset-md-4 text-center'>
+        <p>Are you sure you want to delete the article titled:<br>"{{ article.title }}"?</p>
+        <form method="POST">
             {% csrf_token %}
-            <button type="submit" class="btn btn-danger">Yes, Delete</button>
-            <a href="{% url 'article_detail' article.id %}" class="btn btn-secondary">Cancel</a>
+            <button type="submit" class="btn btn-danger m-2">Yes, Delete</button>
+            <a href="{% url 'article_detail' article.id %}" class="btn btn-secondary m-2">No, Leave it</a>
         </form>
     </div>
 {% endblock %}

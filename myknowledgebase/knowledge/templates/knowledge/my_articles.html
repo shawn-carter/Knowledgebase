@@ -1,7 +1,9 @@
 {% extends 'knowledge/base.html' %}
 {% block title %}{{ block.super }} - My Articles{% endblock %}
+
+{% block page_title%}My Knowledgebase Articles{% endblock %}
+
 {% block content %}
-    <h2>My Knowledgebase Articles</h2>
     
     {% if articles %}
     <!-- If there are any articles-->
@@ -14,6 +16,7 @@
             </tr>
         </thead>
         <tbody>
+            <!-- For each article we create a new row showing the details -->
             {% for article in articles %}
             <tr>
                 <td>
@@ -42,6 +45,7 @@
                 </td>
                 <td>{{ article.article|striptags|truncatechars:50 }}</td>
                 <td>
+                    <!-- Give user a button so they can edit this article (as it is their article)-->
                     <a href="{% url 'edit_article' article.id %}" class="btn btn-primary">Edit</a>
                 </td>
             </tr>
@@ -49,20 +53,26 @@
         </tbody>
     </table>
     {% else %}
-    <!-- Otherwise -->
-        <p>You haven't written any articles yet.</p>
+    <!-- Otherwise User hasn't created any articles yet -->
+        <h4 class='title'>You haven't written any articles yet.</h4>
+        <p class='title'>Why not create a new article?</p>
     {% endif %}
     <br>
+
 {% endblock %}
 
-{% block extra_js %}
+{% block javascript %}
+
     <script>
         // Wait until the document content is fully loaded before running the script
         $(document).ready(function () {
+            // Show the DataTable
             setUpdataTable({
                 colReorder: true
             });
         });
+        // Fade in to prevent redrawing the screen plus it looks nicer
         $("#table").fadeIn(100);
     </script>
+
 {% endblock%}

@@ -1,122 +1,131 @@
 {% extends "knowledge/base.html" %}
 {% block title %}{{ block.super }} - Search {% endblock %}
+
+{% block page_title%}Search the Knowledgebase{% endblock %}
+
 {% block content %}
-<h2>Search the Knowledgebase</h2>
-<!-- Search bar and button with Bootstrap styling -->
-<br>
-<div class="mb-3 col-md-6 offset-md-3">
-    <form method="GET" class="form-inline">
-        <div class="input-group">
-            <input type="text" name="search" value="{{ search_term }}" placeholder="Search..." class="form-control" />
-            <div class="input-group-append">
-                <button type="submit" class="btn btn-primary">Search</button>
+    <!-- Search bar and button with Bootstrap styling -->
+    <br>
+    <div class="mb-3 col-md-6 offset-md-3">
+        <form method="GET" class="form-inline">
+            <div class="input-group">
+                <input type="text" name="search" value="{{ search_term }}" placeholder="Search..." class="form-control" />
+                <div class="input-group-append">
+                    <button type="submit" class="btn btn-primary">Search</button>
+                </div>
             </div>
-        </div>
-    </form>
-</div>
-<!-- Display search results in a table -->
-{% if articles %}
-<table class="table" id="table" style="display:none">
-    <thead>
-        <tr>
-            <th>Title</th>
-            <th>Author</th> <!-- New Column for Author -->
-            <th>Article Extract</th>
-            <th>Metadata Tags</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for article in articles %}
-        <tr>
-            <!-- Table Data-->
-            <td>
-                <a href="{% url 'article_detail' article.id %}">{{ article.title }}</a>
+        </form>
+    </div>
+
+    <!-- Display search results in a table -->
+    {% if articles %}
+    <table class="table" id="table" style="display:none">
+        <!-- Table Header -->
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Author</th> <!-- New Column for Author -->
+                <th>Article Extract</th>
+                <th>Metadata Tags</th>
+            </tr>
+        </thead>
+        <!-- Table Body-->
+        <tbody>
+            {% for article in articles %}
+            <tr>
+                <!-- Table Data-->
+                <td>
+                    <a href="{% url 'article_detail' article.id %}">{{ article.title }}</a>
+                    {% if article.rating == 0.0 and article.downvotes.count == 0 %}
+                    <span class="badge rounded-pill badge-norating" aria-label="Not Yet Rated">Not Yet Rated</span>
+                    {% else %}
+                        {% if article.rating >= 75 %}
+                        <span class="badge rounded-pill badge-green" aria-label="{{ article.views }} views (Good rating)">
+                            {{ article.views }}
+                        </span>
+                        {% elif article.rating >= 50 %}
+                        <span class="badge rounded-pill badge-yellow" aria-label="{{ article.views }} views (Average rating)">
+                            {{ article.views }}
+                        </span>
+                        {% elif article.rating >= 25 %}
+                        <span class="badge rounded-pill badge-orange" aria-label="{{ article.views }} views (Below average rating)">
+                            {{ article.views }}
+                        </span>
+                        {% else %}
+                        <span class="badge rounded-pill badge-red" aria-label="{{ article.views }} views (Poor rating)">
+                            {{ article.views }}
+                        </span>
+                        {% endif %}
+                    {% endif %}
+                    </td>
+                    <td><a href="{% url 'user_articles' article.created_by.id %}">{{ article.created_by.username }}</a></td>
+                    <td>{{ article.article|truncatechars:100 }}</td>
+                    <td>
+                    {% for tag in article.meta_data.all %}
+                        <a href="/?search={{ tag.name }}" class="btn btn-secondary btn-sm m-1">{{ tag.name }}</a>
+                    {% endfor %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% elif search_term %}
+        <!-- If no articles found-->
+        <p>No Articles found that match the search term: "{{ search_term }}"</p>
+    {% endif %}
+
+    <!-- If there are less than 5 articles retrieved or if we haven't got any results just came here display the top 5 and 5 newest articles -->
+    {% if not articles or articles|length < 5 %} <div class="row">
+
+        <!-- The Newest Articles Area -->
+        <div class="col-md-6 text-center">
+            <h3>Newest Articles</h3>
+            {% for article in newest_articles %}
+                <a href="{% url 'article_detail' article.id %}">{{ article.title|truncatechars:50 }}</a>
                 {% if article.rating == 0.0 and article.downvotes.count == 0 %}
                 <span class="badge rounded-pill badge-norating" aria-label="Not Yet Rated">Not Yet Rated</span>
                 {% else %}
                     {% if article.rating >= 75 %}
-                    <span class="badge rounded-pill badge-green" aria-label="{{ article.views }} views (Good rating)">
-                        {{ article.views }}
-                    </span>
+                    <span class="badge rounded-pill badge-green" aria-label="{{ article.views }} views (Good rating)">{{ article.views }}</span>
                     {% elif article.rating >= 50 %}
-                    <span class="badge rounded-pill badge-yellow" aria-label="{{ article.views }} views (Average rating)">
-                        {{ article.views }}
-                    </span>
+                    <span class="badge rounded-pill badge-yellow" aria-label="{{ article.views }} views (Average rating)">{{ article.views }}</span>
                     {% elif article.rating >= 25 %}
-                    <span class="badge rounded-pill badge-orange" aria-label="{{ article.views }} views (Below average rating)">
-                        {{ article.views }}
-                    </span>
+                    <span class="badge rounded-pill badge-orange" aria-label="{{ article.views }} views (Below average rating)">{{ article.views }}</span>
                     {% else %}
-                    <span class="badge rounded-pill badge-red" aria-label="{{ article.views }} views (Poor rating)">
-                        {{ article.views }}
-                    </span>
+                    <span class="badge rounded-pill badge-red" aria-label="{{ article.views }} views (Poor rating)">{{ article.views }}</span>
                     {% endif %}
                 {% endif %}
-                </td>
-                <td><a href="{% url 'user_articles' article.created_by.id %}">{{ article.created_by.username }}</a></td>
-                <td>{{ article.article|truncatechars:100 }}</td>
-                <td>
-                {% for tag in article.meta_data.all %}
-                    <a href="/?search={{ tag.name }}" class="btn btn-secondary btn-sm m-1">{{ tag.name }}</a>
-                {% endfor %}
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
-{% elif search_term %}
-    <!-- If no articles found-->
-    <p>No Articles found that match the search term: "{{ search_term }}"</p>
-{% endif %}
-<!-- If there are less than 5 articles retrieved or if we haven't got any results just came here display the top 5 and 5 newest articles -->
-{% if not articles or articles|length < 5 %} <div class="row">
-    <!-- The Newest Articles Area -->
-    <div class="col-md-6 text-center">
-        <h3>Newest Articles</h3>
-        {% for article in newest_articles %}
-            <a href="{% url 'article_detail' article.id %}">{{ article.title|truncatechars:50 }}</a>
-            {% if article.rating == 0.0 and article.downvotes.count == 0 %}
-            <span class="badge rounded-pill badge-norating" aria-label="Not Yet Rated">Not Yet Rated</span>
-            {% else %}
-                {% if article.rating >= 75 %}
-                <span class="badge rounded-pill badge-green" aria-label="{{ article.views }} views (Good rating)">{{ article.views }}</span>
-                {% elif article.rating >= 50 %}
-                <span class="badge rounded-pill badge-yellow" aria-label="{{ article.views }} views (Average rating)">{{ article.views }}</span>
-                {% elif article.rating >= 25 %}
-                <span class="badge rounded-pill badge-orange" aria-label="{{ article.views }} views (Below average rating)">{{ article.views }}</span>
+                <br>
+            {% endfor %}
+        </div>
+
+        <!-- The Top Rated Area -->
+        <div class="col-md-6 text-center">
+            <h3>Top Rated Articles</h3>
+            {% for article in top_rated_articles %}
+                <a href="{% url 'article_detail' article.id %}">{{ article.title|truncatechars:50 }}</a>
+                {% if article.rating == 0.0 and article.downvotes.count == 0 %}
+                    <span class="badge rounded-pill badge-norating" aria-label="Not Yet Rated">Not Yet Rated</span>
                 {% else %}
-                <span class="badge rounded-pill badge-red" aria-label="{{ article.views }} views (Poor rating)">{{ article.views }}</span>
+                    {% if article.rating >= 75 %}
+                        <span class="badge rounded-pill badge-green" aria-label="{{ article.views }} views (Good rating)">{{ article.views }}</span>
+                    {% elif article.rating >= 50 %}
+                        <span class="badge rounded-pill badge-yellow" aria-label="{{ article.views }} views (Average rating)">{{ article.views }}</span>
+                    {% elif article.rating >= 25 %}
+                        <span class="badge rounded-pill badge-orange" aria-label="{{ article.views }} views (Below average rating)">{{ article.views }}</span>
+                    {% else %}
+                        <span class="badge rounded-pill badge-red" aria-label="{{ article.views }} views (Poor rating)">{{ article.views }}</span>
+                    {% endif %}
                 {% endif %}
-            {% endif %}
-            <br>
-        {% endfor %}
-    </div>
-    <!-- The Top Rated Area -->
-    <div class="col-md-6 text-center">
-        <h3>Top Rated Articles</h3>
-        {% for article in top_rated_articles %}
-            <a href="{% url 'article_detail' article.id %}">{{ article.title|truncatechars:50 }}</a>
-            {% if article.rating == 0.0 and article.downvotes.count == 0 %}
-                <span class="badge rounded-pill badge-norating" aria-label="Not Yet Rated">Not Yet Rated</span>
-            {% else %}
-                {% if article.rating >= 75 %}
-                    <span class="badge rounded-pill badge-green" aria-label="{{ article.views }} views (Good rating)">{{ article.views }}</span>
-                {% elif article.rating >= 50 %}
-                    <span class="badge rounded-pill badge-yellow" aria-label="{{ article.views }} views (Average rating)">{{ article.views }}</span>
-                {% elif article.rating >= 25 %}
-                    <span class="badge rounded-pill badge-orange" aria-label="{{ article.views }} views (Below average rating)">{{ article.views }}</span>
-                {% else %}
-                    <span class="badge rounded-pill badge-red" aria-label="{{ article.views }} views (Poor rating)">{{ article.views }}</span>
-                {% endif %}
-            {% endif %}
-            <br>
-        {% endfor %}
-    </div>
-{% endif %}
+                <br>
+            {% endfor %}
+        </div>
+    {% endif %}
 
 {% endblock %}
 
-{% block extra_js %}
+{% block javascript %}
+
     <script>
         // Wait until the document content is fully loaded before running the script
         $(document).ready(function () {
@@ -124,4 +133,5 @@
             $("#table").fadeIn(100);
         });
     </script>
+    
 {% endblock%}

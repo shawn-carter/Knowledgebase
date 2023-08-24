@@ -1,7 +1,10 @@
 {% extends "knowledge/base.html" %}
 {% block title %}{{ block.super }} - Manage Tags {% endblock %}
+
+{% block page_title%}Manage Tags{% endblock %}
+
 {% block content %}
-    <h2>Manage Tags</h2>
+
     <table class="table" id="table" style="display:none">
         <thead>
             <tr>
@@ -18,7 +21,7 @@
                     {{ tag.num_times_used }}
                 </td>
                 <td>
-                    <form method="post" action="{% url 'manage_tags' %}">
+                    <form method="POST" action="{% url 'manage_tags' %}">
                         {% csrf_token %}
                         <input type="hidden" name="tag_id" value="{{ tag.id }}" />
                         <button type="submit" class="btn btn-danger">Delete</button>
@@ -28,14 +31,19 @@
             {% endfor %}
         </tbody>
     </table>
+
 {% endblock %}
 
-{% block extra_js %}
+{% block javascript %}
+
    <script>
     // Wait until the document content is fully loaded before running the script
         $(document).ready(function () {
+            // Show the DataTable
             setUpdataTable({colReorder: true, order: false});
+            // Fade in to prevent screen showing table, and redrawing the DataTable
             $("#table").fadeIn(100);
         });
     </script>
+
 {% endblock%}

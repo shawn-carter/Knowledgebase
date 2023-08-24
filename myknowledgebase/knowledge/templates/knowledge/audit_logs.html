@@ -1,40 +1,51 @@
 {% extends 'knowledge/base.html' %}
 {% block title %}{{ block.super }} - Audit Logs {% endblock %}
+
+{% block page_title%}Audit Logs{% endblock %}
+
 {% block content %}
-<h2>Audit Logs</h2>
-<table class="table" id="table" style="display: none">
-    <thead>
-        <tr>
-            <th>User</th>
-            <th>Action Date & Time</th>
-            <th>Article Name</th>
-            <th>Action Details</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for audit in audits %}
-        <tr>
-            <td>{{ audit.user.username }}</td>
-            <td>{{ audit.action_datetime }}</td>
-            {% if audit.kb_entry %}
-            <td>
-                <a href="/article/{{ audit.kb_entry.id }}">{{ audit.kb_entry.title }}</a>
-            </td>
-            {% else %}
-            <td>N/A</td>
-            {% endif %}
-            <td>{{ audit.action_details }}</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
-{% endblock %} {% block extra_js %}
-<script>
-    // Wait until the document content is fully loaded before running the script
-    $(document).ready(function () {
-        setUpdataTable({ colReorder: true, order: false });
-        // Fade in table to prevent it drawing twice
-        $("#table").fadeIn(100);
-    });
-</script>
+
+    <!-- Display a Table with all Audit Events -->
+    <!-- We could add additional events to the table such as user login, password resets, logout, searches -->
+    <!-- But for simplicity we just log create, edit and deletion of articles -->
+    <table class="table" id="table" style="display: none">
+        <thead>
+            <tr>
+                <th>User</th>
+                <th>Action Date & Time</th>
+                <th>Article Name</th>
+                <th>Action Details</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for audit in audits %}
+            <tr>
+                <td>{{ audit.user.username }}</td>
+                <td>{{ audit.action_datetime }}</td>
+                {% if audit.kb_entry %}
+                <td>
+                    <a href="/article/{{ audit.kb_entry.id }}">{{ audit.kb_entry.title }}</a>
+                </td>
+                {% else %}
+                <td>N/A</td>
+                {% endif %}
+                <td>{{ audit.action_details }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+{% endblock %}
+
+{% block javascript %}
+
+    <script>
+        // Wait until the document content is fully loaded before running the script
+        $(document).ready(function () {
+            setUpdataTable({ colReorder: true, order: false });
+            // Fade in table to prevent it drawing twice
+            $("#table").fadeIn(100);
+        });
+    </script>
+
 {% endblock%}

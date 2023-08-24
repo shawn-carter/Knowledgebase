@@ -1,64 +1,70 @@
 {% extends 'knowledge/base.html' %}
 {% block title %}{{ block.super }} - User Articles: {{ author.username }} {% endblock %}
-{% block content %}
-<h2>All Articles by {{ author.username }}</h2>
 
-{% if articles %}
-<table class="table" id="table" style="display:none">
-    <thead>
-        <tr>
-            <th>Title</th>
-            <th>Article Extract</th>
-            <th>Created Date</th>
-            <th>Last Modified</th>
-            <th>Modified By</th>
-            <th>Metadata Tags</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for article in articles %}
-        <tr>
-            <td><a href="{% url 'article_detail' article.id %}">{{ article.title }}</a>
-                {% if article.rating == 0.0 and article.downvotes.count == 0 %}
-                <span class="badge rounded-pill badge-norating">Not Yet Rated</span>
-                {% else %}
-                {% if article.rating >= 75 %}
-                <span class="badge rounded-pill badge-green">{{ article.views }}</span>
-                {% elif article.rating >= 50 %}
-                <span class="badge rounded-pill badge-yellow">{{ article.views }}</span>
-                {% elif article.rating >= 25 %}
-                <span class="badge rounded-pill badge-orange">{{ article.views }}</span>
-                {% else %}
-                <span class="badge rounded-pill badge-red">{{ article.views }}</span>
-                {% endif %}
-                {% endif %}
-            </td>
-            <td>{{ article.article|striptags|truncatechars:50 }}</td>
-            <td>{{ article.created_datetime|date:"d/m/Y H:i:s" }}</td>
-            <td>{{ article.modified_datetime|date:"d/m/Y H:i:s" }}</td>
-            <td>{{ article.last_modified_by.username }}</td>
-            <td>
-                {% for tag in article.meta_data.all %}
-                <a href="/?search={{ tag.name }}" class="btn btn-secondary btn-sm m-1">{{ tag.name }}</a>
-                {% endfor %}
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
-{% else %}
-<p>{{ author.username }} has not written any articles yet.</p>
-{% endif %}
+{% block page_title%}All Articles by {{ author.username }}{% endblock %}
+
+{% block content %}
+
+    <!-- If there are any articles we'll display them in a table -->
+    {% if articles %}
+    <table class="table" id="table" style="display:none">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Article Extract</th>
+                <th>Created Date</th>
+                <th>Last Modified</th>
+                <th>Modified By</th>
+                <th>Metadata Tags</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for article in articles %}
+            <tr>
+                <!-- Article Name with a Badge that show a colour for the rating and number of views -->
+                <td><a href="{% url 'article_detail' article.id %}">{{ article.title }}</a>
+                    {% if article.rating == 0.0 and article.downvotes.count == 0 %}
+                    <span class="badge rounded-pill badge-norating">Not Yet Rated</span>
+                    {% else %}
+                    {% if article.rating >= 75 %}
+                    <span class="badge rounded-pill badge-green">{{ article.views }}</span>
+                    {% elif article.rating >= 50 %}
+                    <span class="badge rounded-pill badge-yellow">{{ article.views }}</span>
+                    {% elif article.rating >= 25 %}
+                    <span class="badge rounded-pill badge-orange">{{ article.views }}</span>
+                    {% else %}
+                    <span class="badge rounded-pill badge-red">{{ article.views }}</span>
+                    {% endif %}
+                    {% endif %}
+                </td>
+                <td>{{ article.article|striptags|truncatechars:50 }}</td>
+                <td>{{ article.created_datetime|date:"d/m/Y H:i:s" }}</td>
+                <td>{{ article.modified_datetime|date:"d/m/Y H:i:s" }}</td>
+                <td>{{ article.last_modified_by.username }}</td>
+                <td>
+                    {% for tag in article.meta_data.all %}
+                    <a href="/?search={{ tag.name }}" class="btn btn-secondary btn-sm m-1">{{ tag.name }}</a>
+                    {% endfor %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+        <!-- Otherwise let the user know they have no articles-->
+        <p>{{ author.username }} has not written any articles yet.</p>
+    {% endif %}
+
 {% endblock %}
 
-{% block extra_js %}
-<script>
-    // Wait until the document content is fully loaded before running the script
-    $(document).ready(function () {
-        setUpdataTable({
-            colReorder: true
+{% block javascript %}
+    <script>
+        // Wait until the document content is fully loaded before running the script
+        $(document).ready(function () {
+            setUpdataTable({
+                colReorder: true
+            });
+            $("#table").fadeIn(250);
         });
-        $("#table").fadeIn(250);
-    });
-</script>
+    </script>
 {% endblock%}

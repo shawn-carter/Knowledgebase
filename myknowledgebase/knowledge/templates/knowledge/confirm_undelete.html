@@ -1,13 +1,15 @@
 {% extends 'knowledge/base.html' %}
 {% block title %}{{ block.super }} - Confirm Undelete: {{ article.title }}{% endblock %}
+
+{% block page_title%}Confirm Undelete{% endblock %}
+
 {% block content %}
-    <div class='col-md-6 offset-md-3 text-center'>
-        <h2>Confirm Restoration</h2>
-        <p>Are you sure you want to undelete the article titled "{{ article.title }}"?</p>
+    <div class='col-md-4 offset-md-4 text-center'>
+        <p>Are you sure you want to undelete the article titled:<br>"{{ article.title }}"?</p>
         <form method="post">
             {% csrf_token %}
-            <button type="submit" class="btn btn-danger">Yes, UnDelete</button>
-            <a href="{% url 'article_detail' article.id %}" class="btn btn-secondary">Cancel</a>
+            <button type="submit" class="btn btn-danger m-2">Yes, UnDelete</button>
+            <a href="{% url 'article_detail' article.id %}" class="btn btn-secondary m-2">No, Keep Deleted</a>
         </form>
     </div>
 {% endblock %}

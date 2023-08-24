@@ -1,8 +1,10 @@
 {% extends 'knowledge/base.html' %}
 {% block title %}{{ block.super }} - Confirm Logout{% endblock %}
+
+{% block page_title%}Confirm Logout{% endblock %}
+
 {% block content %}
-    <div class='col-md-6 offset-md-3 text-center'>
-        <h2>Confirm Logout</h2>
+    <div class='col-md-4 offset-md-4 text-center'>
         <p>Are you sure you want to logout?</p>
         <form method="post">
             {% csrf_token %}

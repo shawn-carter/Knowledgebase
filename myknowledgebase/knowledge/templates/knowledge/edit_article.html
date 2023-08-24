@@ -3,68 +3,76 @@
 {% block title %}{{ block.super }} - Edit Article:  {{ article.title }}{% endblock %}
 {% load widget_tweaks %}
 
+{% block page_title%}Edit an Existing KB Article{% endblock %}
+
 {% block content %}
-<h2>Edit an Existing KB Article</h2>
-{% if is_deleted %}
-<div class="alert alert-danger" role="alert">
-    This Article has been Deleted and is not visible to Normal Users!
-</div>
-{% endif %}
-<form method="POST" id="kbEntryForm">
-    {% csrf_token %}
-    {% for field in form %}
-        {% if not field.name == "meta_data"%}
-        <div class="form-group">
-            {% if field.name == "article" %}
-                <label for="quillEditor">{{ field.label }}</label>
-                <div id="quillEditor" style="height: 200px">{{ field.value|safe }}</div>
-                {{ field|attr:"style:display:none;" }} 
-            {% else %}
-                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-                {{ field|add_class:"form-control" }}
+
+    <!-- If the article is deleted can only be views by SuperUsers - this is to remind them that the Article is not visible to normal users -->
+    {% if is_deleted %}
+    <div class="alert alert-danger" role="alert">
+        This Article has been Deleted and is not visible to Normal Users!
+    </div>
+    {% endif %}
+
+    <form method="POST" id="kbEntryForm">
+        {% csrf_token %}
+        {% for field in form %}
+            {% if not field.name == "meta_data"%}
+            <div class="form-group">
+                {% if field.name == "article" %}
+                    <label for="quillEditor">{{ field.label }}</label>
+                    <div id="quillEditor" style="height: 200px">{{ field.value|safe }}</div>
+                    {{ field|attr:"style:display:none;" }} 
+                {% else %}
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field|add_class:"form-control" }}
+                {% endif %}
             {% endif %}
-        {% endif %}
+            </div>
+        {% endfor %}
+        <div class="form-group">
+            <label for="metatagLookup">Lookup/Add Metatag:</label>
+            <input type="text" id="metatagLookup" class="form-control" placeholder="Type to search or add a new tag..." />
         </div>
-    {% endfor %}
-    <div class="form-group">
-        <label for="metatagLookup">Lookup/Add Metatag:</label>
-        <input type="text" id="metatagLookup" class="form-control" placeholder="Type to search or add a new tag..." />
+
+        <div class="form-group">
+            <label>Metadata Tags:</label>
+            <div id="selectedMetatags"></div>
+            <input type="hidden" name="meta_data" id="meta_data_input" />
+        </div>
+        <br />
+
+        <button type="submit" class="btn btn-danger">Save Changes</button>
+        <button type="button" class="btn btn-primary" onclick="window.history.back();">
+            Go Back (Do Not Save)
+        </button>
+    </form>
+
+    <!-- We are using the data attributes of this div to pass the metatagLookup to JavaScript -->
+    <div id="metatagData" data-metatags="{{ all_tags_json }}"></div>
+    <!-- We are using the data attributes of this div to pass the intialMetatags to JavaScript -->
+    <div id="initialMetatags" data-metatags="{{ associated_metatags|join:','|default:'' }}"></div>
+
+    {% if form.errors %}
+    <div class="alert alert-danger">
+        <ul>
+            {% for field, errors in form.errors.items %} {% for error in errors %}
+            <li><strong>{{ field }}:</strong> {{ error|escape }}</li>
+            {% endfor %} {% endfor %}
+        </ul>
     </div>
+    {% endif %}
 
-    <div class="form-group">
-        <label>Metadata Tags:</label>
-        <div id="selectedMetatags"></div>
-        <input type="hidden" name="meta_data" id="meta_data_input" />
-    </div>
-    <br />
-
-    <button type="submit" class="btn btn-danger">Save Changes</button>
-    <button type="button" class="btn btn-primary" onclick="window.history.back();">
-        Go Back (Do Not Save)
-    </button>
-</form>
-
-<!-- We are using the data attributes of this div to pass the metatagLookup to JavaScript -->
-<div id="metatagData" data-metatags="{{ all_tags_json }}"></div>
-<!-- We are using the data attributes of this div to pass the intialMetatags to JavaScript -->
-<div id="initialMetatags" data-metatags="{{ associated_metatags|join:','|default:'' }}"></div>
-
-{% if form.errors %}
-<div class="alert alert-danger">
-    <ul>
-        {% for field, errors in form.errors.items %} {% for error in errors %}
-        <li><strong>{{ field }}:</strong> {{ error|escape }}</li>
-        {% endfor %} {% endfor %}
-    </ul>
-</div>
-{% endif %}
 {% endblock %}
 
-{% block extra_js %}
-<script>
-    // Wait until the document content is fully loaded before running the script
-    $(document).ready(function () {
-        initialiseArticleEditor("edit");
-    });
-</script>
+{% block javascript %}
+
+    <script>
+        // Wait until the document content is fully loaded before running the script
+        $(document).ready(function () {
+            // Initialise the Quill Editor
+            initialiseArticleEditor("edit");
+        });
+    </script>
+
 {% endblock %}

@@ -1,7 +1,10 @@
 {% extends 'knowledge/base.html' %}
 {% block title %}{{ block.super }} - User List {% endblock %}
+
+{% block page_title%}List All Users{% endblock %}
+
 {% block content %}
-    <h2>List All Users</h2>
+
     <table class="table" id="table" style="display:none">
         <thead>
             <tr>
@@ -41,9 +44,11 @@
             <!-- No need to check for %empty% as a user has to exist to see this page -->
         </tbody>
     </table>
+
 {% endblock %}
 
-{% block extra_js %}
+{% block javascript %}
+
     <script>
         // Wait until the document content is fully loaded before running the script
         $(document).ready(function () {
@@ -53,4 +58,5 @@
         });
         $("#table").fadeIn(250);
     </script>
+
 {% endblock%}

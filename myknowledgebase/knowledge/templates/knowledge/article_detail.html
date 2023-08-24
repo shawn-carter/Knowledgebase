@@ -1,30 +1,41 @@
 {% extends 'knowledge/base.html' %}
 {% block title %}{{ block.super }} - Article: {{ article.title }}{% endblock %}
-{% block content %}
-    <h2>{{ article.title }}</h2>
 
+{% block page_title%}{{ article.title }}{% endblock %}
+
+{% block content %}
+
+    <!-- If the article is (soft) deleted show this alert (only SuperUsers can see this template if the article is deleted)-->
     {% if is_deleted %}
         <div class="alert alert-danger" role="alert">
             This Article has been Deleted and is not visible to Normal Users!
         </div>
     {% endif %}
+
+    <!-- Display the Article inside a div with class ql-editor and ql-snow to use Quill CSS -->
     <article>
         <div class="ql-editor ql-snow">      
             {{ article.article|safe }}
         </div>
     </article>
+
+    <!-- If user is SuperUser or the author of the document show the Edit Article button -->
     {% if user.is_superuser or article.created_by == user %}
         <a href="{% url 'edit_article' article.id %}" class="btn btn-warning mb-2">Edit Article</a>
     {% endif %}
+
+    <!-- Display Author and Display Date-->
     <p><strong>Author:</strong> <a href="{% url 'user_articles' article.created_by.id %}"
             title="See all articles by {{ article.created_by.username }}">{{ article.created_by.username }}</a></p>
     <p><strong>Created Date:</strong> {{ article.created_datetime|date:"d/m/Y H:i:s" }}</p>
 
+    <!-- If the article has been modified since creation, show the last modified user and date of modification -->
     {% if article.last_modified_by %}
         <p><strong>Last Modified By:</strong> {{ article.last_modified_by }}</p>
         <p><strong>Last Modified Date:</strong> {{ article.modified_datetime|date:"d/m/Y H:i:s" }}</p>
     {% endif %}
 
+    <!-- Show the Article no. of Views, Rating and no. of Metatags -->
     <p><strong>Views:</strong> {{ article.views }}</p>
     <p><strong>Rating:</strong>
     {% if article.rating != 0.0 or article.downvotes.count > 0 %}
@@ -35,30 +46,34 @@
     </p>
     <p><strong># of MetaTags:</strong> {{ article.meta_data.count }} </p>
 
+    <!-- If the article wasn't created by the user who is viewing it - and user is not a superuser show the Up and Downvote buttons  -->
     {% if user != article.created_by and not user.is_superuser %}
         <button class="btn btn-success m-2" id="upvote" {% if user_has_upvoted %} disabled {% endif %}>Upvote</button>
         <button class="btn btn-danger m-2" id="downvote" {% if user_has_downvoted %} disabled {% endif %}>Downvote</button>
     {% endif %}
 
+    <!-- Display the Article MetaTags -->
     <h3>Metadata Tags</h3>
-    <div class="mt-3 text-center">
+    <div class="mt-3">
     {% for tag in article.meta_data.all %}
         <a href="{% url 'home' %}?search={{ tag.name }}" class="btn btn-secondary mb-1">{{ tag.name }}</a>
     {% endfor %}
     </div>
 
-    <!-- Show Delete or Undelete and Permanently Delete for SuperUser-->
+    <!-- If the user is SuperUser show Delete or Undelete and Permanently Delete-->
     {% if user.is_superuser %}
         {% if is_deleted %}
             <a href="{% url 'undelete_article' article.id %}" class="btn btn-success m-1">Undelete Article</a>
             <a href="{% url 'confirm_permanent_delete' article.id %}" class="btn btn-danger m-1">Permanently Delete</a>
         {% else %}
-            <a href="{% url 'delete_article' article.id %}" class="btn btn-danger m-1">Delete Article</a>
+            <a href="{% url 'delete_article' article.id %}" class="btn btn-danger m-2">Delete Article</a>
         {% endif %}
     {% endif %}
+
 {% endblock %}
 
-{% block extra_js %}
+{% block javascript %}
+
     <script>
         // Wait for the page to load
         window.onload = function () {
@@ -98,4 +113,5 @@
             });
         }
     </script>
+    
 {% endblock %}

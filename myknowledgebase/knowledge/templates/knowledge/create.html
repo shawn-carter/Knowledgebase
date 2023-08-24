@@ -4,6 +4,7 @@
 {% block page_title%}Create New Article{% endblock %}
 
 {% block content %}
+
     <form method="POST" id="kbEntryForm" novalidate>
         {% csrf_token %}
         {% for field in form %}
@@ -53,10 +54,13 @@
 {% endblock %}
 
 {% block javascript %}
-<script>
-    $(document).ready(function () {
-        // Wait till the page is loaded then initialise the Quill Editor
-        initialiseArticleEditor("new");
-    });
-</script>
+
+    <script>
+        // Wait until the document content is fully loaded before running the script
+        $(document).ready(function () {
+            // Initialise the Quill Editor
+            initialiseArticleEditor("new");
+        });
+    </script>
+
 {% endblock %}

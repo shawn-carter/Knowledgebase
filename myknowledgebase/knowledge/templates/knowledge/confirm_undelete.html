@@ -4,12 +4,14 @@
 {% block page_title%}Confirm Undelete{% endblock %}
 
 {% block content %}
+
     <div class='col-md-4 offset-md-4 text-center'>
         <p>Are you sure you want to undelete the article titled:<br>"{{ article.title }}"?</p>
-        <form method="post">
+        <form method="POST">
             {% csrf_token %}
             <button type="submit" class="btn btn-danger m-2">Yes, UnDelete</button>
             <a href="{% url 'article_detail' article.id %}" class="btn btn-secondary m-2">No, Keep Deleted</a>
         </form>
     </div>
+    
 {% endblock %}

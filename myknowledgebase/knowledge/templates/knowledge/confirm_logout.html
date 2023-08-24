@@ -4,12 +4,14 @@
 {% block page_title%}Confirm Logout{% endblock %}
 
 {% block content %}
+
     <div class='col-md-4 offset-md-4 text-center'>
         <p>Are you sure you want to logout?</p>
-        <form method="post">
+        <form method="POST">
             {% csrf_token %}
             <button type="submit" class="btn btn-danger">Yes</button>
             <a href="{% url 'home' %}" class="btn btn-secondary">No</a>
         </form>
     </div>
+    
 {% endblock %}

@@ -392,28 +392,35 @@ def home(request):
     - top_rated_articles: A list of the 5 highest-rated KBEntry objects.
     - search_term: The search term entered by the user, if any.
     """
-    search_term = request.GET.get("search", "")
+    search_term = request.GET.get("search", None)
     articles = KBEntry.objects.none()  # Default to no entries
+    
+    # Check if search parameter is present in the request
+    if search_term is not None:
+        search_term = search_term.strip()
+        if search_term:
+             # Get all articles
+            all_articles = KBEntry.objects.filter(
+                deleted_datetime__isnull=True
+            )
 
-    if search_term:
-        # Get all articles
-        all_articles = KBEntry.objects.filter(
-            deleted_datetime__isnull=True
-        )
-
-        # Filter articles based on the search term, but exclude HTML tags
-        # As search was bringing back articles with a search like qwe - this might have been included in an image
-        articles = [
-            article for article in all_articles
-            if search_term.lower() in strip_tags(article.article).lower() # match if in article after stripping tags
-            or search_term.lower() in article.title.lower() # match if in article title
-            or any(search_term.lower() in tag.name.lower() for tag in article.meta_data.all()) # match if in any tags
-            or search_term.lower() in article.created_by.username.lower() #match on username
-        ]
-        
-        for article in articles:
-            article.article = strip_tags(article.article.replace("<p>", " ")) # strip tags, as we want to display without in a table
-
+            # Filter articles based on the search term, but exclude HTML tags
+            # As search was bringing back articles with a search like qwe - this might have been included in an image
+            articles = [
+                article for article in all_articles
+                if search_term.lower() in strip_tags(article.article).lower() # match if in article after stripping tags
+                or search_term.lower() in article.title.lower() # match if in article title
+                or any(search_term.lower() in tag.name.lower() for tag in article.meta_data.all()) # match if in any tags
+                or search_term.lower() in article.created_by.username.lower() #match on username
+            ]
+            for article in articles:
+                article.article = strip_tags(article.article.replace("<p>", " ")) # strip tags, as we want to display without in a table
+        else:
+            # Code for handling an empty search term (showing all articles)
+            articles = KBEntry.objects.filter(deleted_datetime__isnull=True)
+            for article in articles:
+                article.article = strip_tags(article.article.replace("<p>", " ")) 
+       
     # If search results return less than 5 articles or no search termy:
     if len(articles) < 5 or not search_term:
         newest_articles = KBEntry.objects.filter(
@@ -432,7 +439,7 @@ def home(request):
         "articles": articles, # The articles with tags stripped from article.article
         "newest_articles": newest_articles, # top 5 newest articles
         "top_rated_articles": top_rated_articles, # top 5 rated articles
-        "search_term": search_term, # the original search term
+        "search_term": search_term if search_term is not None else "", # the original search term
     }
 
     return render(request, "knowledge/home.html", context)

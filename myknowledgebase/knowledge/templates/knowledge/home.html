@@ -71,7 +71,7 @@
     </table>
     {% elif search_term %}
         <!-- If no articles found-->
-        <p>No Articles found that match the search term: "{{ search_term }}"</p>
+        <p class='title'>No Articles found that match the search term: "{{ search_term }}"</p>
     {% endif %}
 
     <!-- If there are less than 5 articles retrieved or if we haven't got any results just came here display the top 5 and 5 newest articles -->
@@ -133,5 +133,5 @@
             $("#table").fadeIn(100);
         });
     </script>
-    
+
 {% endblock%}

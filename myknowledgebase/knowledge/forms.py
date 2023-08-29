@@ -76,12 +76,17 @@ class NewUserForm(forms.ModelForm):
         cleaned_data = super().clean()
         password1 = cleaned_data.get("password1")
         password2 = cleaned_data.get("password2")
+        username = cleaned_data.get("username")
 
         # Check if password1 is valid
         if password1:
             # Check if password1 matches password2
             if password1 != password2:
                 self.add_error("password2", "Passwords must match")
+                
+            if password1 == username:
+                self.add_error("password1", "Password cannot be the same as the username")
+            
         return cleaned_data
 
     # Save the user with new password = password1

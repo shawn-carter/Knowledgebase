@@ -76,10 +76,11 @@
 
     <script>
         // Wait for the page to load
-        window.onload = function () {
+        $(document).ready(function () {
 
             // Upvote button - if I put the url and csrf in data-attributes on the button I can move this to static file
             $('#upvote').click(function () {
+                console.log("Upvote")
                 $.ajax({
                     url: "{% url 'upvote_article' article.id %}",
                     type: "POST",
@@ -97,6 +98,7 @@
 
             // Downvote button
             $('#downvote').click(function () {
+                console.log("Downvote")
                 $.ajax({
                     url: "{% url 'downvote_article' article.id %}",
                     type: "POST",
@@ -111,7 +113,7 @@
                     }
                 })
             });
-        }
+        })
     </script>
 
 {% endblock %}

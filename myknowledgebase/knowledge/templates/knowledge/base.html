@@ -155,8 +155,8 @@
 
     <!-- Script to display the Alertify Messages on Page Load-->
     <script>
-
-        window.onload = function () {
+        // Wait until the document content is fully loaded before running the script
+        $(document).ready(function () {
             {% for message in messages %}
             if ("{{ message.level_tag }}" === "success") {
                 alertify.success("{{ message }}");
@@ -169,7 +169,7 @@
                 console.log("{{ message }}")
             }
             {% endfor %}
-        }
+        })
 
     </script>
 

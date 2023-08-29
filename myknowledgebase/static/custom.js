@@ -286,3 +286,4 @@ function updateMetaDataInput(selectedMetatags, meta_data_input) {
 function stripTags(input) {
   return input.replace(/<\/?[^>]+(>|$)/g, "");
 }
+

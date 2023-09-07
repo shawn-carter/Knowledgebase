@@ -122,3 +122,9 @@ The ``User`` model is the Django built in User model.
 Testing
 =======
 I used Django built in tests - there are over 100 tests, testing the models, forms and views - with unit tests and some integration tests.
+To run the tests
+
+.. code:: python
+
+    python manage.py test
+

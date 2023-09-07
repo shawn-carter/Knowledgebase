@@ -1,7 +1,35 @@
 =========================
 Welcome to Knowledgebase!
 =========================
+This application was written by me, using Django with SQLiteDB for an assignment for a level 5 module called 'Software Engineering and Agile'.
+The application makes use of several libraries, including Bootstrap5, jQuery, DataTables.js, Quill.js and Alertify.js
 
+It is a simple application, incorporating user login and registration, password reset via link (the pythonanywhere platform does not have the ability to send emails).
+
+Logged in users can:
+  + Search the Knowledgebase (this searches in the article title, article body and for author name).
+  + Search results are displayed in a table and allows access to the article details via a link, but also allows a user to click on the author (to see all articles by this author), or they can click on the Metadata Tags to perform a search for all articles with that tag.
+  + Search results can be sorted by Title, Author, Article Extract or Metatags, a user can also search within the search results to filter the search results.
+  + Create a New Article - utilising a Quill.js editor, the user can create a rich text article, and add meta tags.  Metatags can be created or selected from a drop down which utilises a lookup based on the text being typed.
+  + See article details, including Author, Created Date, Last Modified By and Date, Views and Rating along with Metatags.
+  + Edit their own articles, using similar page to create, the title, article body can be modified - and tags can be added or removed.
+  + See All Articles - Like the search results these can be sorted by Title, Rating, Summary, Created By, Created Date or Tags.  Links to the article details, all articles by an author and links to search for metatags are displayed in the view.
+  + My Articles - Shows a list of all the users articles, can again be sorted by any column.
+  + Anywhere the article title is displayed, it shows a badge - the colour of the badge reflects the user rating, red for poor (25% or less), orange for 26-50%, yellow for 50-74% and green for over 75% - the number in the badge is the amount of times the article has been viewed.
+  + Any article not written by the logged in user can be up or dowvoted (you cannot vote on your own articles)
+  + Change their password - you need to give your old password + valid password x2
+  + Log out - with confirmation.
+
+Admin (SuperUsers) can also:
+  + Look at the audit logs, in a datatable - that can be filtered with a search box, the results are paginated.  Logs are created when an article is created, modified, soft deleted and permanently deleted.
+  + Manage Metatags, tags can be deleted (whether they are used or not) - this can be used to delete orphaned tags (where an article has been permanently deleted, the tag is not removed intentionally).
+  + List all users, and has the ability to Enable and Disable User Accounts - user is not allowed to disable their own account for obvious reasons.
+  + See All Articles, allows SuperUser to see all articles (including those which have been soft deleted) - articles can be soft deleted from this view (without confirmation) for ease of use.
+  + See article details - allows the SuperUser to Edit or Soft Delete any article (with confirmation). Soft deleted articles are not returned in search results, or any other view (such as my articles etc).
+  + When an article is soft deleted, it can be permanently deleted - I only added this feature to meet the needs of showing full CRUD capabilities. The article can also be undeleted from the soft deleted state.
+  + If an article is permanently deleted then references to the article in the audit logs are removed and replaced with N/A, but the audit log still shows that the article was created, edited or deleted.
+  + Admin users cannot up or downvote articles (intentional).
+  
 Source code
   http://github.com/shawn-carter/Knowledgebase
 
@@ -71,7 +99,7 @@ Collect Static Files (if needed)
         
 .. code:: python
 
-    python manage.py createsuperuser
+    python manage.py collectstatic
 
 Run the Development Server
 
@@ -85,11 +113,12 @@ Models
 The ``KBEntry`` model represents a KnowledgeBase Article  - this is the main model in the application, 
 holding the details of the Article along with things like upvotes, rating, author, created date etc.
 
-The ``Tags`` model is used to hold all the Metadata Tags
+The ``Tags`` model is used to hold all the Metadata Tags.
 
 The ``Audit`` model is used to store and track events such as Article creation, editting and deletions.
 
-Using the included sqlite3 DB
-=============================
-User: sc3639
-Password: To Add Later when development finished
+The ``User`` model is the Django built in User model.
+
+Testing
+=======
+I used Django built in tests - there are over 100 tests, testing the models, forms and views - with unit tests and some integration tests.

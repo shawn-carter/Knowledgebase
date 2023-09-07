@@ -8,15 +8,23 @@ It is a simple application, incorporating user login and registration, password 
 
 Logged in users can:
   + Search the Knowledgebase (this searches in the article title, article body and for author name).
-  + Search results are displayed in a table and allows access to the article details via a link, but also allows a user to click on the author (to see all articles by this author), or they can click on the Metadata Tags to perform a search for all articles with that tag.
-  + Search results can be sorted by Title, Author, Article Extract or Metatags, a user can also search within the search results to filter the search results.
-  + Create a New Article - utilising a Quill.js editor, the user can create a rich text article, and add meta tags.  Metatags can be created or selected from a drop down which utilises a lookup based on the text being typed.
+      - Search results are displayed in a table and allows access to the article details via a link, but also allows a user to click on the author (to see all articles by this author), or they can click on the Metadata Tags to perform a search for all articles with that tag.
+      - Search results can be sorted by Title, Author, Article Extract or Metatags, a user can also filter the search results with the table search.
+      - Columns can be re-arranged.
+  + Create a New Article - utilising a Quill.js editor, the user can create a rich text article, and add meta tags.
+      - Metatags can be created or selected from a drop down which utilises a lookup based on the text being typed.
   + See article details, including Author, Created Date, Last Modified By and Date, Views and Rating along with Metatags.
   + Edit their own articles, using similar page to create, the title, article body can be modified - and tags can be added or removed.
-  + See All Articles - Like the search results these can be sorted by Title, Rating, Summary, Created By, Created Date or Tags.  Links to the article details, all articles by an author and links to search for metatags are displayed in the view.
-  + My Articles - Shows a list of all the users articles, can again be sorted by any column.
-  + Anywhere the article title is displayed, it shows a badge - the colour of the badge reflects the user rating, red for poor (25% or less), orange for 26-50%, yellow for 50-74% and green for over 75% - the number in the badge is the amount of times the article has been viewed.
-  + Any article not written by the logged in user can be up or dowvoted (you cannot vote on your own articles)
+  + See All Articles - Like the search results these can be sorted by Title, Rating, Summary, Created By, Created Date or Tags.
+      - Links to the article details, all articles by an author and links to search for metatags are displayed in the view.
+  + My Articles - Shows a list of all your articles, can again be sorted by any column.
+      - Anywhere the article title is displayed, it shows a badge - the colour of the badge reflects the user rating
+          + Red for poor (25% or less)
+          + Orange for below average (26-49%)
+          + Yellow for averate (50-74%)
+          + Green for good (75%+)
+      - The number in the badge is the amount of times the article has been viewed.
+      - Any article not written by the logged in user can be up or dowvoted (you cannot vote on your own articles)
   + Change their password - you need to give your old password + valid password x2
   + Log out - with confirmation.
 
@@ -32,6 +40,9 @@ Admin (SuperUsers) can also:
   
 Source code
   http://github.com/shawn-carter/Knowledgebase
+
+Working demonstration
+  https://shawncarter.pythonanywhere.com
 
 Installation and Setup
 ======================

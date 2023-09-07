@@ -7,10 +7,12 @@ The application makes use of several libraries, including Bootstrap5, jQuery, Da
 It is a simple application, incorporating user login and registration, password reset via link (the pythonanywhere platform does not have the ability to send emails).
 
 Logged in users can:
-  + Search the Knowledgebase (this searches in the article title, article body and for author name).
-      - Search results are displayed in a table and allows access to the article details via a link, but also allows a user to click on the author (to see all articles by this author), or they can click on the Metadata Tags to perform a search for all articles with that tag.
+  + Search the Knowledgebase
+      - This searches in the article title, article body and for author name.
+      - Search results are displayed in a paginated table and allows access to the article details via a link, but also allows a user to click on the author (to see all articles by this author), or they can click on the Metadata Tags to perform a search for all articles with that tag.
       - Search results can be sorted by Title, Author, Article Extract or Metatags, a user can also filter the search results with the table search.
       - Columns can be re-arranged.
+      - If there are less than 5 articles returned in a search (or when the search page is opened) then the top 5 rated articles, and the newest 5 articles are shown below the search bar/search results.
   + Create a New Article - utilising a Quill.js editor, the user can create a rich text article, and add meta tags.
       - Metatags can be created or selected from a drop down which utilises a lookup based on the text being typed.
   + See article details, shows the article title and article content, and shows article information including: Author, Created Date, Last Modified By and Date, Views and Rating along with Metatags.

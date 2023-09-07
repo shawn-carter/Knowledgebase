@@ -13,7 +13,7 @@ Logged in users can:
       - Columns can be re-arranged.
   + Create a New Article - utilising a Quill.js editor, the user can create a rich text article, and add meta tags.
       - Metatags can be created or selected from a drop down which utilises a lookup based on the text being typed.
-  + See article details, including Author, Created Date, Last Modified By and Date, Views and Rating along with Metatags.
+  + See article details, shows the article title and article content, and shows article information including: Author, Created Date, Last Modified By and Date, Views and Rating along with Metatags.
   + Edit their own articles, using similar page to create, the title, article body can be modified - and tags can be added or removed.
   + See All Articles - Like the search results these can be sorted by Title, Rating, Summary, Created By, Created Date or Tags.
       - Links to the article details, all articles by an author and links to search for metatags are displayed in the view.
@@ -23,6 +23,7 @@ Logged in users can:
           + Orange for below average (26-49%)
           + Yellow for averate (50-74%)
           + Green for good (75%+)
+          + Grey for articles that have not yet been rated
       - The number in the badge is the amount of times the article has been viewed.
       - Any article not written by the logged in user can be up or dowvoted (you cannot vote on your own articles)
   + Change their password - you need to give your old password + valid password x2
@@ -32,11 +33,12 @@ Admin (SuperUsers) can also:
   + Look at the audit logs, in a datatable - that can be filtered with a search box, the results are paginated.  Logs are created when an article is created, modified, soft deleted and permanently deleted.
   + Manage Metatags, tags can be deleted (whether they are used or not) - this can be used to delete orphaned tags (where an article has been permanently deleted, the tag is not removed intentionally).
   + List all users, and has the ability to Enable and Disable User Accounts - user is not allowed to disable their own account for obvious reasons.
-  + See All Articles, allows SuperUser to see all articles (including those which have been soft deleted) - articles can be soft deleted from this view (without confirmation) for ease of use.
-  + See article details - allows the SuperUser to Edit or Soft Delete any article (with confirmation). Soft deleted articles are not returned in search results, or any other view (such as my articles etc).
-  + When an article is soft deleted, it can be permanently deleted - I only added this feature to meet the needs of showing full CRUD capabilities. The article can also be undeleted from the soft deleted state.
-  + If an article is permanently deleted then references to the article in the audit logs are removed and replaced with N/A, but the audit log still shows that the article was created, edited or deleted.
-  + Admin users cannot up or downvote articles (intentional).
+  + See All Articles, allows SuperUser to see all articles (including those which have been soft deleted) - articles can be edited or soft deleted from this view (without confirmation) for ease of use.
+  + See article details - allows the SuperUser to Edit or Soft Delete any article (with confirmation). 
+      - Soft deleted articles are not returned in search results, or any other view (such as my articles etc).
+      - When an article is soft deleted, it can be permanently deleted - I only added this feature to meet the needs of showing full CRUD capabilities. The article can also be undeleted from the soft deleted state.
+      - If an article is permanently deleted then references to the article in the audit logs are removed and replaced with N/A, but the audit log still shows that the article was created, edited or deleted.
+Admin users cannot up or downvote articles (intentional).
   
 Source code
   http://github.com/shawn-carter/Knowledgebase

@@ -16,6 +16,7 @@ Logged in users can:
   + Create a New Article - utilising a Quill.js editor, the user can create a rich text article, and add meta tags.
       - Metatags can be created or selected from a drop down which utilises a lookup based on the text being typed.
   + See article details, shows the article title and article content, and shows article information including: Author, Created Date, Last Modified By and Date, Views and Rating along with Metatags.
+  
   + Edit their own articles, using similar page to create, the title, article body can be modified - and tags can be added or removed.
   + See All Articles - Like the search results these can be sorted by Title, Rating, Summary, Created By, Created Date or Tags.
       - Links to the article details, all articles by an author and links to search for metatags are displayed in the view.
@@ -27,7 +28,7 @@ Logged in users can:
           + Green for good (75%+)
           + Grey for articles that have not yet been rated
       - The number in the badge is the amount of times the article has been viewed.
-      - Any article not written by the logged in user can be up or dowvoted (you cannot vote on your own articles)
+      - Any article not written by the logged in user can be up or downvoted (you cannot vote on your own articles)
   + Change their password - you need to give your old password + valid password x2
   + Log out - with confirmation.
 

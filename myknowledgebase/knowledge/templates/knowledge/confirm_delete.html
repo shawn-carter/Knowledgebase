@@ -4,6 +4,7 @@
 {% block page_title%}Confirm Deletion{% endblock %}
 
 {% block content %}
+
     <div class='col-md-4 offset-md-4 text-center'>
         <p>Are you sure you want to delete the article titled:<br>"{{ article.title }}"?</p>
         <form method="POST">
@@ -12,4 +13,5 @@
             <a href="{% url 'article_detail' article.id %}" class="btn btn-secondary m-2">No, Leave it</a>
         </form>
     </div>
+    
 {% endblock %}

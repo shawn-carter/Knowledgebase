@@ -74,18 +74,24 @@ def login_view(request):
         return redirect("home")
     
     form = AuthenticationForm(request, data=request.POST) if request.method == "POST" else AuthenticationForm()
-    if request.method == "POST":
-        
+    if request.method == "POST":       
         if form.is_valid():
             username = form.cleaned_data.get("username")
             password = form.cleaned_data.get("password")
             user = authenticate(username=username, password=password)
             if user is not None:
                 django_login(request, user)
+                Audit(
+                    user=request.user,
+                    kb_entry=None,
+                    action_details=f"User Logged In",
+                ).save()
                 messages.success(request, f"You are now logged in as {username}.")
                 # Check if 'next' parameter is present in GET data
                 next_url = request.GET.get('next') or 'home'
                 return redirect(next_url)
+            else:
+                messages.error(request, "Invalid username or password")
         else:
             username = form.cleaned_data.get("username")
             password = form.cleaned_data.get("password")
@@ -95,6 +101,14 @@ def login_view(request):
                 if not password:
                     messages.error(request, "Password cannot be blank")
             else:
+                # Add audit log for unsuccessful login attempt
+                ip_address = request.META.get('REMOTE_ADDR')               
+                Audit(
+                    user=None,
+                    kb_entry=None,
+                    action_details=f"Failed login attempt for username: {username}",
+                    ip_address=ip_address
+                ).save()
                 messages.error(request, "Invalid username or password")
         
     return render(
@@ -323,6 +337,11 @@ def logout(request):
     Returns:
     - HttpResponseRedirect: A redirect response object that redirects the user to the home page.
     """
+    Audit(
+        user=request.user,
+        kb_entry=None,
+        action_details=f"User Logged Out",
+        ).save()
     django_logout(request)
     messages.success(request, "You were successfully logged out.")
     return redirect("login")

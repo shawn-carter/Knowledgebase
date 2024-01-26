@@ -11,7 +11,7 @@
     <table class="table" id="table" style="display: none">
         <thead>
             <tr>
-                <th>User</th>
+                <th>User/IP Address</th>
                 <th>Action Date & Time</th>
                 <th>Article Name</th>
                 <th>Action Details</th>
@@ -20,7 +20,11 @@
         <tbody>
             {% for audit in audits %}
             <tr>
-                <td>{{ audit.user.username }}</td>
+                {%if audit.user%}               
+                    <td>{{ audit.user.username }}</td>
+                {% else %}
+                    <td>{{ audit.ip_address }}</td>
+                {% endif %}
                 <td>{{ audit.action_datetime }}</td>
                 {% if audit.kb_entry %}
                 <td>

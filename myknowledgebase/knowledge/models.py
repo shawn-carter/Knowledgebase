@@ -85,11 +85,11 @@ class Audit(models.Model):
     thereby allowing for accountability and potential analysis of user activity.
     """
 
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
     action_datetime = models.DateTimeField(auto_now_add=True)
     kb_entry = models.ForeignKey(KBEntry, on_delete=models.SET_NULL, null=True)
     action_details = models.CharField(max_length=255)
-
+    ip_address = models.CharField(max_length=100, null=True, blank=True)
 
 def calculate_rating(article):
     """

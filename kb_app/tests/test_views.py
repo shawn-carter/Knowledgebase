@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 from django.test import TestCase
 from django.urls import reverse
 from django.contrib.messages import get_messages
-from knowledge.models import KBEntry
+from kb_app.models import KBEntry
 from .base_tests import BaseTestCaseWithUser, BaseTestCaseWithSuperUser
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.test import TestCase, tag

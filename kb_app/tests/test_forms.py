@@ -1,5 +1,5 @@
 from django.test import TestCase
-from knowledge.forms import (
+from kb_app.forms import (
     NewUserForm,
     KBEntryForm,
     RequestPasswordResetForm,

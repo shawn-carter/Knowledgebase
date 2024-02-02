@@ -7,7 +7,7 @@ environment-defaults:
     branch: null
     repository: null
 global:
-  application_name: myknowledgebase
+  application_name: kb_app
   branch: null
   default_ec2_keyname: aws-eb
   default_platform: Python 3.11 running on 64bit Amazon Linux 2023

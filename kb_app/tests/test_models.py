@@ -2,8 +2,8 @@
 
 from django.contrib.auth.models import User
 from .base_tests import BaseTestCaseWithUser
-from knowledge.models import KBEntry, Audit, Tag
-from knowledge.models import calculate_rating
+from kb_app.models import KBEntry, Audit, Tag
+from kb_app.models import calculate_rating
 
 # These tests are for the Knowledgebase Models
 

@@ -1,7 +1,7 @@
 from django.test import TestCase, Client
 from django.contrib.auth.models import User
 from django.urls import reverse
-from knowledge.models import KBEntry
+from kb_app.models import KBEntry
 from django.utils import timezone
 
 # Class to be used with functions that need a user to be logged in

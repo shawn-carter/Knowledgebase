@@ -1,0 +1,11 @@
+asgiref==3.7.2
+Django==4.2.4
+django-extensions==3.2.3
+django-widget-tweaks==1.4.12
+graphviz==0.20.1
+gunicorn==21.2.0
+packaging==23.2
+pydot==1.4.2
+pyparsing==3.1.1
+sqlparse==0.4.4
+tzdata==2023.3

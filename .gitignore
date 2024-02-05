@@ -29,7 +29,7 @@ __pycache__/
 .env
 
 # Ignore static files collected by Django's collectstatic command
-/static/
+#/static/ - removed as static files not being deployed
 
 # Ignore the media folder where Django by default will put uploaded files
 /media/

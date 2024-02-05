@@ -26,8 +26,12 @@ SECRET_KEY = 'django-insecure--19f7_(icnwtzewefrp2f-nx$qyzhu3g4av3)8pdnez=hz4bky
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['shawncarter.pythonanywhere.com','127.0.0.1','172.31.20.219','aws.shwan.tech','azure.shwan.tech']
+ALLOWED_HOSTS = ['shawncarter.pythonanywhere.com','127.0.0.1','172.31.20.219','51.21.21.3','aws.shwan.tech','azure.shwan.tech','knowledgebase-dev.eu-north-1.elasticbeanstalk.com']
 
+CSRF_TRUSTED_ORIGINS = [
+    'https://azure.shwan.tech',
+    # Add any other domain variations if necessary
+]
 
 # Application definition
 

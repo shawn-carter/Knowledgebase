@@ -33,3 +33,6 @@ __pycache__/
 
 # Ignore the virtual environment
 venv/
+
+# Ignore the SQLLite DB
+db.sqlite3

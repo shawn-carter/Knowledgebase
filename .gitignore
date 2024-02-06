@@ -22,9 +22,6 @@ __pycache__/
 # Ignore all folders named .ipynb_checkpoints that are generated when you run jupyter notebook
 .ipynb_checkpoints
 
-# Ignore migrations directory in Django
-*/migrations/*
-
 # Ignore all the .env files that contain sensitive information
 .env
 

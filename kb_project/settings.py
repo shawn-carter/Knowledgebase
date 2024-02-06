@@ -21,12 +21,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure--19f7_(icnwtzewefrp2f-nx$qyzhu3g4av3)8pdnez=hz4bky'
+SECRET_KEY = os.environ.get('SECRET_KEY', '65#oxwiww2y6aeaiadi&#s9va!5puhqkx=6a(1p1u#*%($!#5=')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['shawncarter.pythonanywhere.com','127.0.0.1','172.31.20.219','51.21.21.3','aws.shwan.tech','azure.shwan.tech','knowledgebase-dev.eu-north-1.elasticbeanstalk.com']
+ALLOWED_HOSTS = ['shawncarter.pythonanywhere.com','127.0.0.1','azure.shwan.tech']
 
 CSRF_TRUSTED_ORIGINS = [
     'https://azure.shwan.tech',
@@ -82,12 +82,28 @@ WSGI_APPLICATION = 'kb_project.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+# Check if running in Azure environment
+if os.environ.get('AZURE_SQL_SERVER'):
+    DATABASES = {
+        'default': {
+            'ENGINE': 'sql_server.pyodbc',
+            'NAME': os.environ['AZURE_SQL_DATABASE'],
+            'USER': os.environ['AZURE_SQL_USER'],
+            'PASSWORD': os.environ['AZURE_SQL_PASSWORD'],
+            'HOST': os.environ['AZURE_SQL_SERVER'],
+            'PORT': os.environ['AZURE_SQL_PORT'],
+            'OPTIONS': {
+                'driver': 'ODBC Driver 17 for SQL Server',
+            },
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        }
+    }
 
 
 # Password validation

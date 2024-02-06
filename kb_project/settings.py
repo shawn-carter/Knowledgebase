@@ -24,7 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('SECRET_KEY', '65#oxwiww2y6aeaiadi&#s9va!5puhqkx=6a(1p1u#*%($!#5=')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['shawncarter.pythonanywhere.com','127.0.0.1','azure.shwan.tech']
 

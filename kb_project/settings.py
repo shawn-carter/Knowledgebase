@@ -86,7 +86,7 @@ WSGI_APPLICATION = 'kb_project.wsgi.application'
 if os.environ.get('AZURE_SQL_SERVER'):
     DATABASES = {
         'default': {
-            'ENGINE': 'sql_server.pyodbc',
+            'ENGINE': 'mssql',
             'NAME': os.environ['AZURE_SQL_DATABASE'],
             'USER': os.environ['AZURE_SQL_USER'],
             'PASSWORD': os.environ['AZURE_SQL_PASSWORD'],

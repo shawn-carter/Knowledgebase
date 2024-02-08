@@ -26,7 +26,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY', '65#oxwiww2y6aeaiadi&#s9va!5puhqkx=6a(
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['shawncarter.pythonanywhere.com','127.0.0.1','azure.shwan.tech']
+ALLOWED_HOSTS = ['shawncarter.pythonanywhere.com','127.0.0.1','azure.shwan.tech','shwanapp-env.eba-dkiwbguq.eu-north-1.elasticbeanstalk.com']
 
 CSRF_TRUSTED_ORIGINS = [
     'https://azure.shwan.tech',

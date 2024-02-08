@@ -35,4 +35,4 @@ __pycache__/
 venv/
 
 # Ignore the SQLLite DB
-db.sqlite3
+#db.sqlite3

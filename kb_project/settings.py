@@ -38,6 +38,7 @@ CSRF_TRUSTED_ORIGINS = [
 INSTALLED_APPS = [
     'kb_app',
     'mssql',
+    'corsheaders',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -57,6 +58,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
 ]
 
 ROOT_URLCONF = 'kb_project.urls'
@@ -98,6 +100,23 @@ if os.environ.get('AZURE_SQL_SERVER'):
             },
         }
     }
+    # Secure settings for production in Azure
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_BROWSER_XSS_FILTER = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    X_FRAME_OPTIONS = 'DENY'
+    SECURE_HSTS_SECONDS = 31536000  # 1 year
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+    
+    # CORS Policy
+    CORS_ALLOWED_ORIGINS = [
+    "http://127.0.0.1:8000"
+    # ... other domains ...
+    ]
 else:
     DATABASES = {
         'default': {

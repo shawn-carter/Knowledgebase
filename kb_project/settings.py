@@ -86,20 +86,7 @@ WSGI_APPLICATION = 'kb_project.wsgi.application'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
 # Check if running in Azure environment
-if os.environ.get('AZURE_SQL_SERVER'):
-    DATABASES = {
-        'default': {
-            'ENGINE': 'mssql',
-            'NAME': os.environ['AZURE_SQL_DATABASE'],
-            'USER': os.environ['AZURE_SQL_USER'],
-            'PASSWORD': os.environ['AZURE_SQL_PASSWORD'],
-            'HOST': os.environ['AZURE_SQL_SERVER'],
-            'PORT': os.environ['AZURE_SQL_PORT'],
-            'OPTIONS': {
-                'driver': 'ODBC Driver 17 for SQL Server',
-            },
-        }
-    }
+if os.environ.get('ENVIRONMENT') == 'PRODUCTION':
     # Secure settings for production in Azure
     SECURE_SSL_REDIRECT = True
     SESSION_COOKIE_SECURE = True
@@ -114,9 +101,18 @@ if os.environ.get('AZURE_SQL_SERVER'):
     
     # CORS Policy
     CORS_ALLOWED_ORIGINS = [
-    "http://127.0.0.1:8000"
+    "http://127.0.0.1:8000",
+    "https://azure.shwan.tech"
     # ... other domains ...
     ]
+    
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        }
+    }
+    
 else:
     DATABASES = {
         'default': {

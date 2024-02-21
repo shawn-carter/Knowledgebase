@@ -88,9 +88,9 @@ WSGI_APPLICATION = 'kb_project.wsgi.application'
 # Check if running in Azure environment
 if os.environ.get('ENVIRONMENT') == 'PRODUCTION':
     # Secure settings for production in Azure
-    #SECURE_SSL_REDIRECT = True
-    #SESSION_COOKIE_SECURE = True
-    #CSRF_COOKIE_SECURE = True
+    SESSION_COOKIE_SECURE = True
+    SESSION_COOKIE_HTTPONLY = True
+    CSRF_COOKIE_SECURE = True
     #SECURE_BROWSER_XSS_FILTER = True
     #SECURE_CONTENT_TYPE_NOSNIFF = True
     #X_FRAME_OPTIONS = 'DENY'

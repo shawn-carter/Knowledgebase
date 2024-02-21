@@ -23,9 +23,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get('SECRET_KEY', '65#oxwiww2y6aeaiadi&#s9va!5puhqkx=6a(1p1u#*%($!#5=')
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
 ALLOWED_HOSTS = ['shawncarter.pythonanywhere.com','127.0.0.1','azure.shwan.tech','knowledgebase-devenv.azurewebsites.net']
 
 CSRF_TRUSTED_ORIGINS = [
@@ -59,6 +56,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'corsheaders.middleware.CorsMiddleware',
+    'csp.middleware.CSPMiddleware',
 ]
 
 ROOT_URLCONF = 'kb_project.urls'
@@ -81,12 +79,36 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'kb_project.wsgi.application'
 
+# Content Security Policy (CSP)
+CSP_DEFAULT_SRC = ("'self'", )
+CSP_SCRIPT_SRC = (
+    "'self'",
+    'https://cdn.datatables.net', 
+    'https://cdn.jsdelivr.net', 
+    'https://cdn.quilljs.com', 
+    'https://code.jquery.com',
+    # ... (any other script sources you need) ...
+)
+CSP_STYLE_SRC = (
+    "'self'",
+    'https://cdn.datatables.net', 
+    'https://cdn.jsdelivr.net',
+    'https://cdn.quilljs.com', 
+    # ... (any other style sources you need) ...
+)
+CSP_IMG_SRC = (
+    "'self'",
+    'https://cdn.jsdelivr.net',
+    # ... (any other image sources you need) ...
+)
 
-# Database
-# https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
 # Check if running in Azure environment
 if os.environ.get('ENVIRONMENT') == 'PRODUCTION':
+    
+    # Turn off Debug in Production Environment
+    DEBUG = False
+    
     # Secure settings for production in Azure
     SESSION_COOKIE_SECURE = True
     SESSION_COOKIE_HTTPONLY = True
@@ -99,13 +121,15 @@ if os.environ.get('ENVIRONMENT') == 'PRODUCTION':
     SECURE_HSTS_PRELOAD = True
     SESSION_EXPIRE_AT_BROWSER_CLOSE = True
     
-    # CORS Policy
+    # Cross Origin Resource Sharing Policy
     CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:8000",
     "https://azure.shwan.tech"
     # ... other domains ...
     ]
     
+    # Database (using Environment variables)
+    # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
     DATABASES = {
         'default': {
             'ENGINE': 'mssql',
@@ -121,6 +145,10 @@ if os.environ.get('ENVIRONMENT') == 'PRODUCTION':
     }
     
 else:
+    # SECURITY WARNING: don't run with debug turned on in production!
+    DEBUG = True
+    
+    # Use the local sqllite DB
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',

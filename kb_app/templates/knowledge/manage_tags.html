@@ -36,7 +36,7 @@
 
 {% block javascript %}
 
-   <script>
+   <script nonce="{{ request.csp_nonce }}">
         // Wait until the document content is fully loaded before running the script
         $(document).ready(function () {
             // Show the DataTable

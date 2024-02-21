@@ -108,8 +108,15 @@ if os.environ.get('ENVIRONMENT') == 'PRODUCTION':
     
     DATABASES = {
         'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+            'ENGINE': 'mssql',
+            'NAME': os.environ['AZURE_SQL_DATABASE'],
+            'USER': os.environ['AZURE_SQL_USER'],
+            'PASSWORD': os.environ['AZURE_SQL_PASSWORD'],
+            'HOST': os.environ['AZURE_SQL_SERVER'],
+            'PORT': os.environ['AZURE_SQL_PORT'],
+            'OPTIONS': {
+                'driver': 'ODBC Driver 17 for SQL Server',
+            },
         }
     }
     

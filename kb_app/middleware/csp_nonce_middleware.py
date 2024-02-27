@@ -1,3 +1,4 @@
+import base64
 import os
 from django.utils.deprecation import MiddlewareMixin
 

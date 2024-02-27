@@ -17,8 +17,6 @@ class CSPNonceMiddleware(MiddlewareMixin):
                 "style-src 'self' https://cdn.datatables.net https://cdn.jsdelivr.net https://cdn.quilljs.com 'sha256-aqNNdDLnnrDOnTNdkJpYlAxKVJtLt9CtFLklmInuUAE=' 'sha256-r06yVUBqP+7ZbDWovXc9AqepL8NwsS69BQIUpScMDvU=' 'sha256-0EZqoz+oBhx7gF4nvY2bSqoGyy4zLjNF+SDQXGp/ZrY=' 'sha256-RvAvREUHojDuwHylTVWZp9DhleqLs6ml8G7LpjCF+EY=' 'sha256-ZdHxw9eWtnxUb3mk6tBS+gIiVUPE3pGM470keHPDFlE='; "
                 "img-src 'self' https://cdn.jsdelivr.net; "
                 "connect-src 'self'; "
-                "style-src 'self'; "
-                "img-src 'self'; "
                 "connect-src 'self'; "
                 "frame-src 'self'; "
                 "font-src 'self'; "

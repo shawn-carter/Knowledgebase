@@ -21,8 +21,8 @@
             <div class="form-group">
                 {% if field.name == "article" %}
                     <label for="quillEditor">{{ field.label }}</label>
-                    <div id="quillEditor" style="height: 200px">{{ field.value|safe }}</div>
-                    {{ field|attr:"style:display:none;" }} 
+                    <div id="quillEditor" class="quill-editor-height">{{ field.value|safe }}</div>
+                    {{ field|add_class:"hidden" }} 
                 {% else %}
                     <label for="{{ field.id_for_label }}">{{ field.label }}</label>
                     {{ field|add_class:"form-control" }}

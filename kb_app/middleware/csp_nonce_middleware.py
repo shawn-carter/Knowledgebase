@@ -15,7 +15,7 @@ class CSPNonceMiddleware(MiddlewareMixin):
                 "default-src 'self'; "
                 "script-src 'self' 'nonce-{}' ; "
                 "style-src 'self' 'sha256-r06yVUBqP+7ZbDWovXc9AqepL8NwsS69BQIUpScMDvU=' 'sha256-0EZqoz+oBhx7gF4nvY2bSqoGyy4zLjNF+SDQXGp/ZrY=' 'sha256-RvAvREUHojDuwHylTVWZp9DhleqLs6ml8G7LpjCF+EY=' 'sha256-aqNNdDLnnrDOnTNdkJpYlAxKVJtLt9CtFLklmInuUAE='; "
-                "img-src 'self' data: *; "
+                "img-src 'self' data:; "
                 "connect-src 'self'; "
                 "frame-src 'self'; "
                 "font-src 'self'; "

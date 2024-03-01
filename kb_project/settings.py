@@ -78,6 +78,8 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'kb_project.wsgi.application'
+AZURE_COMMUNICATION_SERVICES_CONNECTION_STRING = 'endpoint=https://kbcommsservice.uk.communication.azure.com/;accesskey=XwO95+HbpgSkJbhcw1jXOXZBgnBWeJxDPmwrby7E664SCLvJV12LKa2PEcWzHruhK3Kui8IQHrtSSVnYZL68GQ=='
+
 
 # Check if running in Azure environment
 if os.environ.get('ENVIRONMENT') == 'PRODUCTION':

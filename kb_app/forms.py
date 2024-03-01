@@ -200,3 +200,9 @@ class PasswordResetConfirmForm(forms.Form):
             self.add_error("new_password2", "The two password fields didn’t match.")
 
         return cleaned_data
+
+## Test Email Form ##
+class EmailTestForm(forms.Form):
+    to_email = forms.EmailField(label='To Email', widget=forms.EmailInput(attrs={'class': 'form-control'}))
+    subject = forms.CharField(label='Subject', max_length=100, widget=forms.TextInput(attrs={'class': 'form-control'}))
+    message = forms.CharField(label='Message', widget=forms.Textarea(attrs={'class': 'form-control'}))

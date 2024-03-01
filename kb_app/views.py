@@ -1,6 +1,7 @@
 # knowledge/views.py
 
 from django.db import models
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import (authenticate, login as django_login, logout as django_logout, update_session_auth_hash,)
 from django.contrib.auth.decorators import login_required
@@ -18,7 +19,9 @@ from .forms import (
     NewUserForm,
     PasswordResetConfirmForm,
     RequestPasswordResetForm,
+    EmailTestForm
 )
+from azure.communication.email import EmailClient
 from .models import KBEntry, Tag, Audit, calculate_rating
 import json
 
@@ -292,6 +295,34 @@ def password_reset_complete(request):
         return redirect("home")
 
     return render(request, "knowledge/password_reset_complete.html")
+
+def send_email_test(request):
+    if request.method == 'POST':
+        form = EmailTestForm(request.POST)
+        if form.is_valid():
+            to_email = form.cleaned_data['to_email']
+            subject = form.cleaned_data['subject']
+            message = form.cleaned_data['message']
+            
+            try:
+                connection_string = settings.AZURE_COMMUNICATION_SERVICES_CONNECTION_STRING
+                client = EmailClient.from_connection_string(connection_string)
+
+                email_message = {
+                    "senderAddress": f"shwan@mail.shwan.tech",
+                    "recipients": {"to": [{"address": to_email }]},
+                    "content": {"subject": subject, "plainText": message},
+                }
+
+                poller = client.begin_send(email_message)
+                result = poller.result()  # Consider handling or logging the result
+                
+                return redirect('success_page')  # Redirect to a new URL if email is sent successfully
+            except Exception as e:
+                print(e)  # Consider a better error handling approach
+    else:
+        form = EmailTestForm()
+    return render(request, 'knowledge/email_test_form.html', {'form': form})
 
 
 ################################# ------------ End of non authenticated Views ----------

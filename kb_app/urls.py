@@ -9,10 +9,11 @@ urlpatterns = [
     path("login/", views.login_view, name="login"),
     path("register/", views.register, name="register"),
     path("resetpassword/", views.password_reset_request, name="password_reset_request"),
-    path("reset/<int:user_id>/<str:token>/",views.password_reset_confirm,name="password_reset_confirm",),
+    path("reset/<uidb64>/<token>/",views.password_reset_confirm,name="password_reset_confirm",),
+    
     path("password_reset_complete/",views.password_reset_complete,name="password_reset_complete",),
     path('test-email/', views.send_email_test, name='test_email'),
-    
+    path('resetpassword/done/', views.password_reset_done, name='password_reset_done'),
     # ---------- These URLS are for Authenticated Users ----------
     path("", views.home, name="home"),
     path("changepassword/", views.changepassword, name="change_password"),

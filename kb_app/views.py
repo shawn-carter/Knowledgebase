@@ -11,7 +11,9 @@ from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.http import HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404, render, redirect
 from django.utils import timezone
+from django.utils.encoding import force_bytes
 from django.utils.html import strip_tags
+from django.utils.http import urlsafe_base64_encode
 from django.urls import reverse
 from .forms import (
     CustomPasswordChangeForm,
@@ -39,6 +41,23 @@ def undeleteArticle(article):
     article.deleted_datetime = None
     article.deleted_by = None
     article.save()
+
+def send_email(sender, recipient, subject, message):
+    try:
+        client = EmailClient.from_connection_string(settings.AZURE_COMMUNICATION_SERVICES_CONNECTION_STRING)
+
+        email_message = {
+            "senderAddress": sender,
+            "recipients": {"to": [{"address": recipient}]},
+            "content": {"subject": subject, "plainText": message},
+        }
+
+        poller = client.begin_send(email_message)
+        result = poller.result()  # You might want to handle or log the result
+        return True
+    except Exception as e:
+        print(e)  # Consider a more sophisticated error handling approach
+        return False
 
 
 # -- This token_generator is required to generate Tokens for password reset requests
@@ -120,7 +139,6 @@ def login_view(request):
         context={"login_form": form},
     )
 
-
 def register(request):
     """
     Handles the user registration process.
@@ -163,7 +181,6 @@ def register(request):
         context={"register_form": form},
     )
 
-
 def password_reset_request(request):
     """
     Handles the password reset request process.
@@ -200,23 +217,34 @@ def password_reset_request(request):
             try:
                 user = User.objects.get(email=email)
                 token = token_generator.make_token(user)
-                # Normally, you'd email this link to the user
-                reset_url = reverse("password_reset_confirm", args=[user.pk, token])
-                # For now, just display it
-                return render(
-                    request,
-                    "knowledge/password_reset_link.html",
-                    {"reset_url": reset_url},
+                uid = urlsafe_base64_encode(force_bytes(user.pk))
+                reset_url = request.build_absolute_uri(
+                    reverse("password_reset_confirm", kwargs={'uidb64': uid, 'token': token})
                 )
+                
+                # Send the password reset email
+                if send_email(
+                    sender="DoNotReply@mail.shwan.tech",
+                    recipient=email,
+                    subject="Password Reset Request",
+                    message=f"Please click the link to reset your password: {reset_url}"
+                ):
+                    messages.success(request, "A password reset link has been sent to your email.")
+                else:
+                    messages.error(request, "Failed to send password reset email.")
+
+                return redirect("password_reset_done")
             except User.DoesNotExist:
                 messages.error(request, "No account with this email address exists.")
-                form.add_error(None, "No account with this email address exists.")
         else:
              messages.error(request, "Please enter a valid email address")  
     else:
         form = RequestPasswordResetForm()
     return render(request, "knowledge/password_reset_request.html", {"form": form})
 
+def password_reset_done(request):
+    # Your view logic here
+    return render(request, 'knowledge/password_reset_done.html')
 
 def password_reset_confirm(request, user_id, token):
     """

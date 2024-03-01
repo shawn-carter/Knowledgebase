@@ -13,7 +13,7 @@ from django.shortcuts import get_object_or_404, render, redirect
 from django.utils import timezone
 from django.utils.encoding import force_bytes
 from django.utils.html import strip_tags
-from django.utils.http import urlsafe_base64_encode
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.urls import reverse
 from .forms import (
     CustomPasswordChangeForm,
@@ -58,7 +58,6 @@ def send_email(sender, recipient, subject, message):
     except Exception as e:
         print(e)  # Consider a more sophisticated error handling approach
         return False
-
 
 # -- This token_generator is required to generate Tokens for password reset requests
 token_generator = PasswordResetTokenGenerator()
@@ -246,7 +245,7 @@ def password_reset_done(request):
     # Your view logic here
     return render(request, 'knowledge/password_reset_done.html')
 
-def password_reset_confirm(request, user_id, token):
+def password_reset_confirm(request, uidb64, token):
     """
     Handles the password reset confirmation process.
 
@@ -280,6 +279,8 @@ def password_reset_confirm(request, user_id, token):
         return redirect("home")
 
     try:
+        # Decode uidb64 to user_id
+        user_id = urlsafe_base64_decode(uidb64).decode()
         user = User.objects.get(pk=user_id)
         if token_generator.check_token(user, token):
             if request.method == "POST":
@@ -301,7 +302,6 @@ def password_reset_confirm(request, user_id, token):
     except User.DoesNotExist:
         # Invalid user ID
         return render(request, "knowledge/password_reset_invalid_token.html")
-
 
 def password_reset_complete(request):
     """
@@ -405,7 +405,6 @@ def logout(request):
     messages.success(request, "You were successfully logged out.")
     return redirect("login")
 
-
 @login_required
 def changepassword(request):
     """
@@ -444,7 +443,6 @@ def changepassword(request):
     else:
         form = CustomPasswordChangeForm(request.user)
     return render(request, "knowledge/change_password.html", {"form": form})
-
 
 @login_required
 def home(request):
@@ -522,7 +520,6 @@ def home(request):
 
     return render(request, "knowledge/home.html", context)
 
-
 @login_required
 def create(request):
     """
@@ -598,7 +595,6 @@ def create(request):
     }
     return render(request, "knowledge/create.html", context)
 
-
 @login_required
 def article_detail(request, article_id):
     """
@@ -655,7 +651,6 @@ def article_detail(request, article_id):
     }
 
     return render(request, "knowledge/article_detail.html", context)
-
 
 @login_required
 def edit_article(request, article_id):
@@ -748,7 +743,6 @@ def edit_article(request, article_id):
     }
     return render(request, "knowledge/edit_article.html", context)
 
-
 @login_required
 def allarticles(request):
     """
@@ -773,7 +767,6 @@ def allarticles(request):
 
     return render(request, "knowledge/all_articles.html", {"articles": articles})
 
-
 @login_required
 def my_articles(request):
     """
@@ -794,7 +787,6 @@ def my_articles(request):
         created_by=request.user, deleted_datetime__isnull=True
     )
     return render(request, "knowledge/my_articles.html", {"articles": user_articles})
-
 
 @login_required
 def user_articles(request, user_id):
@@ -839,7 +831,6 @@ def user_articles(request, user_id):
         messages.error(request, "User not found.")
         return redirect("home")
 
-
 @login_required
 def upvote_article(request, article_id):
     """
@@ -879,7 +870,6 @@ def upvote_article(request, article_id):
         })
     except KBEntry.DoesNotExist:
         return JsonResponse({"status": "error", "message": "Article not found"})
-
 
 @login_required
 def downvote_article(request, article_id):
@@ -954,7 +944,6 @@ def audit_logs(request):
 
     return render(request, "knowledge/audit_logs.html", context)
 
-
 @login_required
 def user_list(request):
     """
@@ -979,7 +968,6 @@ def user_list(request):
     
     users = User.objects.all()  # get all users
     return render(request, "knowledge/user_list.html", {"users": users})
-
 
 @login_required
 def toggle_user_active_status(request, user_id):
@@ -1038,7 +1026,6 @@ def toggle_user_active_status(request, user_id):
         )
     return redirect("user-list")
 
-
 @login_required
 def delete_article(request, article_id):
     """
@@ -1086,7 +1073,6 @@ def delete_article(request, article_id):
         return redirect("article_detail", article_id=article.id)
 
     return render(request, "knowledge/confirm_delete.html", {"article": article})
-
 
 @login_required
 def quick_delete_toggle(request, article_id):
@@ -1144,7 +1130,6 @@ def quick_delete_toggle(request, article_id):
     #messages.success(request, "Article successfully " + action + ".")
     return JsonResponse({'success': True, 'action': action})
 
-
 @login_required
 def undelete_article(request, article_id):
     """
@@ -1200,7 +1185,6 @@ def undelete_article(request, article_id):
     # Render the confirmation template for undeletion
     return render(request, "knowledge/confirm_undelete.html", {"article": article})
 
-
 @login_required
 def confirm_permanent_delete(request, article_id):
     """
@@ -1234,7 +1218,6 @@ def confirm_permanent_delete(request, article_id):
     except KBEntry.DoesNotExist:
         messages.error(request, "Article not found.")
         return redirect("home")
-
 
 @login_required
 def perform_permanent_delete(request, article_id):
@@ -1280,7 +1263,6 @@ def perform_permanent_delete(request, article_id):
         messages.error(request, "Article not found.")
 
     return redirect("home")
-
 
 @login_required
 def manage_tags(request):

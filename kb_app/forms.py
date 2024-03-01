@@ -7,7 +7,6 @@ from django.contrib.auth.password_validation import validate_password
 from django.utils.html import strip_tags
 from .models import KBEntry
 
-
 class NewUserForm(forms.ModelForm):
     """
     A form for creating new users. Includes all the required fields,
@@ -95,8 +94,7 @@ class NewUserForm(forms.ModelForm):
         user.set_password(self.cleaned_data["password1"])
         if commit:
             user.save()
-        return user
-    
+        return user 
 
 class CustomPasswordChangeForm(PasswordChangeForm):
     """
@@ -112,7 +110,6 @@ class CustomPasswordChangeForm(PasswordChangeForm):
 
         return password1
 
-
 class RequestPasswordResetForm(forms.Form):
     """
     A simple form for requesting a password reset.
@@ -121,7 +118,6 @@ class RequestPasswordResetForm(forms.Form):
     """
 
     email = forms.EmailField()
-
 
 class KBEntryForm(forms.ModelForm):
     """
@@ -168,7 +164,6 @@ class KBEntryForm(forms.ModelForm):
             instance.save()
             self.save_m2m()
         return instance
-
 
 class PasswordResetConfirmForm(forms.Form):
     """

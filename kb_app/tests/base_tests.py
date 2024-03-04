@@ -12,7 +12,7 @@ class BaseTestCaseWithUser(TestCase):
     """
     def setUp(self):
         self.client = Client()
-        self.email = "test@testdomain.test"  # Store email in a class attribute
+        self.email = "shawn.carter@redcar-cleveland.gov.uk"  # Needs a valid email address (or Azure email client fails)
         self.user = User.objects.create_user(
             username="testuser", password="testpass", email=self.email
         )
@@ -30,7 +30,7 @@ class BaseTestCaseWithSuperUser(BaseTestCaseWithUser):
     def setUp(self):
         super().setUp()
         self.superuser = User.objects.create_superuser(
-            username="testadmin", password="adminpass"
+            username="testadmin", password="adminpass", email=self.email  # Include the email address here
         )
         self.client.login(username="testadmin", password="adminpass")
         self.article = KBEntry.objects.create(

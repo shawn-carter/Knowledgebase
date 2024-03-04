@@ -197,7 +197,6 @@ class NewUserFormTestCase(TestCase):
         self.assertFalse(form.is_valid())
         self.assertIn("Enter a valid email address.", form.errors["email"])
 
-
 class KBEntryFormTestCase(TestCase):
     """
     Tests for Knowledgebase Entry (Article)    
@@ -353,7 +352,6 @@ class KBEntryFormTestCase(TestCase):
 
         # Assert that the last_modified_by field in the database remains unchanged
         self.assertEqual(article.last_modified_by, self.user)
-
     
 class RequestPasswordResetFormTestCase(TestCase):
     """ 
@@ -373,7 +371,6 @@ class RequestPasswordResetFormTestCase(TestCase):
         form = RequestPasswordResetForm(data={"email": "john@examplecom"})
         self.assertFalse(form.is_valid())
         self.assertIn("Enter a valid email address.", form.errors["email"])
-
 
 class PasswordResetConfirmFormTestCase(TestCase):
     """ 
@@ -423,7 +420,6 @@ class PasswordResetConfirmFormTestCase(TestCase):
         )
         self.assertFalse(form.is_valid())
         self.assertIn("This password is too common.", form.errors["new_password1"])
-
 
 class CustomPasswordChangeFormTestCase(TestCase):
     """ 

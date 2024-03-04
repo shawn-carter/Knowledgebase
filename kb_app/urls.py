@@ -7,6 +7,7 @@ from . import views
 urlpatterns = [
     # ---------- These URLS are for users who are not Authenticated ----------
     path("login/", views.login_view, name="login"),
+    path('mfa/', views.mfa_view, name='mfa_view'),
     path("register/", views.register, name="register"),
     path("resetpassword/", views.password_reset_request, name="password_reset_request"),
     path("reset/<uidb64>/<token>/",views.password_reset_confirm,name="password_reset_confirm",),

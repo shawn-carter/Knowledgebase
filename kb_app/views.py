@@ -1,9 +1,10 @@
 # knowledge/views.py
-
+from azure.communication.email import EmailClient
+from datetime import timedelta
 from django.db import models
 from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth import (authenticate, login as django_login, logout as django_logout, update_session_auth_hash,)
+from django.contrib.auth import (authenticate, login as django_login, logout as django_logout, update_session_auth_hash,get_user_model,)
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.models import User
@@ -11,6 +12,7 @@ from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.http import HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404, render, redirect
 from django.utils import timezone
+from django.utils.dateparse import parse_datetime
 from django.utils.encoding import force_bytes
 from django.utils.html import strip_tags
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
@@ -23,9 +25,9 @@ from .forms import (
     RequestPasswordResetForm,
     EmailTestForm
 )
-from azure.communication.email import EmailClient
+
 from .models import KBEntry, Tag, Audit, calculate_rating
-import json
+import json, random
 
 ################################# Functions to be used inside Views
 
@@ -101,16 +103,36 @@ def login_view(request):
             password = form.cleaned_data.get("password")
             user = authenticate(username=username, password=password)
             if user is not None:
-                django_login(request, user)
+                #Add Audit entry for user provided correct password
                 Audit(
-                    user=request.user,
+                    user=user,
                     kb_entry=None,
-                    action_details=f"User Logged In",
+                    action_details=f"User provided correct password",                    
                 ).save()
-                messages.success(request, f"You are now logged in as {username}.")
-                # Check if 'next' parameter is present in GET data
-                next_url = request.GET.get('next') or 'home'
-                return redirect(next_url)
+                # Generate a 6-digit PIN
+                mfa_pin = random.randint(100000, 999999)
+                request.session["mfa_pin"] = str(mfa_pin)
+                request.session["authenticated_user_id"] = user.id  # Temporarily store user information
+                request.session["mfa_created"] = timezone.now().isoformat()
+                
+                # Send PIN via email (implement email sending logic here)
+                connection_string = settings.AZURE_COMMUNICATION_SERVICES_CONNECTION_STRING
+                client = EmailClient.from_connection_string(connection_string)
+                to_email = user.email  # The user's email address
+                subject = "Your MFA PIN"
+                message = f"Your PIN is: {mfa_pin}"
+
+                email_message = {
+                    "senderAddress": "DoNotReply@mail.shwan.tech",
+                    "recipients": {"to": [{"address": to_email}]},
+                    "content": {"subject": subject, "plainText": message},
+                }
+
+                poller = client.begin_send(email_message)
+                result = poller.result()  # Consider handling or logging the result
+
+                # Redirect to MFA view
+                return redirect('mfa_view')
             else:
                 messages.error(request, "Invalid username or password")
         else:
@@ -137,6 +159,66 @@ def login_view(request):
         template_name="knowledge/login.html",
         context={"login_form": form},
     )
+
+def mfa_view(request):
+    if request.user.is_authenticated:
+        return redirect("home")
+    
+    User = get_user_model()
+    user_id = request.session.get("authenticated_user_id")
+    user = None
+    if user_id:
+        try:
+            user = User.objects.get(id=user_id)
+        except User.DoesNotExist:
+            messages.error(request, "User not found. Please start the login process again.")
+            return redirect("login")
+    
+    pin_creation_str = request.session.get("mfa_created")
+    if pin_creation_str:
+        pin_creation_time = parse_datetime(pin_creation_str)
+        if timezone.now() - pin_creation_time > timedelta(minutes=30):
+            messages.error(request, "The PIN has expired. Please log in again.")
+            return redirect("login")
+    
+    if request.method == "POST":
+        user_pin = request.POST.get("pin")
+        attempts = request.session.get("mfa_attempts", 1)
+        
+        if user_pin == request.session.get("mfa_pin"):
+            if user:               
+                Audit(
+                    user=user,
+                    kb_entry=None,
+                    action_details=f"User Logged in Successfully",
+                ).save()
+                django_login(request, user)  # Log in the user
+                # Clear MFA-related session variables
+                del request.session["mfa_pin"], request.session["mfa_created"], request.session["authenticated_user_id"]
+                request.session.pop("mfa_attempts", None) 
+                return redirect("home")
+        else:
+            request.session["mfa_attempts"] = attempts + 1
+            Audit(
+                user=user,
+                kb_entry=None,
+                action_details=f"Failed MFA attempt {attempts}/3",
+                ip_address=request.META.get('REMOTE_ADDR')
+            ).save()
+            if request.session["mfa_attempts"] >= 4:
+                # Clear session data to force login again
+                request.session.pop("authenticated_user_id", None)
+                request.session.pop("mfa_created", None)
+                request.session.pop("mfa_attempts", None)  # Safely remove 'mfa_attempts' without KeyError
+                messages.error(request, "Maximum MFA attempts reached. Please log in again.")
+                return redirect("login")
+            
+            messages.error(request, "Invalid PIN. Please try again.")
+            return render(request, "knowledge/mfa.html")
+    else:
+        if not user or "mfa_pin" not in request.session:
+            return redirect("login")  # Redirect to login if no MFA session or user is detected
+        return render(request, "knowledge/mfa.html")
 
 def register(request):
     """

@@ -22,8 +22,7 @@ from .forms import (
     KBEntryForm,
     NewUserForm,
     PasswordResetConfirmForm,
-    RequestPasswordResetForm,
-    EmailTestForm
+    RequestPasswordResetForm
 )
 
 from .models import KBEntry, Tag, Audit, calculate_rating

@@ -414,6 +414,11 @@ class MFAViewTestCase(TestCase):
     #     self.assertTrue(self.client.session.get("mfa_created") is None, "MFA creation time should be cleared from session")
     #     self.assertTrue(self.client.session.get("mfa_attempts") is None, "MFA attempts should be cleared from session")
 
+    def test_mfa_with_correct_pin(self):
+        response = self.client.post(reverse('mfa_view'), {'pin': '123456'})
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Invalid PIN. Please try again.")
+
     def test_mfa_with_incorrect_pin(self):
         response = self.client.post(reverse('mfa_view'), {'pin': 'wrongpin'})
         self.assertEqual(response.status_code, 200)

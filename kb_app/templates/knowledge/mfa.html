@@ -1,16 +1,18 @@
 {% extends 'knowledge/base.html' %}
 {% block title %}{{ block.super }} - MFA{% endblock %}
 
-{% block page_title%}MultiFactor Authentication{% endblock %}
+{% block page_title %}MultiFactor Authentication{% endblock %}
 
 {% block content %}
 
 <div class='col-md-4 offset-md-4 text-center'>
     <form method="post">
         {% csrf_token %}
-        <label for="pin">Enter the 6-digit PIN sent to your email:</label>
-        <input type="text" name="pin" required>
-        <button type="submit">Verify</button>
+        <div class="form-group">
+            <label for="pin">Enter the 6-digit PIN sent to your email:</label>
+            <input type="text" name="pin" class="form-control" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Verify</button>
     </form>
 </div>
 

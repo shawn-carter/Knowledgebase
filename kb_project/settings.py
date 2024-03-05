@@ -80,6 +80,8 @@ TEMPLATES = [
 WSGI_APPLICATION = 'kb_project.wsgi.application'
 AZURE_COMMUNICATION_SERVICES_CONNECTION_STRING = 'endpoint=https://kbcommsservice.uk.communication.azure.com/;accesskey=XwO95+HbpgSkJbhcw1jXOXZBgnBWeJxDPmwrby7E664SCLvJV12LKa2PEcWzHruhK3Kui8IQHrtSSVnYZL68GQ=='
 
+# Password Reset Timeout (in seconds)
+PASSWORD_RESET_TIMEOUT = 1800 #A password reset link is invalid after 30 mins
 
 # Check if running in Azure environment
 if os.environ.get('ENVIRONMENT') == 'PRODUCTION':
@@ -91,6 +93,8 @@ if os.environ.get('ENVIRONMENT') == 'PRODUCTION':
     SESSION_COOKIE_SECURE = True
     SESSION_COOKIE_HTTPONLY = True
     CSRF_COOKIE_SECURE = True
+    CSRF_COOKIE_HTTPONLY = True
+    CSRF_COOKIE_SAMESITE = True
     SECURE_BROWSER_XSS_FILTER = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
     X_FRAME_OPTIONS = 'DENY'

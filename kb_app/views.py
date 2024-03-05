@@ -107,14 +107,14 @@ def login_view(request):
                 Audit(
                     user=user,
                     kb_entry=None,
-                    action_details=f"User provided correct password",                    
+                    action_details=f"User Provided Correct Password (Needs to provide MFA PIN)",                    
                 ).save()
                 # Generate a 6-digit PIN
                 mfa_pin = random.randint(100000, 999999)
                 request.session["mfa_pin"] = str(mfa_pin)
                 request.session["authenticated_user_id"] = user.id  # Temporarily store user information
                 request.session["mfa_created"] = timezone.now().isoformat()
-                
+                request.session["user_name"] = username
                 # Send PIN via email (implement email sending logic here)
                 connection_string = settings.AZURE_COMMUNICATION_SERVICES_CONNECTION_STRING
                 client = EmailClient.from_connection_string(connection_string)
@@ -149,7 +149,7 @@ def login_view(request):
                 Audit(
                     user=None,
                     kb_entry=None,
-                    action_details=f"Failed login attempt for username: {username}",
+                    action_details=f"Failed Login Attempt for username: {username}",
                     ip_address=ip_address
                 ).save()
                 messages.error(request, "Invalid username or password")
@@ -190,12 +190,16 @@ def mfa_view(request):
                 Audit(
                     user=user,
                     kb_entry=None,
-                    action_details=f"User Logged in Successfully",
+                    action_details=f"User Logged in Successfully (Passed MFA)",
                 ).save()
                 django_login(request, user)  # Log in the user
+                username=request.session.get("user_name")
                 # Clear MFA-related session variables
-                del request.session["mfa_pin"], request.session["mfa_created"], request.session["authenticated_user_id"]
+                request.session.pop("mfa_pin", None)
+                request.session.pop("mfa_created", None)
+                request.session.pop("authenticated_user_id", None)
                 request.session.pop("mfa_attempts", None) 
+                messages.success(request, f"You are now logged in as {user.username}.")
                 return redirect("home")
         else:
             request.session["mfa_attempts"] = attempts + 1
@@ -405,35 +409,6 @@ def password_reset_complete(request):
         return redirect("home")
 
     return render(request, "knowledge/password_reset_complete.html")
-
-def send_email_test(request):
-    if request.method == 'POST':
-        form = EmailTestForm(request.POST)
-        if form.is_valid():
-            to_email = form.cleaned_data['to_email']
-            subject = form.cleaned_data['subject']
-            message = form.cleaned_data['message']
-            
-            try:
-                connection_string = settings.AZURE_COMMUNICATION_SERVICES_CONNECTION_STRING
-                client = EmailClient.from_connection_string(connection_string)
-
-                email_message = {
-                    "senderAddress": f"shwan@mail.shwan.tech",
-                    "recipients": {"to": [{"address": to_email }]},
-                    "content": {"subject": subject, "plainText": message},
-                }
-
-                poller = client.begin_send(email_message)
-                result = poller.result()  # Consider handling or logging the result
-                
-                return redirect('success_page')  # Redirect to a new URL if email is sent successfully
-            except Exception as e:
-                print(e)  # Consider a better error handling approach
-    else:
-        form = EmailTestForm()
-    return render(request, 'knowledge/email_test_form.html', {'form': form})
-
 
 ################################# ------------ End of non authenticated Views ----------
 

@@ -3,6 +3,7 @@
 from .base_tests import BaseTestCaseWithUser, BaseTestCaseWithSuperUser
 from base64 import urlsafe_b64encode
 from datetime import timedelta
+from django.contrib.auth import get_user_model
 from django.contrib.auth.models import User
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.contrib.messages import get_messages
@@ -15,6 +16,7 @@ from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 from kb_app.models import KBEntry
 from unittest import skip
+from unittest.mock import patch
 from django.utils.dateparse import parse_datetime
 from django.utils.timezone import now
 
@@ -383,59 +385,64 @@ class LoginViewTestCase(TestCase):
 
 class MFAViewTestCase(TestCase):
     def setUp(self):
-        self.username = 'shawncarter'
-        self.password = 'g0oDp4$$w0rd'
-        self.email = 'shawn.carter@redcar-cleveland.gov.uk'
-        self.user = User.objects.create_user(username=self.username, password=self.password, email=self.email)
-        # Instead of logging the user in, simulate the authentication and MFA setup
-        self.assertTrue(self.user.id is not None, "User ID must be valid and not None")
-        self.client.session['authenticated_user_id'] = self.user.id
-        self.client.session['mfa_pin'] = '123456'
-        self.client.session['mfa_created'] = timezone.now().isoformat()
-        self.client.session.save()
+        # Setup common across tests
+        self.user = get_user_model().objects.create_user(username='testuser', email='test@example.com', password='testpassword')
+        self._setup_mfa_session()
 
-    # def test_mfa_with_correct_pin(self):  // Some issues with setting/using session variables - will look later
-    #     # Check session state before POST request
-    #     self.assertTrue(self.client.session.get("authenticated_user_id") is not None, "User ID should be in session")
-    #     self.assertTrue(self.client.session.get("mfa_pin") is not None, "MFA PIN should be in session")
-    #     pin_creation_str = self.client.session.get("mfa_created")
-    #     self.assertTrue(pin_creation_str is not None, "MFA creation time should be in session")
-    #     pin_creation_time = parse_datetime(pin_creation_str)
-    #     self.assertTrue(now() - pin_creation_time <= timedelta(minutes=30), "PIN should not be expired")
+    def _setup_mfa_session(self):
+        # Mock the session setup as performed by your login process
+        session = self.client.session
+        session['authenticated_user_id'] = self.user.id
+        session['mfa_pin'] = '123456'
+        session['mfa_created'] = timezone.now().isoformat()
+        session.save()
 
-    #     # Make the POST request with the correct PIN
-    #     response = self.client.post(reverse('mfa_view'), {'pin': '123456'}, follow=True)
+    @patch('django.utils.timezone.now')
+    def test_mfa_with_correct_pin(self, mock_now):
+        # Mock timezone.now() to return a specific datetime
+        mock_now.return_value = timezone.make_aware(timezone.datetime(2020, 1, 1, 12, 0, 0))
+        
+        # No changes are needed in the _setup_mfa_session for this mock to work correctly, 
+        # but make sure that when you use timezone.now() in your views or models to handle logic,
+        # this mocked return_value is used.
 
-    #     # Assertions to check after POST request
-    #     self.assertRedirects(response, reverse('home'), msg_prefix="Should redirect to home after correct PIN")
-    #     # Check session is cleared as expected
-    #     self.assertTrue(self.client.session.get("authenticated_user_id") is None, "User ID should be cleared from session")
-    #     self.assertTrue(self.client.session.get("mfa_pin") is None, "MFA PIN should be cleared from session")
-    #     self.assertTrue(self.client.session.get("mfa_created") is None, "MFA creation time should be cleared from session")
-    #     self.assertTrue(self.client.session.get("mfa_attempts") is None, "MFA attempts should be cleared from session")
-
-    def test_mfa_with_correct_pin(self):
-        response = self.client.post(reverse('mfa_view'), {'pin': '123456'})
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Invalid PIN. Please try again.")
+        # Act: Submit the correct PIN to the mfa_view
+        response = self.client.post(reverse('mfa_view'), {'pin': '123456'}, follow=True)
+        
+        # Assert
+        self.assertRedirects(response, reverse('home'), status_code=302, target_status_code=200)
 
     def test_mfa_with_incorrect_pin(self):
-        response = self.client.post(reverse('mfa_view'), {'pin': 'wrongpin'})
+        self._setup_mfa_session()  # Prepare the session with MFA details
+        
+        # Act: Submit an incorrect PIN to the mfa_view
+        response = self.client.post(reverse('mfa_view'), {'pin': 'wrongpin'}, follow=True)
+        
+        # Assert: Check the response for the error message
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Invalid PIN. Please try again.")
 
     def test_mfa_with_three_incorrect_attempts(self):
-        # Since mfa_attempts starts at 1, we expect it to be incremented on each wrong attempt
-        for attempt in range(1, 3):  # Simulate three incorrect attempts
-            self.client.post(reverse('mfa_view'), {'pin': 'wrongpin'})
-            # After each attempt, check the mfa_attempts
-            expected_attempt_value = attempt + 1  # Adjusting expectation based on starting value being 1
-            self.assertEqual(self.client.session.get('mfa_attempts'), expected_attempt_value, f"After {attempt} incorrect attempt(s), mfa_attempts should be {expected_attempt_value}")
+        # Setup: Prepare the session with MFA details
+        self._setup_mfa_session()
 
-        # After the third attempt, check for redirection and session clearing
-        response = self.client.post(reverse('mfa_view'), {'pin': 'wrongpin'}, follow=True)
-        self.assertRedirects(response, reverse('login'), msg_prefix="User should be redirected to login after 3 failed attempts")
-        self.assertIsNone(self.client.session.get('mfa_attempts'), "Session should be cleared after exceeding max attempts")
+        # Act: Simulate three incorrect PIN submissions
+        response = self.client.post(reverse('mfa_view'), {'pin': 'wrongpin'}, follow=False)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Invalid PIN. Please try again.")
+        
+        response = self.client.post(reverse('mfa_view'), {'pin': 'wrongpin'}, follow=False)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Invalid PIN. Please try again.")
+        
+        response = self.client.post(reverse('mfa_view'), {'pin': 'wrongpin'}, follow=False)         
+        # Check for redirection to the login page after the fourth attempt
+        self.assertEqual(response.status_code, 302)
+        
+        # Check if the session variables related to MFA are cleared after exceeding max attempts
+        self.assertIsNone(self.client.session.get('mfa_attempts'), "MFA attempts should be cleared from session")
+        self.assertIsNone(self.client.session.get('authenticated_user_id'), "User ID should be cleared from session")
+        self.assertIsNone(self.client.session.get('mfa_created'), "MFA creation time should be cleared from session")
 
 class ArticleViewTestCase(BaseTestCaseWithUser):
     """

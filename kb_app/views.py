@@ -32,18 +32,59 @@ import json, random
 
 # -- This is to soft delete an article
 def softDeleteArticle(article, user):
-    article.deleted_datetime = timezone.now()
-    article.deleted_by = user
-    article.save()
+    """
+    Soft deletes an article by marking it as deleted rather than removing it from the database.
 
+    This function sets the 'deleted_datetime' field of the article to the current time, and records the user
+    who performed the deletion in the 'deleted_by' field. It then saves these changes to the database.
+    This approach allows the data to be retained for record-keeping or auditing purposes, and potentially restored later,
+    rather than being permanently removed.
+
+    Parameters:
+    - article (Article): The article object that is to be soft deleted.
+    - user (User): The user object representing the user who is performing the deletion.
+
+    No explicit return value, but the article object is modified and saved within the function.
+    """
+    article.deleted_datetime = timezone.now()  # Set the deletion time to the current time
+    article.deleted_by = user  # Record the user performing the deletion
+    article.save()  # Save the changes to the database
 
 # -- This can be used to 'undelete' an article
 def undeleteArticle(article):
-    article.deleted_datetime = None
-    article.deleted_by = None
-    article.save()
+    """
+    Reverses the soft deletion of an article, effectively 'undeleting' it.
+
+    This function clears the 'deleted_datetime' and 'deleted_by' fields of the article, setting them to None,
+    and saves the changes to the database. By removing these deletion markers, the article is no longer considered
+    deleted in the context of the application, making it visible and accessible again as if it had never been deleted.
+
+    Parameters:
+    - article (Article): The article object that is to be undeleted.
+
+    No explicit return value, but the article object is modified and saved within the function, making it 'active' again.
+    """
+    article.deleted_datetime = None  # Clear the deletion timestamp
+    article.deleted_by = None  # Remove the record of who deleted the article
+    article.save()  # Save the changes, effectively undeleting the article
 
 def send_email(sender, recipient, subject, message):
+    """
+    Sends an email using Azure Communication Services.
+
+    This function attempts to send an email by creating an email client using the Azure Communication Services connection string.
+    It constructs the email message with the specified sender, recipient, subject, and message content.
+    If the email is successfully sent, the function returns True. If an error occurs, it logs the exception and returns False.
+    
+    Parameters:
+    - sender (str): The email address of the sender.
+    - recipient (str): The email address of the recipient.
+    - subject (str): The subject line of the email.
+    - message (str): The plain text message body of the email.
+
+    Returns:
+    - bool: True if the email was successfully sent, False otherwise.
+    """
     try:
         client = EmailClient.from_connection_string(settings.AZURE_COMMUNICATION_SERVICES_CONNECTION_STRING)
 
@@ -60,8 +101,13 @@ def send_email(sender, recipient, subject, message):
         print(e)  # Consider a more sophisticated error handling approach
         return False
 
-# -- This token_generator is required to generate Tokens for password reset requests
+# Utility object for password reset process
 token_generator = PasswordResetTokenGenerator()
+"""
+A PasswordResetTokenGenerator instance is used for generating secure tokens for password reset requests.
+This object ensures that the password reset links are secure and can only be used once, providing a layer of security
+against unauthorized password reset attempts.
+"""
 
 ################################ End of Functions
 
@@ -69,28 +115,31 @@ token_generator = PasswordResetTokenGenerator()
 
 def login_view(request):
     """
-    Handles the user login process.
+    Manages the user login flow with additional steps for Multi-Factor Authentication (MFA) and auditing.
 
-    - If the user is already authenticated, send them to 'home'
+    - Redirects already authenticated users to the 'home' page.
 
-    - If the request is POST, it means the form has been submitted:
-        - An instance of AuthenticationForm is created using the POST data.
-        - If the form is valid, it attempts to authenticate the user with the given username and password.
-        - If the user is authenticated successfully, they are logged in, a success message is added,
-          and they are redirected to the 'home' page.
-        - If the user is not authenticated, an error message is displayed.
-        - If the form itself is not valid, an error message is displayed.
+    - For POST requests (form submissions):
+        - Creates an AuthenticationForm instance with POST data.
+        - Validates the form:
+            - On success, attempts user authentication with provided credentials.
+            - If authentication succeeds:
+                - Logs an audit entry for a successful password attempt.
+                - Generates a 6-digit MFA PIN and stores it in the session along with the user's ID and timestamp.
+                - Sends the MFA PIN to the user's email address using Azure Communication Services Email Client.
+                - Redirects the user to the MFA verification view ('mfa_view').
+            - If authentication fails, logs an audit entry for a failed login attempt (including IP address) and shows an error message.
+            - If the form is invalid due to missing username or password, displays appropriate error messages.
 
-    - If the request is not POST (e.g., a GET request), an empty AuthenticationForm instance is created.
+    - For non-POST requests, initializes an empty AuthenticationForm.
 
-    - The function finally renders the 'knowledge/login.html' template, passing the form instance
-      in the context under the name 'login_form'.
+    - Renders the 'knowledge/login.html' template, passing the form as 'login_form' in the context.
 
     Parameters:
     - request (HttpRequest): The HTTP request object.
 
     Returns:
-    - HttpResponse: The HTTP response object (the rendered template).
+    - HttpResponse: The rendered login page or redirects to another view based on the login process.
     """
     if request.user.is_authenticated:
         return redirect("home")
@@ -101,7 +150,7 @@ def login_view(request):
             username = form.cleaned_data.get("username")
             password = form.cleaned_data.get("password")
             user = authenticate(username=username, password=password)
-            if user is not None:
+            if user is not None:                
                 #Add Audit entry for user provided correct password
                 Audit(
                     user=user,
@@ -160,6 +209,39 @@ def login_view(request):
     )
 
 def mfa_view(request):
+    """
+    Handles the Multi-Factor Authentication (MFA) process for users.
+
+    - Redirects authenticated users to the 'home' page to prevent re-authentication.
+
+    - Retrieves the user based on the 'authenticated_user_id' stored in the session during the login process.
+      - If the user cannot be found, displays an error message and redirects to the login page.
+
+    - Checks if the MFA PIN has expired (30 minutes after creation).
+      - If expired, displays an error message and redirects to the login page.
+
+    - For POST requests (MFA PIN submission):
+        - Compares the submitted PIN with the one stored in the session.
+        - If the PIN matches:
+            - Logs an audit entry for a successful login with MFA.
+            - Logs the user in and clears all MFA-related session variables.
+            - Displays a success message and redirects to the 'home' page.
+        - If the PIN does not match:
+            - Increments the 'mfa_attempts' session variable and logs an audit entry for the failed MFA attempt.
+            - If the number of attempts reaches 4, clears the session and redirects to the login page with an error message.
+            - Otherwise, displays an error message about the invalid PIN and re-renders the MFA page for another attempt.
+
+    - For non-POST requests or if the user session or MFA PIN is not found, redirects to the login page.
+      This ensures that users cannot access the MFA page without passing through the initial authentication steps.
+
+    - Renders the 'knowledge/mfa.html' template for users to input their MFA PIN if conditions are met.
+
+    Parameters:
+    - request (HttpRequest): The HTTP request object.
+
+    Returns:
+    - HttpResponse: The rendered MFA page or redirects based on the authentication and MFA process status.
+    """
     if request.user.is_authenticated:
         return redirect("home")
     
@@ -172,6 +254,10 @@ def mfa_view(request):
         except User.DoesNotExist:
             messages.error(request, "User not found. Please start the login process again.")
             return redirect("login")
+    else:
+        # If there's no user_id in the session, redirect to login page immediately.
+        messages.error(request, "No authentication process detected. Please log in.")
+        return redirect("login")
     
     pin_creation_str = request.session.get("mfa_created")
     if pin_creation_str:
@@ -181,18 +267,18 @@ def mfa_view(request):
             return redirect("login")
     
     if request.method == "POST":
-        user_pin = request.POST.get("pin")
-        attempts = request.session.get("mfa_attempts", 1)
-        
-        if user_pin == request.session.get("mfa_pin"):
-            if user:               
+        # Ensure that this block only executes if there is a valid user object.
+        if user:
+            user_pin = request.POST.get("pin")
+            attempts = request.session.get("mfa_attempts", 1)
+            
+            if user_pin == request.session.get("mfa_pin"):
                 Audit(
                     user=user,
                     kb_entry=None,
                     action_details=f"User Logged in Successfully (Passed MFA)",
                 ).save()
                 django_login(request, user)  # Log in the user
-                username=request.session.get("user_name")
                 # Clear MFA-related session variables
                 request.session.pop("mfa_pin", None)
                 request.session.pop("mfa_created", None)
@@ -200,27 +286,30 @@ def mfa_view(request):
                 request.session.pop("mfa_attempts", None) 
                 messages.success(request, f"You are now logged in as {user.username}.")
                 return redirect("home")
+            else:
+                request.session["mfa_attempts"] = attempts + 1
+                Audit(
+                    user=user,
+                    kb_entry=None,
+                    action_details=f"Failed MFA attempt {attempts}/3",
+                    ip_address=request.META.get('REMOTE_ADDR')
+                ).save()
+                if request.session["mfa_attempts"] >= 4:
+                    # Clear session data to force login again
+                    request.session.pop("authenticated_user_id", None)
+                    request.session.pop("mfa_created", None)
+                    request.session.pop("mfa_attempts", None)
+                    messages.error(request, "Maximum MFA attempts reached. Please log in again.")
+                    return redirect("login")
+                
+                messages.error(request, "Invalid PIN. Please try again.")
+                return render(request, "knowledge/mfa.html")
         else:
-            request.session["mfa_attempts"] = attempts + 1
-            Audit(
-                user=user,
-                kb_entry=None,
-                action_details=f"Failed MFA attempt {attempts}/3",
-                ip_address=request.META.get('REMOTE_ADDR')
-            ).save()
-            if request.session["mfa_attempts"] >= 4:
-                # Clear session data to force login again
-                request.session.pop("authenticated_user_id", None)
-                request.session.pop("mfa_created", None)
-                request.session.pop("mfa_attempts", None)  # Safely remove 'mfa_attempts' without KeyError
-                messages.error(request, "Maximum MFA attempts reached. Please log in again.")
-                return redirect("login")
-            
-            messages.error(request, "Invalid PIN. Please try again.")
-            return render(request, "knowledge/mfa.html")
+            # This condition should already be handled by the earlier redirect, but it's good to have a safeguard.
+            return redirect("login")
     else:
         if not user or "mfa_pin" not in request.session:
-            return redirect("login")  # Redirect to login if no MFA session or user is detected
+            return redirect("login")
         return render(request, "knowledge/mfa.html")
 
 def register(request):
@@ -267,29 +356,34 @@ def register(request):
 
 def password_reset_request(request):
     """
-    Handles the password reset request process.
+    Manages the process for requesting a password reset.
 
-    - If the user is already authenticated, send them to 'home'
+    - Redirects authenticated users to the 'home' page to prevent them from using this function.
 
-    - If the request is POST, it means the form has been submitted:
-        - An instance of RequestPasswordResetForm is created using the POST data.
-        - If the form is valid, the function attempts to retrieve a user with the submitted email:
-            - If a user with that email exists, a token is generated for that user.
-            - A password reset link containing the user's ID and token is created (but, in this case,
-              the link is displayed on a template rather than being sent via email).
-            - The user is redirected to a template displaying the reset link.
-            - If no user with that email exists, an error message is added to the form and displayed.
+    - For POST requests (form submissions):
+        - Instantiates the RequestPasswordResetForm with the submitted data.
+        - Validates the form:
+            - If valid, it attempts to find a user with the provided email.
+                - If a user is found:
+                    - Generates a password reset token for the user.
+                    - Encodes the user's ID in a URL-safe base64 format.
+                    - Constructs a password reset URL with the user's ID and token.
+                    - Attempts to send a password reset email to the user's email address with the reset link.
+                        - If the email is successfully sent, displays a success message and redirects to a page indicating
+                          the password reset email has been sent ('password_reset_done').
+                        - If the email fails to send, displays an error message to the user.
+                - If no user is found with the provided email, displays an error message.
+            - If the form is not valid (e.g., invalid email format), displays an error message.
 
-    - If the request is not POST (e.g., a GET request), an empty RequestPasswordResetForm instance is created.
+    - For non-POST requests, or initially, displays an empty RequestPasswordResetForm for the user to fill in.
 
-    - The function finally renders the 'knowledge/password_reset_request.html' template, passing the form instance
-      in the context under the name 'form'.
+    - Renders the 'knowledge/password_reset_request.html' template, passing the form in the context as 'form'.
 
     Parameters:
     - request (HttpRequest): The HTTP request object.
 
     Returns:
-    - HttpResponse: The HTTP response object (the rendered template).
+    - HttpResponse: The response object rendering the template, or redirects as per the logic.
     """
     if request.user.is_authenticated:
         return redirect("home")
@@ -332,33 +426,31 @@ def password_reset_done(request):
 
 def password_reset_confirm(request, uidb64, token):
     """
-    Handles the password reset confirmation process.
+    Manages the password reset confirmation process after a user clicks on the password reset link.
 
-    - If the user is already authenticated, send them to 'home'
+    - Redirects authenticated users to the 'home' page to prevent access to this page.
 
-    - The function first attempts to retrieve a user with the provided user_id parameter.
-        - If no user with that ID exists, the function redirects to a template that indicates an invalid token.
+    - Decodes the base64-encoded user ID (uidb64) and attempts to retrieve the corresponding user.
+        - If no matching user is found, renders a template indicating an invalid or expired link.
 
-    - If a user with the provided ID is found, the function checks if the provided token is valid for that user:
-        - If the token is invalid, the function redirects to a template that indicates an invalid token.
+    - Verifies the reset token against the user:
+        - If the token is valid, proceeds with the password reset process:
+            - For POST requests, indicating form submission:
+                - Instantiates the PasswordResetConfirmForm with POST data.
+                - If the form is valid, updates the user's password with the new one provided in the form, saves the user object,
+                  and redirects to the 'password_reset_complete' page, indicating a successful password reset.
+            - For non-POST requests (e.g., GET), displays an empty PasswordResetConfirmForm for the user to fill in.
+        - If the token is invalid, renders a template indicating an invalid or expired link.
 
-    - If the token is valid:
-        - If the request is POST, it means the form has been submitted:
-            - An instance of PasswordResetConfirmForm is created using the POST data.
-            - If the form is valid, the user’s password is updated with the new password,
-              the user object is saved, and the user is redirected to the 'password_reset_complete' page.
-        - If the request is not POST (e.g., a GET request), an empty PasswordResetConfirmForm instance is created.
-
-    - The function finally renders the 'knowledge/password_reset_confirm.html' template, passing the form instance
-      in the context under the name 'form'.
+    - Renders the 'knowledge/password_reset_confirm.html' template with the password reset form, or the invalid token template based on the conditions met.
 
     Parameters:
     - request (HttpRequest): The HTTP request object.
-    - user_id (int): The ID of the user who requested the password reset.
-    - token (str): The token required to verify the password reset request.
+    - uidb64 (str): The base64-encoded ID of the user who requested the password reset.
+    - token (str): The token for verifying the password reset request's validity.
 
     Returns:
-    - HttpResponse: The HTTP response object (the rendered template).
+    - HttpResponse: The rendered template for the password reset confirmation or invalid token page.
     """
     if request.user.is_authenticated:
         return redirect("home")

@@ -121,11 +121,20 @@ class RequestPasswordResetForm(forms.Form):
 
 class KBEntryForm(forms.ModelForm):
     """
-    A form for creating a new article. Includes all the required fields,
-    This form is also used to allow a user to edit an existing article.
+    A form for creating or editing an article within the knowledge base. Includes all required fields.
+    The 'article' field is initially allowed to be empty (for UI purposes), but must contain at least 10 characters upon submission.    
+
+    Attributes:
+    - article (CharField): A field for the article's body, using a Textarea widget. It's marked as initially optional, but if provided, it must meet the validation criteria.
+    - title (CharField): Automatically included from the KBEntry model's fields and is subjected to custom validation to ensure its length.
+
+    Methods:
+    - clean_title(): Validates that the title contains at least 3 characters.
+    - clean_article(): Validates that, if provided, the article contains at least 10 characters, excluding HTML tags and whitespace.
+    - save(): Overrides the default save method to set the 'created_by' and 'last_modified_by' fields to the current user.
     """
 
-    article = forms.CharField(widget=forms.Textarea, required=False, initial="")
+    article = forms.CharField(widget=forms.Textarea, required=True, initial="")
 
     class Meta:
         model = KBEntry
@@ -135,34 +144,27 @@ class KBEntryForm(forms.ModelForm):
         self.request = kwargs.pop("request", None)
         super(KBEntryForm, self).__init__(*args, **kwargs)
 
-    # Ensure the title contains at least 3 characters
     def clean_title(self):
         title = self.cleaned_data.get("title")
         if len(title) < 3:
             raise ValidationError("Article Title should be at least 3 characters.")
         return title
 
-    # Ensure the article contains at least 10 characters (after stripping tags)
     def clean_article(self):
-        title = self.cleaned_data.get("title")
-        article = self.cleaned_data.get("article")
-        # Strip HTML tags and white spaces for validation
+        article = self.cleaned_data.get("article", "")
         plain_text = strip_tags(article).strip()
-        if len(plain_text) < 10:
-            raise ValidationError("Article Body should contain at least 10 characters.")
-        # Always return the original article data, not the stripped version
+        if not article or len(plain_text) < 10:
+            raise ValidationError("Article Body is required and should contain at least 10 characters.")
         return article
 
     def save(self, commit=True):
         instance = super(KBEntryForm, self).save(commit=False)
-        if (
-            not instance.pk
-        ):  # Check if the instance has a primary key (i.e., if it's been saved before)
+        if not instance.pk:  # If it's a new instance, set created_by to the current user
             instance.created_by = self.request.user
-        instance.last_modified_by = self.request.user
+        instance.last_modified_by = self.request.user  # Always update 'last_modified_by'
         if commit:
             instance.save()
-            self.save_m2m()
+            self.save_m2m()  # Save many-to-many relationships, if applicable
         return instance
 
 class PasswordResetConfirmForm(forms.Form):

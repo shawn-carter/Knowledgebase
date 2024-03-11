@@ -1,7 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
 
-
 class KBEntry(models.Model):
     """
     Represents an entry in the knowledge base.
@@ -73,18 +72,17 @@ class Tag(models.Model):
 
 class Audit(models.Model):
     """
-    Represents an audit log entry to track user actions on knowledge base entries.
+    Represents an audit log entry to track user actions, including web interactions within the knowledge base system.
 
     Attributes:
-    - user (ForeignKey): Reference to the user who performed the action.
-    - action_datetime (DateTimeField): The date and time when the action was performed. Automatically set to the current date and time when a new log entry is created.
-    - kb_entry (ForeignKey): Reference to the knowledge base entry that the action was performed on. Can be null if the action is not related to a specific entry.
-    - action_details (CharField): A brief description of the action performed. Maximum length of 255 characters.
+    - user (ForeignKey): Reference to the User model. Represents the user who performed the action. This field can be null if the action was performed by a non-authenticated user or the user context is not available.
+    - action_datetime (DateTimeField): Records the date and time when the action was performed. Automatically set to the current date and time when a new log entry is created.
+    - kb_entry (ForeignKey): Reference to the KBEntry model. Represents the knowledge base entry related to the action. Can be null if the action did not pertain to a specific knowledge base entry.
+    - action_details (CharField): A brief description of the action performed by the user. Maximum length of 255 characters.
+    - ip_address (CharField): The IP address from which the action was performed. This field can be left blank and is designed to help in identifying the source of the action for security and auditing purposes.
 
-    The Audit model is designed to keep a log of various actions that users perform within the application,
-    thereby allowing for accountability and potential analysis of user activity.
+    The addition of the 'ip_address' attribute enhances the model's capability to log and analyse actions from a security perspective, offering better insight into the source of each action.
     """
-
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
     action_datetime = models.DateTimeField(auto_now_add=True)
     kb_entry = models.ForeignKey(KBEntry, on_delete=models.SET_NULL, null=True)

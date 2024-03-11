@@ -43,7 +43,7 @@
         <br />
 
         <button type="submit" class="btn btn-danger">Save Changes</button>
-        <button type="button" class="btn btn-primary" onclick="window.history.back();">
+        <button type="button" id="goBackButton" class="btn btn-primary">
             Go Back (Do Not Save)
         </button>
     </form>
@@ -72,6 +72,9 @@
         $(document).ready(function () {
             // Initialise the Quill Editor
             initialiseArticleEditor("edit");
+            $('#goBackButton').click(function() {
+                window.history.back();
+            });
         });
     </script>
 

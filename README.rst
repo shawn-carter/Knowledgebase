@@ -8,18 +8,18 @@ The application makes use of several libraries, including Bootstrap5, jQuery, Da
 It is a simple application, incorporating user login and registration, password reset via link.
 
 New Features:
-Application is now hosted on Azure as a web app, and uses GitHub Actions workflow to build/test and deploy upon a push to this repo.
-Now sends emails via Azure Communications for password reset.
-MFA has been added, again sending an email with a 6 digit PIN.
++ Application is now hosted on Azure as a web app, and uses GitHub Actions workflow to build/test and deploy upon a push to this repo.
++ Now sends emails via Azure Communications for password reset.
++ MFA has been added, again sending an email with a 6 digit PIN.
 
 New Security:
-Content Security Policy - using middleware that creates nonce for inpage scripts.
-Security Headers - to prevent XSS, etc
-Environment Variables - DB Connection details are kept in the Azure WebApp Configuration, along with SECRET_KEY and AZURE COMMS CONNECTION STRING
-Secure Cookies/Session Cookies
-HSTS enabled - also Azure is set to HTTPS only
-Microsoft SQL Server for production (based on environmental variable 'ENVIRONMENT' = 'PRODUCTION')
-All JS/CSS is hosted from domain
++ Content Security Policy - using middleware that creates nonce for inpage scripts.
++ Security Headers - to prevent XSS, etc
++ Environment Variables - DB Connection details are kept in the Azure WebApp Configuration, along with SECRET_KEY and AZURE COMMS CONNECTION STRING
++ Secure Cookies/Session Cookies
++ HSTS enabled - also Azure is set to HTTPS only
++ Microsoft SQL Server for production (based on environmental variable 'ENVIRONMENT' = 'PRODUCTION')
++ All JS/CSS is hosted from domain
 
 Logged in users can:
   + Search the Knowledgebase

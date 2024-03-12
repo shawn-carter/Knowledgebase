@@ -566,46 +566,46 @@ class PasswordResetRequestViewExistingUser(BaseTestCaseWithUser):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'knowledge/password_reset_done.html')        
 
-@skip("Temporarily Skipping this test - as the process has changed")
-class PasswordResetIntegrationTest(TestCase):
-    """ 
-    This is an integration test for the User Password Process for an authenticated user
-    It tests the full password reset process for a user from logging in to changing password
-    Checking that the password is successfully changed
-    """
-    def setUp(self):
-        # We create a new user called testuser with email test@example.com
-        self.user = User.objects.create_user(username='testuser', email='test@example.com', password='old_password')
-        self.email = 'test@example.com'
+# @skip("Temporarily Skipping this test - as the process has changed")
+# class PasswordResetIntegrationTest(TestCase):
+#     """ 
+#     This is an integration test for the User Password Process for an authenticated user
+#     It tests the full password reset process for a user from logging in to changing password
+#     Checking that the password is successfully changed
+#     """
+#     def setUp(self):
+#         # We create a new user called testuser with email test@example.com
+#         self.user = User.objects.create_user(username='testuser', email='test@example.com', password='old_password')
+#         self.email = 'test@example.com'
     
-    @tag('integration') #tagged during debug to allow quicker testing   
-    def test_password_reset_flow(self):
-        # Check that the user cannot log in with an incorrect password 
-        self.assertFalse(self.client.login(username=self.user.username, password='incorrect_password_123'))
+#     @tag('integration') #tagged during debug to allow quicker testing   
+#     def test_password_reset_flow(self):
+#         # Check that the user cannot log in with an incorrect password 
+#         self.assertFalse(self.client.login(username=self.user.username, password='incorrect_password_123'))
         
-        # Request password reset - POST the email address to the password_reset_request view
-        response = self.client.post(reverse('password_reset_request'), data={'email': self.email})
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'knowledge/password_reset_done.html')
+#         # Request password reset - POST the email address to the password_reset_request view
+#         response = self.client.post(reverse('password_reset_request'), data={'email': self.email})
+#         self.assertEqual(response.status_code, 200)
+#         self.assertTemplateUsed(response, 'knowledge/password_reset_done.html')
         
-        # Generate password reset link uses similar process to the password reset view
-        # But we need the link as a variable to perform the password reset
-        user = User.objects.get(email=self.email)
-        token = token_generator.make_token(user)
-        reset_url = reverse("password_reset_confirm", args=[user.pk, token])
+#         # Generate password reset link uses similar process to the password reset view
+#         # But we need the link as a variable to perform the password reset
+#         user = User.objects.get(email=self.email)
+#         token = token_generator.make_token(user)
+#         reset_url = reverse("password_reset_confirm", args=[user.pk, token])
         
-        # Reset password - by POSTING to reset_url with the new password
-        new_password = 'new_password_123'
-        response = self.client.post(reset_url, data={
-            'new_password1': new_password, 
-            'new_password2': new_password
-        })
+#         # Reset password - by POSTING to reset_url with the new password
+#         new_password = 'new_password_123'
+#         response = self.client.post(reset_url, data={
+#             'new_password1': new_password, 
+#             'new_password2': new_password
+#         })
         
-        # Check that the response redirects to the password reset complete page
-        self.assertRedirects(response, reverse('password_reset_complete'))
+#         # Check that the response redirects to the password reset complete page
+#         self.assertRedirects(response, reverse('password_reset_complete'))
         
-        # Confirm that the password reset was successful by checking the user can login
-        self.assertTrue(self.client.login(username=self.user.username, password=new_password))
+#         # Confirm that the password reset was successful by checking the user can login
+#         self.assertTrue(self.client.login(username=self.user.username, password=new_password))
 
 class DeleteViewTestCase(BaseTestCaseWithUser):
     """

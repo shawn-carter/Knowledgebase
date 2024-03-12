@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 from pathlib import Path
-import os
+import os, dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -78,7 +78,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'kb_project.wsgi.application'
-AZURE_COMMUNICATION_SERVICES_CONNECTION_STRING = os.environ.get('AZURE_COMMUNICATION_SERVICES_CONNECTION_STRING')
 
 # Password Reset Timeout (in seconds)
 PASSWORD_RESET_TIMEOUT = 1800 #A password reset link is invalid after 30 mins
@@ -86,6 +85,7 @@ PASSWORD_RESET_TIMEOUT = 1800 #A password reset link is invalid after 30 mins
 # Check if running in Azure environment
 if os.environ.get('ENVIRONMENT') == 'PRODUCTION':
     
+    AZURE_COMMUNICATION_SERVICES_CONNECTION_STRING = os.environ.get('AZURE_COMMUNICATION_SERVICES_CONNECTION_STRING')
     # Turn off Debug in Production Environment
     DEBUG = False
     
@@ -127,7 +127,9 @@ if os.environ.get('ENVIRONMENT') == 'PRODUCTION':
     }
     
 else:
-    
+    dotenv.load_dotenv()
+    AZURE_COMMUNICATION_SERVICES_CONNECTION_STRING = os.environ.get('AZURE_COMMUNICATION_SERVICES_CONNECTION_STRING')
+   
     SESSION_COOKIE_SECURE = True
     SESSION_COOKIE_HTTPONLY = True
     CSRF_COOKIE_SECURE = True

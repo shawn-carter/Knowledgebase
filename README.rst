@@ -2,19 +2,20 @@
 Welcome to Knowledgebase!
 =========================
 This application was written by me, using Django with SQLiteDB for an assignment for a level 5 module called 'Software Engineering and Agile' in 2023.
-It is now being updated for a level 6 module called 'Software Engineering and DevOps' - and has had some improvements.
+It is now being updated for a level 6 module called 'Software Engineering and DevOps' in 2024 - and has had some improvements.
 
 The application makes use of several libraries, including Bootstrap5, jQuery, DataTables.js, Quill.js and Alertify.js
 
-It is a simple application, incorporating user login and registration, password reset via link.
+It is a simple application, incorporating user login and registration, password reset.
 
 New Features:
   + Application is now hosted on Azure as a web app, and uses GitHub Actions workflow to build/test and deploy upon a push to this repo.
   + Now sends emails via Azure Communications for password reset.
-  + MFA has been added, again sending an email with a 6 digit PIN.
+  + MFA has been added, sending an email with a 6 digit PIN.
+  + Important to note that you need to register with a valid email or you can't login anymore.
 
 New Security:
-  + Content Security Policy - using middleware that creates nonce for inpage scripts.
+  + Content Security Policy - using middleware that creates nonce for in page scripts.
   + Security Headers - to prevent XSS, etc
   + Environment Variables - DB Connection details are kept in the Azure WebApp Configuration, along with SECRET_KEY and AZURE COMMS CONNECTION STRING
   + Secure Cookies/Session Cookies
@@ -22,6 +23,7 @@ New Security:
   + Microsoft SQL Server for production (based on environmental variable 'ENVIRONMENT' = 'PRODUCTION')
   + All JS/CSS is hosted from domain
   + Auditing now includes login attempts, failed/success MFA, successful login - and records IP address in the audit table
+  + Passes OWASP ZAP scan with exception of a SQLite alert about possible injection, but I think it's a false positive
 
 Logged in users can:
   + Search the Knowledgebase
@@ -99,7 +101,7 @@ Install Dependencies
 
     pip install -r requirements.txt
 
-SetUp the Database (Optional) -- You can use the included sqlite3 Database - and create a new SuperUser [Jump to Create a Superuser](#create_superuser) or
+SetUp the Database (Optional) -- You can use the included sqlite3 Database - and create a new SuperUser or
   Update the settings.py file in the myknowledgebase directory with your database settings.
 
 .. code:: python
@@ -149,13 +151,13 @@ holding the details of the Article along with things like upvotes, rating, autho
 
 The ``Tags`` model is used to hold all the Metadata Tags.
 
-The ``Audit`` model is used to store and track events such as Article creation, editting and deletions.
+The ``Audit`` model is used to store and track events such as Article creation, editting and deletions, logging in/out, failed loging, failed MFA, successful login (including MFA).
 
 The ``User`` model is the Django built in User model.
 
 Testing
 =======
-I used Django built in tests - there are over 100 tests, testing the models, forms and views - with unit tests and some integration tests.
+I used Django built in tests - there are over 100 tests, testing all the models, all forms and all views - with unit tests and some integration tests.
 To run the tests
 
 .. code:: python

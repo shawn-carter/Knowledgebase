@@ -438,6 +438,8 @@ class MFAViewTestCase(TestCase):
         response = self.client.post(reverse('mfa_view'), {'pin': 'wrongpin'}, follow=False)         
         # Check for redirection to the login page after the fourth attempt
         self.assertEqual(response.status_code, 302)
+        # Check we are redirected to login
+        self.assertRedirects(response, reverse('login'))
         
         # Check if the session variables related to MFA are cleared after exceeding max attempts
         self.assertIsNone(self.client.session.get('mfa_attempts'), "MFA attempts should be cleared from session")

@@ -78,7 +78,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'kb_project.wsgi.application'
-AZURE_COMMUNICATION_SERVICES_CONNECTION_STRING = 'endpoint=https://kbcommsservice.uk.communication.azure.com/;accesskey=XwO95+HbpgSkJbhcw1jXOXZBgnBWeJxDPmwrby7E664SCLvJV12LKa2PEcWzHruhK3Kui8IQHrtSSVnYZL68GQ=='
+AZURE_COMMUNICATION_SERVICES_CONNECTION_STRING = os.environ.get('AZURE_COMMUNICATION_SERVICES_CONNECTION_STRING')
 
 # Password Reset Timeout (in seconds)
 PASSWORD_RESET_TIMEOUT = 1800 #A password reset link is invalid after 30 mins

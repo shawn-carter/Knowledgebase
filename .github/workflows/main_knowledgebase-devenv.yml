@@ -31,7 +31,8 @@ jobs:
         run: pip install -r requirements.txt
         
       - name: Prepare and Test
-        env: AZURE_COMMUNICATION_SERVICES_CONNECTION_STRING: ${{ secrets.AZURE_COMMUNICATION_SERVICES_CONNECTION_STRING }}
+        env: 
+          AZURE_COMMUNICATION_SERVICES_CONNECTION_STRING: ${{ secrets.AZURE_COMMUNICATION_SERVICES_CONNECTION_STRING }}
         run: python manage.py test
 
       - name: Collect Static Files

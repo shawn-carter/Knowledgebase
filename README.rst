@@ -2,7 +2,8 @@
 Welcome to Knowledgebase!
 =========================
 This application was written by me, using Django with SQLiteDB for an assignment for a level 5 module called 'Software Engineering and Agile' in 2023.
-It is now being updated for a level 6 module called 'Software Engineering and Agile' - and has had some improvements.
+It is now being updated for a level 6 module called 'Software Engineering and DevOps' - and has had some improvements.
+
 The application makes use of several libraries, including Bootstrap5, jQuery, DataTables.js, Quill.js and Alertify.js
 
 It is a simple application, incorporating user login and registration, password reset via link.
@@ -20,6 +21,7 @@ New Security:
   + HSTS enabled - also Azure is set to HTTPS only
   + Microsoft SQL Server for production (based on environmental variable 'ENVIRONMENT' = 'PRODUCTION')
   + All JS/CSS is hosted from domain
+  + Auditing now includes login attempts, failed/success MFA, successful login - and records IP address in the audit table
 
 Logged in users can:
   + Search the Knowledgebase

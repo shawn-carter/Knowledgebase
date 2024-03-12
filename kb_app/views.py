@@ -342,9 +342,8 @@ def register(request):
         form = NewUserForm(request.POST)
         if form.is_valid():
             user = form.save()
-            django_login(request, user)
             messages.success(request, "Registration successful.")
-            return redirect("home")
+            return redirect("register_success")
         messages.error(request, "Unsuccessful registration. Invalid information.")
     else:
         form = NewUserForm()
@@ -353,6 +352,10 @@ def register(request):
         template_name="knowledge/register.html",
         context={"register_form": form},
     )
+
+def register_success(request):
+    # Your view logic here
+    return render(request, 'knowledge/register_success.html')
 
 def password_reset_request(request):
     """

@@ -1,0 +1,12 @@
+{% extends "knowledge/base.html" %}
+{% block title %}{{ block.super }} - Registration Successful{% endblock %}
+
+{% block page_title%}Account Registration Successful{% endblock %}
+
+{% block content %}
+
+    <div class='col-md-4 offset-md-4 text-center'>
+        <p>Thanks for Registering! <a href="{% url 'login' %}">Login here</a></p>
+    </div>
+    
+{% endblock %}

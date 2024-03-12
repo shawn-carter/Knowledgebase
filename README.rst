@@ -1,10 +1,25 @@
 =========================
 Welcome to Knowledgebase!
 =========================
-This application was written by me, using Django with SQLiteDB for an assignment for a level 5 module called 'Software Engineering and Agile'.
+This application was written by me, using Django with SQLiteDB for an assignment for a level 5 module called 'Software Engineering and Agile' in 2023.
+It is now being updated for a level 6 module called 'Software Engineering and Agile' - and has had some improvements.
 The application makes use of several libraries, including Bootstrap5, jQuery, DataTables.js, Quill.js and Alertify.js
 
-It is a simple application, incorporating user login and registration, password reset via link (the pythonanywhere platform does not have the ability to send emails).
+It is a simple application, incorporating user login and registration, password reset via link.
+
+New Features:
+Application is now hosted on Azure as a web app, and uses GitHub Actions workflow to build/test and deploy upon a push to this repo.
+Now sends emails via Azure Communications for password reset.
+MFA has been added, again sending an email with a 6 digit PIN.
+
+New Security:
+Content Security Policy - using middleware that creates nonce for inpage scripts.
+Security Headers - to prevent XSS, etc
+Environment Variables - DB Connection details are kept in the Azure WebApp Configuration, along with SECRET_KEY and AZURE COMMS CONNECTION STRING
+Secure Cookies/Session Cookies
+HSTS enabled - also Azure is set to HTTPS only
+Microsoft SQL Server for production (based on environmental variable 'ENVIRONMENT' = 'PRODUCTION')
+All JS/CSS is hosted from domain
 
 Logged in users can:
   + Search the Knowledgebase
@@ -47,7 +62,7 @@ Source code
   http://github.com/shawn-carter/Knowledgebase
 
 Working demonstration
-  https://shawncarter.pythonanywhere.com
+  https://azure.shwan.tech
 
 Installation and Setup
 ======================
@@ -82,7 +97,7 @@ Install Dependencies
 
     pip install -r requirements.txt
 
-SetUp the Database (Optional) -- You can use the included sqlite3 Database - and create a new SuperUser
+SetUp the Database (Optional) -- You can use the included sqlite3 Database - and create a new SuperUser [Jump to Create a Superuser](#create_superuser) or
   Update the settings.py file in the myknowledgebase directory with your database settings.
 
 .. code:: python
@@ -105,8 +120,9 @@ Run Migrations
     python manage.py makemigrations
     python manage.py migrate
 
-Create a Superuser
+Create a Superuser (Just do this if you are using the SQLite3 DB)
 
+<a id="create_superuser"></a>
 .. code:: python
 
     python manage.py createsuperuser

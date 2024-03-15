@@ -26,7 +26,7 @@ from .forms import (
 )
 
 from .models import KBEntry, Tag, Audit, calculate_rating
-import json, random
+import json, random, re
 
 ################################# Functions to be used inside Views
 
@@ -100,6 +100,16 @@ def send_email(sender, recipient, subject, message):
     except Exception as e:
         print(e)  # Consider a more sophisticated error handling approach
         return False
+
+def sanitize_tag(tag_name):
+    """Remove any unwanted characters from tag names."""
+    # Example: Allow only alphanumeric characters, spaces, and hyphens
+    return re.sub(r'[^\w\s-]', '', tag_name)
+
+def is_valid_tag(tag_name):
+    """Check if the tag name meets defined criteria."""
+    # Example criteria: non-empty, max length of 30 characters
+    return tag_name and len(tag_name) <= 30
 
 # Utility object for password reset process
 token_generator = PasswordResetTokenGenerator()
@@ -719,11 +729,14 @@ def create(request):
             # Process tags
             tag_names = request.POST.get("meta_data", "").split(",")
             for tag_name in tag_names:
-                if tag_name:
-                    tag_name = tag_name.strip()
+                # sanitize tags
+                tag_name = sanitize_tag(tag_name.strip())  # Sanitize input
+                # only add valid tags invalid tags are ignored
+                if is_valid_tag(tag_name):
                     tag, created = Tag.objects.get_or_create(name=tag_name)
                     article.meta_data.add(tag)
-
+                
+                
             messages.success(
                 request, "Your knowledge base entry was successfully created!"
             )
@@ -874,8 +887,8 @@ def edit_article(request, article_id):
             # Process tags
             tag_names = request.POST.get("meta_data", "").split(",")
             for tag_name in tag_names:
-                if tag_name:
-                    tag_name = tag_name.strip()
+                tag_name = sanitize_tag(tag_name.strip())  # Sanitize input
+                if is_valid_tag(tag_name):  # Validate tag
                     tag, created = Tag.objects.get_or_create(name=tag_name)
                     article.meta_data.add(tag)
 
